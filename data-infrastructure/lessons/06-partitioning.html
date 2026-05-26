@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>06 · Partitioning, Clustering, Small Files — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 06 · track 02 — storage</div>
+    <h1>Partition a petabyte<br/>to query a megabyte.</h1>
+    <p class="subtitle">Partitioning is the single biggest knob you control. Wrong key = full scans, right key = millisecond queries. Plus the small-file problem, the hot-partition problem, and Z-ordering for when one key isn't enough.</p>
+    <div class="meta">
+      <span>⏱ <b>12 min</b></span>
+      <span>◆ <b>3 simulations</b></span>
+      <span>✦ <b>+75 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <div class="callout" style="margin-bottom:18px;"><span class="icon">◎</span><div><b>Learning objectives.</b> After this lesson you can: (1) explain the three standard partition strategies — range, hash, and list — and when to use each; (2) describe how Hive-style partitioning differs from Iceberg hidden partitioning; (3) identify the over-partitioning anti-pattern and its symptoms; (4) explain partition pruning mechanics and Z-order clustering for multi-column filters.</div></div>
+        <p>Partitioning is how you tell a query engine: <em>"don't even open these files."</em> A partition is a physical sub-directory (or a metadata-tagged group of files) keyed by some column — typically a date, region, or tenant. When a query filters on the partition key, the engine prunes whole partitions before reading any data. The math is simple and brutal: <strong>your query latency is roughly proportional to the fraction of partitions that survive pruning.</strong></p>
+        <p>The interview-relevant rules are equally simple, but everyone gets them wrong:</p>
+        <ol>
+          <li><strong>Partition by the column your queries filter on.</strong> Not the column that "feels" like an organizing principle. Look at the actual <code>WHERE</code> clauses.</li>
+          <li><strong>Partitions should be big enough to be worth a file.</strong> 1MB partitions are worse than no partitions. Aim for ≥ 128MB per partition file.</li>
+          <li><strong>Cardinality matters.</strong> Partition by <code>order_date</code> (low cardinality) → 365 partitions/year, fine. Partition by <code>order_id</code> (high cardinality) → millions of tiny partitions → metadata catastrophe.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="s1b">
+      <h2>Partition strategies: range, hash, list</h2>
+      <div class="prose">
+        <p>Three fundamental strategies, each with a distinct trade-off:</p>
+        <ul>
+          <li><strong>Range partitioning.</strong> Rows are assigned to partitions based on value ranges — e.g. <code>order_date BETWEEN '2026-01-01' AND '2026-01-31'</code> → January partition. <em>Excellent</em> for time-series data and range scans. <em>Danger</em>: hot partitions — the current day/month takes all writes while old partitions are cold. Mitigate by keeping recent data in a smaller rolling window and archiving historical ranges.</li>
+          <li><strong>Hash partitioning.</strong> A hash function maps each row's key to one of N buckets — e.g. <code>hash(user_id) % 16</code> → partition 0–15. <em>Excellent</em> distribution; writes spread evenly. <em>Danger</em>: destroys range locality — a scan for users created this week must hit all 16 partitions. Common in OLTP sharding; less common in analytical lakehouses (use clustering instead).</li>
+          <li><strong>List partitioning.</strong> Partition values are an explicit enumeration — e.g. <code>region IN ('EU', 'US', 'APAC')</code>. <em>Excellent</em> for known, stable categorical dimensions. <em>Danger</em>: a new value (e.g. 'LATAM') silently lands in no partition or an overflow partition if not explicitly handled. Plan for an <code>OTHER</code> catch-all bucket.</li>
+        </ul>
+        <p>In practice, analytical workloads almost always use <strong>range on a time column</strong> as the top-level partition, then optionally a secondary strategy (list on region, hash on tenant) within each time partition — but always check that the secondary cardinality stays manageable.</p>
+      </div>
+    </section>
+
+    <section id="s1c">
+      <h2>Hive-style vs hidden partitioning</h2>
+      <div class="prose">
+        <p>There are two ways to implement partitioning in the lakehouse ecosystem, and they look the same from a query perspective but are very different to maintain:</p>
+        <p><strong>Hive-style partitioning</strong> (used by plain Hive, Delta Lake, and early Iceberg tables) stores the partition value as a <em>physical column</em> in the file path: <code>s3://lake/orders/order_date=2026-05-01/part-001.parquet</code>. The writer must explicitly compute and set this column. Problems:</p>
+        <ul>
+          <li>The column is often duplicated in the file (path <em>and</em> Parquet column), wasting space.</li>
+          <li>Changing partition granularity (e.g. daily → hourly) requires a full table rewrite because the physical layout changes.</li>
+          <li>If a writer populates <code>order_date</code> from a different timezone or format, partition pruning silently fails.</li>
+        </ul>
+        <p><strong>Hidden partitioning</strong> (Iceberg's default, introduced in Iceberg spec v1) declares partitioning as a <em>transform on an existing column</em>: <code>PARTITIONED BY (days(order_ts))</code>. The partition value is derived at write time and stored in the metadata, not in the data file. Benefits:</p>
+        <ul>
+          <li>No extra column in the schema — queries filter on <code>order_ts</code> naturally and the engine prunes without the user knowing the partition granularity.</li>
+          <li>Changing from <code>days(order_ts)</code> to <code>hours(order_ts)</code> is a partition evolution — a metadata-only operation; existing files keep their old layout, new files use the new one. No full rewrite.</li>
+          <li>The engine guarantees correct pruning because it controls the transform.</li>
+        </ul>
+        <div class="callout"><span class="icon">▸</span><div><b>The hidden partitioning insight for IC5.</b> The reason Iceberg's hidden partitioning is architecturally superior isn't performance — it's correctness and evolvability. Hive-style partitioning creates a coupling between the storage layout and the application schema; hidden partitioning breaks that coupling. When your data model changes, you want to change the partition strategy without a multi-terabyte rewrite job.</div></div>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Pick the partition key</h2>
+      <div class="prose"><p>Same query. Same data. Try each partition strategy. Watch the file count and bytes scanned change.</p></div>
+      <div id="w-part"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>Lesson.</b> "Partition by hour" looks reasonable until you realise you have 720 files for one day's data — most of them under 200MB, the metadata cost dominates. "Partition by user" is even worse: hot users (Walmart, Amazon) get partitions thousands of times bigger than cold users. <em>Skew is the silent killer of partitioning.</em></div></div>
+    </section>
+
+    <section id="s3">
+      <h2>The small-file problem</h2>
+      <div class="prose">
+        <p>Every streaming pipeline produces small files. Every micro-batch commit creates new ones. Every CDC delta pushes more. After a week of unchecked streaming you'll have 100,000 files where you should have 10,000. Each one demands a separate IO operation, a separate metadata lookup, a separate decompression context. Query latency degrades smoothly until one day a dashboard times out.</p>
+        <p>The fix is <strong>compaction</strong>: a periodic job that reads many small files and writes back a few large ones. All major lakehouse formats provide a compaction operation as a first-class concept. Run it nightly, or trigger by file-count thresholds.</p>
+      </div>
+      <pre style="font-family: var(--mono); font-size: 0.84rem; background: var(--paper-2); padding: 14px; border-radius: 8px; border: 1px solid var(--rule); line-height: 1.5; overflow-x: auto;">
+-- Iceberg
+CALL system.rewrite_data_files(
+  table => 'analytics.orders',
+  options => map('target-file-size-bytes', '536870912')
+);
+
+-- Delta
+OPTIMIZE analytics.orders WHERE order_date >= '2026-04-01';
+
+-- Hudi
+hoodie.compact.inline = true</pre>
+    </section>
+
+    <section id="s4">
+      <h2>Clustering & Z-ordering: when one key isn't enough</h2>
+      <div class="prose">
+        <p>Sometimes your queries filter on different columns at different times. Marketing filters by <code>country</code>; the fraud team filters by <code>payment_method</code>; finance filters by <code>order_date</code>. You can only pick one column to physically partition by — typically the lowest-cardinality, most-universal one (<code>order_date</code>). For the others, you use <strong>clustering</strong> within each partition.</p>
+        <p>Plain clustering: sort the data by a second column inside each partition file. Min/max stats then prune well on that column too. <strong>Z-ordering</strong> goes further — it interleaves bits of multiple columns to produce a sort order that's "balanced" across all of them. A query on <em>any</em> of the Z-order columns gets meaningful pruning.</p>
+        <p>Mental model: partition once on the dominant filter, Z-order on 2-4 secondary filters. Beyond 4 columns Z-ordering gets diluted; switch to feature-store-style materialized views.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Sharding ≠ partitioning</h2>
+      <div class="prose">
+        <p>One word for two ideas. Use precisely:</p>
+        <ul>
+          <li><strong>Partitioning</strong> is a logical layout choice <em>within</em> a single storage system, used to prune scans. Files in folders. No coordination needed.</li>
+          <li><strong>Sharding</strong> is splitting data <em>across</em> multiple storage instances for horizontal scale, with a routing function picking which shard a key lives on. Used in OLTP systems (Postgres, Mongo, DynamoDB) where one node can\'t hold the whole dataset.</li>
+        </ul>
+        <p>You partition tables. You shard databases. The interviewer notices when you mix them up.</p>
+      </div>
+      <div class="callout"><span class="icon">▸</span><div><b>The hot-shard problem.</b> Hash sharding distributes evenly but kills range queries. Range sharding preserves locality but creates hot shards (the latest week's shard takes 80% of writes). Real systems use a hash of (key + time bucket) or move hot ranges live. Same trade as partition skew — a level up the stack.</div></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Key takeaways</h2>
+      <div class="prose">
+        <ul>
+          <li><strong>Match the partition key to your query patterns.</strong> The right key is determined by your <code>WHERE</code> clauses, not by what "makes sense" semantically. A great partition key cuts >95% of files for your most common queries.</li>
+          <li><strong>Range, hash, list — each has a failure mode.</strong> Range → hot partitions on recent data. Hash → destroys range locality. List → silently misroutes new enum values. Know the failure mode before you pick.</li>
+          <li><strong>Over-partitioning is a real anti-pattern.</strong> Millions of tiny partitions kill metadata performance, slow down partition listing, and waste object-storage request budget. Target ≥128MB per partition file. If you can't hit that with hourly partitions, go daily.</li>
+          <li><strong>Iceberg hidden partitioning decouples layout from schema.</strong> Hive-style forces writers to maintain a physical partition column; changing granularity requires a full rewrite. Hidden partitioning stores the derived value in metadata only; evolution is free.</li>
+          <li><strong>Partition for the dominant filter; Z-order for secondary filters.</strong> You get one physical partition key. Use Z-ordering (or sort-within-partition) to make secondary columns prunable without exploding the partition count.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s8">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'partitioning';
+initLesson(LID, [
+  { id: 's1', label: 'Why partition' },
+  { id: 's1b', label: 'Range / hash / list' },
+  { id: 's1c', label: 'Hive-style vs hidden' },
+  { id: 's2', label: 'Pick a key' },
+  { id: 's3', label: 'Small files' },
+  { id: 's4', label: 'Clustering / Z-order' },
+  { id: 's5', label: 'Sharding ≠ partitioning' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Key takeaways' },
+  { id: 's8', label: 'Vocab' },
+]);
+
+D.PartitionSim(document.getElementById('w-part'), { lessonId: LID, cpId: 'part' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'The skew trap',
+  question: 'You partition <code>events</code> by <code>user_id</code>. The dataset has 10M users. Production observes: 90% of partitions are <100MB, but 5 partitions are >500GB each. Which user IDs are those?',
+  options: [
+    'Random — that\'s just how distributions work.',
+    'High-volume internal accounts: bots, test accounts, "guest" or unauthenticated users that share an ID, and a few real whales (e.g. enterprise tenants).',
+    'The newest users.',
+    'It must be a bug.',
+  ],
+  correct: 1,
+  explanation: 'Real-world keys are <em>massively</em> skewed. Test accounts, anonymous-user buckets, internal services that all log under one fake user, and a handful of enterprise customers will dominate. Hash-partitioning a skewed key just moves the problem to a different partition. Real fixes: split hot keys with a salt (<code>user_id + (event_id % 16)</code>); special-case bot/test traffic into separate partitions; or partition by something more uniform (e.g. <code>event_date</code>) and cluster by <code>user_id</code> within.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Z-order vs partition',
+  question: 'Your table is partitioned by <code>order_date</code>. Half your queries also filter by <code>country</code>. You want fast queries on both. What\'s the IC5 move?',
+  options: [
+    'Partition by <code>(order_date, country)</code> — nested partitions.',
+    'Repartition by <code>country</code> instead.',
+    'Keep <code>order_date</code> as the partition; Z-order (or simply sort) by <code>country</code> within each partition.',
+    'Build a separate copy of the table partitioned by <code>country</code>.',
+  ],
+  correct: 2,
+  explanation: 'Nested partitioning — <code>(order_date, country)</code> — explodes file counts: 365 days × 200 countries = 73,000 partitions, most of them tiny. Z-ordering (or sort-within-partition) keeps the file count sane while still letting min/max stats prune the <code>country</code> column inside each partition. The general rule: <em>partition for the dominant filter; cluster/Z-order for the secondary filters.</em>'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Partition pruning', q: 'How does the engine "prune"?', a: 'It reads the table\'s manifest, finds which partition values exist, intersects with the query predicate, and only opens files for surviving partitions. Zero data IO for pruned partitions.' },
+    { term: 'Range partition', q: 'Best for? Failure mode?', a: 'Best for time-series data where queries filter on recent ranges. Failure mode: hot partition — the current-period partition takes all writes; historical partitions are read-only. Fix with rolling windows or write spreading.' },
+    { term: 'Hash partition', q: 'Best for? Failure mode?', a: 'Best for even write distribution across N buckets. Failure mode: destroys range locality — a query for a date range must scan all N buckets. Avoid for range-query-heavy analytical workloads; prefer range or list.' },
+    { term: 'List partition', q: 'Best for? Failure mode?', a: 'Best for known stable categorical dimensions (region, status, tenant tier). Failure mode: a new enum value silently misroutes if not declared; always maintain an <code>OTHER</code> catch-all partition.' },
+    { term: 'Hidden partitioning', q: 'Iceberg vs Hive-style', a: 'Hive-style: physical column in the file path, writer-maintained, changing granularity = full rewrite. Iceberg hidden: transform declared in metadata (<code>days(order_ts)</code>), no extra column, evolution is metadata-only.' },
+    { term: 'Over-partitioning', q: 'The anti-pattern', a: 'Too many tiny partitions. Symptoms: slow partition listing, high metadata-listing costs, files <10MB each. Cause: partitioning on a high-cardinality column (user_id, event_id) or too-fine time granularity (minutes). Fix: coarsen the granularity or use clustering instead.' },
+    { term: 'Liquid clustering', q: 'Delta\'s 2024 feature', a: 'Replaces partition columns with a clustering hint; the engine adapts file layout dynamically. No more "stuck with the partition key you picked at table-create time."' },
+    { term: 'Salt', q: 'When to salt a key', a: 'When a key is hot, prepend a small random prefix (e.g. <code>0..15</code>). Spreads writes across partitions. Reads have to fan out, but distribute load. Standard fix for hot-shard / hot-partition.' },
+  ]
+});
+</script>
+
+</body>
+</html>

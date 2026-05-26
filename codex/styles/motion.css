@@ -1,0 +1,1154 @@
+/*
+ * motion.css — the animation & interaction layer
+ *
+ * This file bolts onto the existing styles and elevates the course with:
+ *   · ambient motion  (grid parallax, scanline, noise, cursor glow)
+ *   · scroll reveals  (.reveal, .reveal-stagger)
+ *   · signal micro-FX (number roll-up, pill burst, success ripple)
+ *   · richer hover states (3D card tilt, magnet, scanline wipe, border flow)
+ *   · hero theater     (typing, draw-in arrows, particle flow in the loop diagram)
+ *   · widget polish   (quiz correct/wrong FX, diff line stagger, flashcard physics)
+ *
+ * All animations respect `prefers-reduced-motion: reduce`.
+ */
+
+/* ============================================================
+ * 01 — KEYFRAMES
+ * ============================================================ */
+
+@keyframes m-rise {
+  0%   { opacity: 0; transform: translate3d(0, 14px, 0); filter: blur(6px); }
+  60%  { filter: blur(0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+@keyframes m-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes m-rise-left {
+  from { opacity: 0; transform: translate3d(-18px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes m-scale-in {
+  from { opacity: 0; transform: scale(.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes m-pop {
+  0%   { transform: scale(.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes m-shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+  40%, 60% { transform: translate3d(3px, 0, 0); }
+}
+@keyframes m-flow-dash {
+  to { stroke-dashoffset: -48; }
+}
+@keyframes m-particle {
+  0%   { offset-distance: 0%;   opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+@keyframes m-scan {
+  from { transform: translate3d(-100%, 0, 0); }
+  to   { transform: translate3d(200%, 0, 0); }
+}
+@keyframes m-burst {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-34px) scale(1.05); opacity: 0; }
+}
+@keyframes m-cursor {
+  50% { opacity: 0; }
+}
+@keyframes m-stripe {
+  from { background-position: 0 0; }
+  to   { background-position: 28px 0; }
+}
+@keyframes m-grid-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-48px, -48px, 0); }
+}
+@keyframes m-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(57, 170, 235, 0); }
+  50%      { box-shadow: 0 0 0 6px rgba(57, 170, 235, .18); }
+}
+@keyframes m-typing-caret {
+  50% { background: transparent; }
+}
+@keyframes m-rail-travel {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes m-boot {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes m-progress-indeterminate {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ============================================================
+ * 02 — SCROLL REVEAL
+ *   Add .reveal (or .reveal-left / .reveal-scale) to any element.
+ *   JS adds .in when the element enters the viewport.
+ * ============================================================ */
+
+.reveal,
+.reveal-left,
+.reveal-scale { opacity: 0; will-change: transform, opacity, filter; }
+
+.reveal.in        { animation: m-rise       .7s cubic-bezier(.2,.7,.2,1) both; }
+.reveal-left.in   { animation: m-rise-left  .65s cubic-bezier(.2,.7,.2,1) both; }
+.reveal-scale.in  { animation: m-scale-in   .6s cubic-bezier(.2,.7,.2,1) both; }
+
+/* Stagger utility: JS adds .in to the parent; children animate in sequence */
+.reveal-stagger > * { opacity: 0; }
+.reveal-stagger.in > *:nth-child(1)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1)  40ms both; }
+.reveal-stagger.in > *:nth-child(2)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 100ms both; }
+.reveal-stagger.in > *:nth-child(3)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 160ms both; }
+.reveal-stagger.in > *:nth-child(4)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 220ms both; }
+.reveal-stagger.in > *:nth-child(5)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 280ms both; }
+.reveal-stagger.in > *:nth-child(6)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 340ms both; }
+.reveal-stagger.in > *:nth-child(7)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 400ms both; }
+.reveal-stagger.in > *:nth-child(8)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 460ms both; }
+.reveal-stagger.in > *:nth-child(9)  { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 520ms both; }
+.reveal-stagger.in > *:nth-child(n+10) { animation: m-rise .55s cubic-bezier(.2,.7,.2,1) 580ms both; }
+
+/* ============================================================
+ * 03 — HERO: typing headline, ambient grid, aurora scrim
+ * ============================================================ */
+
+.hero { isolation: isolate; }
+
+/* Grid that slowly drifts — gives the sense of "floating in a terminal". */
+.hero .hero-grid-bg {
+  animation: m-grid-drift 48s linear infinite;
+  will-change: transform;
+}
+
+/* Aurora — a soft cyan bloom low-right that breathes.  */
+.hero::before {
+  content: '';
+  position: absolute; z-index: 0;
+  right: -8%; bottom: -12%;
+  width: 48rem; height: 48rem;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%,
+      color-mix(in oklch, var(--cyan) 40%, transparent) 0%,
+      transparent 55%);
+  filter: blur(40px);
+  opacity: 0.55;
+  animation: m-glow-pulse 6s ease-in-out infinite;
+}
+
+/* Scanline — soft, slow travel */
+.hero .hero-scanline {
+  animation: m-grid-drift 24s linear infinite;
+  animation-direction: reverse;
+}
+
+/* Title: l1 types in, l2 slides + em-word highlight swipe */
+.hero-title .l1,
+.hero-title .l2 { overflow: hidden; }
+.hero-title .l1 {
+  /* "An agent in" — a clean rise & settle */
+  animation: m-rise .75s cubic-bezier(.2,.7,.2,1) .12s both;
+}
+.hero-title .l2 {
+  animation: m-rise .85s cubic-bezier(.2,.7,.2,1) .34s both;
+}
+.hero-title .l2 em {
+  position: relative;
+  background: linear-gradient(180deg, transparent 55%, color-mix(in oklch, var(--cyan) 45%, transparent) 55%);
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  animation: m-hl-sweep 1.1s cubic-bezier(.2,.7,.2,1) .9s forwards;
+}
+@keyframes m-hl-sweep {
+  to { background-size: 100% 100%; }
+}
+
+.hero-rail { animation: m-fade .6s ease both; }
+.hero-lede { animation: m-rise .7s cubic-bezier(.2,.7,.2,1) .55s both; }
+.hero-cta  { animation: m-rise .7s cubic-bezier(.2,.7,.2,1) .7s  both; }
+.hero-meta { animation: m-rise .7s cubic-bezier(.2,.7,.2,1) .85s both; }
+
+/* cursor caret in the hero title */
+.hero-title .blink-caret { animation: m-cursor .85s step-end infinite; }
+
+/* hero-diagram — comes in last, slides up with a glow */
+.hero-diagram {
+  animation: m-rise 1s cubic-bezier(.2,.7,.2,1) 1s both;
+}
+.hero-diagram .hd-col .label::before {
+  animation: m-glow-pulse 2.2s ease-in-out infinite;
+}
+
+/* The inline code minis in the hero diagram — subtle blink on the caret */
+.hero-diagram .hd-col .mini::after {
+  content: '▍';
+  color: var(--cyan);
+  margin-left: 2px;
+  animation: m-cursor 1s step-end infinite;
+}
+
+/* ============================================================
+ * 04 — STATS BAND: count-up numbers
+ * ============================================================ */
+
+.stats-bar .stat            { position: relative; overflow: hidden; }
+.stats-bar .stat::before {
+  /* an accent stripe on hover */
+  content: ''; position: absolute;
+  left: 0; right: 0; top: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  transform: translateX(-100%);
+  transition: transform .6s cubic-bezier(.2,.7,.2,1);
+}
+.stats-bar .stat:hover::before { transform: translateX(100%); }
+.stats-bar .stat .n         { display: inline-block; }
+
+/* ============================================================
+ * 05 — LESSON CARDS: magnetic hover, corner marks, 3D tilt
+ * ============================================================ */
+
+.lesson-card {
+  transform: perspective(900px) rotateX(0) rotateY(0);
+  transition: transform .35s cubic-bezier(.2,.7,.2,1),
+              box-shadow .35s cubic-bezier(.2,.7,.2,1),
+              border-color .25s;
+  will-change: transform;
+}
+.lesson-card::before {
+  /* corner tick — top-right */
+  content: '';
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 10px; height: 10px;
+  border-top: 1px solid var(--ink-4);
+  border-right: 1px solid var(--ink-4);
+  opacity: .55;
+  transition: all .3s cubic-bezier(.2,.7,.2,1);
+}
+.lesson-card:hover::before {
+  border-color: var(--cyan-ink);
+  width: 16px; height: 16px;
+  opacity: 1;
+}
+
+/* sweeping scanline on hover */
+.lesson-card .sweep {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.lesson-card .sweep::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 40%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--cyan) 16%, transparent) 50%,
+    transparent 100%);
+  transform: translate3d(-120%, 0, 0) skewX(-12deg);
+  transition: transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.lesson-card:hover .sweep::after { transform: translate3d(380%, 0, 0) skewX(-12deg); }
+
+.lesson-card .arrow {
+  transition: transform .3s cubic-bezier(.2,.7,.2,1);
+}
+.lesson-card:hover .arrow { transform: translate3d(6px, 0, 0); }
+
+.lesson-card .num { transition: color .2s, letter-spacing .2s; }
+.lesson-card:hover .num { letter-spacing: 0.16em; }
+
+/* mag-tilt states are set via CSS custom properties from JS */
+.lesson-card.tilt {
+  transform:
+    perspective(900px)
+    rotateX(var(--tx, 0deg))
+    rotateY(var(--ty, 0deg))
+    translate3d(0, -4px, 0);
+  box-shadow:
+    calc(var(--sx, 0px)) 10px 32px rgba(18,24,40,.10),
+    calc(var(--sx, 0px)) 4px 10px rgba(18,24,40,.05);
+  border-color: var(--cyan-ink);
+}
+
+/* ============================================================
+ * 06 — TOPBAR: shrink on scroll, XP pill burst
+ * ============================================================ */
+
+.topbar { transition: padding .2s ease, backdrop-filter .2s ease, background .2s ease; }
+.topbar.shrunk { box-shadow: 0 1px 0 var(--rule), 0 4px 18px rgba(18,24,40,.05); }
+.topbar.shrunk .topbar-inner { padding-top: 9px; padding-bottom: 9px; }
+
+.xp-pill {
+  transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .25s;
+  position: relative;
+}
+.xp-pill.xp-bump { transform: scale(1.08); box-shadow: 0 0 0 5px var(--cyan-wash); }
+.xp-pill .spark  { transition: transform .35s cubic-bezier(.2,.7,.2,1); }
+.xp-pill.xp-bump .spark { transform: rotate(45deg) scale(1.2); }
+
+/* Floating "+NN XP" burst. JS injects .xp-burst elements next to the pill. */
+.xp-burst {
+  position: absolute;
+  right: 10px; top: -4px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: .72rem;
+  color: var(--cyan-deep);
+  pointer-events: none;
+  animation: m-burst 900ms cubic-bezier(.2,.7,.2,1) forwards;
+}
+
+/* ============================================================
+ * 07 — LESSON SHELL: sticky progress rail, scroll progress bar
+ * ============================================================ */
+
+.topbar .reading-rail {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: transparent;
+  pointer-events: none;
+}
+.topbar .reading-rail > span {
+  display: block; height: 100%;
+  width: var(--read, 0%);
+  background: linear-gradient(90deg, var(--cyan), var(--cyan-ink));
+  transition: width .15s linear;
+  box-shadow: 0 0 10px rgba(57,170,235,.4);
+}
+
+/* TOC: dotted vertical line + active pip */
+.lesson-sidebar .toc-head {
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 14px;
+}
+.lesson-sidebar ul {
+  list-style: none; margin: 0; padding: 0;
+  position: relative;
+}
+.lesson-sidebar ul::before {
+  content: '';
+  position: absolute;
+  left: 10px; top: 6px; bottom: 6px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--rule) 0%, var(--rule-2) 50%, var(--rule) 100%);
+  border-radius: 2px;
+}
+.lesson-sidebar li { position: relative; margin: 0; padding: 0; }
+.lesson-sidebar li a {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0 6px 28px;
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--ink-3);
+  border-radius: 4px;
+  transition: color .2s;
+  position: relative;
+}
+.lesson-sidebar li a .n {
+  font-size: .7rem;
+  color: var(--ink-4);
+  letter-spacing: .08em;
+}
+.lesson-sidebar li a::before {
+  /* pip on the rail */
+  content: '';
+  position: absolute;
+  left: 6px; top: 50%;
+  width: 10px; height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--rule-2);
+  transition: all .25s cubic-bezier(.2,.7,.2,1);
+}
+.lesson-sidebar li a:hover { color: var(--ink); text-decoration: none; }
+.lesson-sidebar li a:hover::before { border-color: var(--cyan-ink); }
+.lesson-sidebar li a.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+.lesson-sidebar li a.active::before {
+  background: var(--cyan);
+  border-color: var(--cyan-deep);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--cyan) 25%, transparent);
+}
+.lesson-sidebar li a.active .n { color: var(--cyan-deep); }
+
+/* Lesson hero eyebrow: animated prompt */
+.lesson-hero .lesson-num {
+  position: relative; display: inline-flex; align-items: center; gap: 10px;
+}
+.lesson-hero .lesson-num::before {
+  content: '$';
+  color: var(--cyan-ink);
+  animation: m-cursor 1.1s step-end infinite;
+}
+
+/* Lesson content section entrance */
+.lesson-content > section { opacity: 0; transform: translate3d(0, 12px, 0); will-change: transform, opacity; }
+.lesson-content > section.in { animation: m-rise .6s cubic-bezier(.2,.7,.2,1) both; }
+
+/* ============================================================
+ * 08 — WIDGET POLISH
+ * ============================================================ */
+
+/* Common widget appear */
+.w { animation: m-scale-in .5s cubic-bezier(.2,.7,.2,1) both; }
+.w .w-head .w-xp { transition: all .3s cubic-bezier(.2,.7,.2,1); }
+.w .w-head .w-xp.earned {
+  animation: m-pop .55s cubic-bezier(.2,.7,.2,1);
+}
+
+/* Quiz */
+.quiz-opt {
+  position: relative;
+  overflow: hidden;
+  transition: all .2s cubic-bezier(.2,.7,.2,1);
+}
+.quiz-opt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--cyan) 15%, transparent), transparent);
+  transform: translateX(-120%);
+  transition: transform .5s cubic-bezier(.2,.7,.2,1);
+  pointer-events: none;
+}
+.quiz-opt:not(:disabled):hover::before { transform: translateX(120%); }
+.quiz-opt:not(:disabled):hover {
+  border-color: var(--cyan-ink);
+  transform: translate3d(0, -1px, 0);
+}
+.quiz-opt.wrong {
+  animation: m-shake .5s cubic-bezier(.36,.07,.19,.97);
+  border-color: color-mix(in oklch, var(--bad) 40%, var(--rule));
+  background: color-mix(in oklch, var(--bad) 7%, var(--paper));
+}
+.quiz-opt.correct {
+  border-color: color-mix(in oklch, var(--ok) 40%, var(--rule));
+  background: color-mix(in oklch, var(--ok) 8%, var(--paper));
+  position: relative;
+}
+.quiz-opt.correct::after {
+  /* draw-in green check */
+  content: '';
+  position: absolute; right: 14px; top: 50%; margin-top: -7px;
+  width: 14px; height: 14px;
+  background: var(--ok);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M2 7 L6 11 L12 3' stroke='black' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M2 7 L6 11 L12 3' stroke='black' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat;
+  animation: m-pop .4s cubic-bezier(.2,.7,.2,1);
+}
+
+.quiz-explanation {
+  animation: m-rise .45s cubic-bezier(.2,.7,.2,1) both;
+}
+
+/* Diff — stagger rows */
+.diff-line { opacity: 0; animation: m-rise-left .3s cubic-bezier(.2,.7,.2,1) forwards; }
+.diff-line:nth-child(1)  { animation-delay: 30ms; }
+.diff-line:nth-child(2)  { animation-delay: 60ms; }
+.diff-line:nth-child(3)  { animation-delay: 90ms; }
+.diff-line:nth-child(4)  { animation-delay: 120ms; }
+.diff-line:nth-child(5)  { animation-delay: 150ms; }
+.diff-line:nth-child(6)  { animation-delay: 180ms; }
+.diff-line:nth-child(7)  { animation-delay: 210ms; }
+.diff-line:nth-child(8)  { animation-delay: 240ms; }
+.diff-line:nth-child(n+9) { animation-delay: 280ms; }
+.diff-line.add { position: relative; }
+.diff-line.add::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: var(--ok);
+  transform: scaleY(0); transform-origin: top;
+  animation: m-rail-travel .4s cubic-bezier(.2,.7,.2,1) .1s forwards;
+}
+.diff-line.del { position: relative; }
+.diff-line.del::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: var(--bad);
+  transform: scaleY(0); transform-origin: top;
+  animation: m-rail-travel .4s cubic-bezier(.2,.7,.2,1) .1s forwards;
+}
+
+/* Terminal demo — typewriter line entrance */
+.tdemo-line {
+  opacity: 0;
+  animation: m-rise-left .35s cubic-bezier(.2,.7,.2,1) forwards;
+}
+
+/* "● running" status pulse */
+.tdemo-head .title .running-dot {
+  display: inline-block;
+  width: .55rem; height: .55rem;
+  border-radius: 50%;
+  background: oklch(.82 .15 150);
+  box-shadow: 0 0 10px oklch(.82 .15 150);
+  animation: m-glow-pulse 1.2s ease-in-out infinite;
+}
+
+/* Flashcards — stage with 3D perspective */
+.flashcards { perspective: 1400px; }
+.flashcard {
+  transform-style: preserve-3d;
+  transition: transform .7s cubic-bezier(.3, 1.3, .4, 1);
+  position: relative;
+  cursor: pointer;
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard-face.front { transform: rotateY(0deg); backface-visibility: hidden; }
+.flashcard-face.back  { transform: rotateY(180deg); backface-visibility: hidden; position: absolute; inset: 0; }
+.flashcard::after {
+  /* scan-line gets wiped across on reveal */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--cyan) 18%, transparent), transparent);
+  transform: translateX(-120%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.flashcard.flipping::after { animation: m-scan .6s cubic-bezier(.2,.7,.2,1); }
+
+/* TaskSpec toggles — press down */
+.spec-toggle {
+  transition: transform .18s cubic-bezier(.2,.7,.2,1), border-color .2s, background .2s;
+}
+.spec-toggle:hover { transform: translate3d(2px, 0, 0); border-color: var(--cyan-ink); }
+.spec-toggle.on .tog {
+  background: var(--cyan);
+  border-color: var(--cyan-deep);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--cyan) 22%, transparent);
+}
+.spec-toggle.on .tog::after {
+  content: ''; position: absolute; inset: 0;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M2 7 L6 11 L12 3' stroke='black' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'><path d='M2 7 L6 11 L12 3' stroke='black' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / contain no-repeat;
+  background: white;
+  animation: m-pop .35s cubic-bezier(.2,.7,.2,1);
+}
+.spec-score .bar > div {
+  background: linear-gradient(90deg, var(--cyan), var(--cyan-ink));
+  background-size: 200% 100%;
+  animation: m-progress-indeterminate 2.4s linear infinite;
+  transition: width .45s cubic-bezier(.2,.7,.2,1);
+}
+.spec-right { position: relative; overflow: hidden; }
+.spec-right::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent, color-mix(in oklch, var(--cyan) 4%, transparent));
+  pointer-events: none;
+}
+
+/* ============================================================
+ * 09 — HERO LOOP DIAGRAM: flowing particles (SVG overlay)
+ *   Rendered by motion.js into .hero-diagram.
+ * ============================================================ */
+
+.hd-flow {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.hd-flow path {
+  fill: none;
+  stroke: color-mix(in oklch, var(--cyan) 55%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+  animation: m-flow-dash 3s linear infinite;
+  opacity: .55;
+}
+.hd-flow circle.particle {
+  fill: var(--cyan);
+  filter: drop-shadow(0 0 4px var(--cyan));
+  animation: m-particle 3.2s linear infinite;
+}
+.hd-flow circle.particle.p2 { animation-delay: -1.1s; }
+.hd-flow circle.particle.p3 { animation-delay: -2.2s; }
+.hero-diagram { position: relative; }
+.hd-col { position: relative; z-index: 1; }
+.hd-body { position: relative; }
+
+/* ============================================================
+ * 10 — TRACK HEADS & PROGRESS BARS
+ * ============================================================ */
+
+.track-head h2 { position: relative; display: inline-block; }
+.track-head h2::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan) 0%, transparent 60%);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .6s cubic-bezier(.2,.7,.2,1);
+}
+.track:hover .track-head h2::after,
+.track.in .track-head h2::after { transform: scaleX(1); }
+
+.track-prog-bar > div {
+  background: linear-gradient(90deg, var(--cyan), var(--cyan-ink));
+  position: relative;
+}
+.track-prog-bar > div::after {
+  /* moving gloss */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  animation: m-stripe 1.6s linear infinite;
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================
+ * 11 — BADGES: earned gets a pulse & sparkle
+ * ============================================================ */
+
+.badge.earned {
+  position: relative;
+  animation: m-pop .55s cubic-bezier(.2,.7,.2,1);
+}
+.badge.earned::after {
+  content: '';
+  position: absolute; top: -2px; right: -2px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+  animation: m-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ============================================================
+ * 12 — BUTTONS & LINKS
+ * ============================================================ */
+
+.btn { position: relative; overflow: hidden; }
+.btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.25) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .7s cubic-bezier(.2,.7,.2,1);
+  pointer-events: none;
+}
+.btn:hover::after { transform: translateX(120%); }
+.btn.primary:hover { box-shadow: 0 10px 24px rgba(18,24,40,.18); }
+.btn.cyan:hover { box-shadow: 0 10px 24px rgba(57,170,235,.32); }
+
+.btn.primary, .btn.cyan {
+  /* subtle idle breathing */
+  animation: m-glow-pulse 5s ease-in-out infinite;
+}
+
+/* ============================================================
+ * 13 — FOOTER
+ * ============================================================ */
+
+.lesson-foot a { transition: transform .25s cubic-bezier(.2,.7,.2,1); }
+.lesson-foot a:hover { transform: translate3d(0, -2px, 0); }
+.lesson-foot a.next:hover { transform: translate3d(4px, -2px, 0); }
+
+#btn-complete:not(:disabled):hover {
+  animation: m-glow-pulse 1.2s ease-in-out infinite;
+}
+
+/* ============================================================
+ * 14 — PAGE BOOT & TRANSITIONS
+ * ============================================================ */
+
+body { animation: m-boot .4s cubic-bezier(.2,.7,.2,1) both; }
+
+@view-transition { navigation: auto; }
+::view-transition-old(root)   { animation: m-fade-out .24s cubic-bezier(.2,.7,.2,1) both; }
+::view-transition-new(root)   { animation: m-fade-in  .3s  cubic-bezier(.2,.7,.2,1) both; }
+@keyframes m-fade-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes m-fade-in  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+/* ============================================================
+ * 15 — REDUCED MOTION
+ * ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .hero .hero-grid-bg, .hero .hero-scanline, .hd-flow path, .hd-flow circle { animation: none !important; }
+  .reveal, .reveal-left, .reveal-scale,
+  .reveal-stagger > *, .lesson-content > section { opacity: 1 !important; transform: none !important; }
+  .btn.primary, .btn.cyan { animation: none !important; }
+}
+
+/* ============================================================
+ * 16 — WIDGET EXTRAS introduced in widgets.js v2
+ * ============================================================ */
+
+/* terminal status dot */
+.tdemo-head .title { display: inline-flex; align-items: center; gap: 6px; }
+.tdemo-head .title .status-dot {
+  display: inline-block;
+  width: .55rem; height: .55rem;
+  border-radius: 50%;
+  background: oklch(.6 .01 240);
+  transition: background .25s, box-shadow .25s;
+}
+.tdemo-head .title .status-dot.running {
+  animation: m-glow-pulse 1.2s ease-in-out infinite;
+}
+.tdemo-head .title .status-dot.done {
+  animation: none;
+}
+
+/* terminal speed selector */
+.tdemo-ctrl { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.tdemo-speed { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+.tdemo-speed select {
+  width: auto;
+  padding: 5px 8px;
+  font-size: .76rem;
+  background: var(--paper);
+  color: var(--ink-2);
+  border: 1px solid var(--rule-2);
+  border-radius: 4px;
+  font-family: var(--mono);
+}
+.tdemo-speed label { font-family: var(--mono); }
+
+/* inline typewriter caret while typing */
+.type-caret {
+  display: inline-block;
+  margin-left: 1px;
+  color: oklch(.82 .15 210);
+  animation: m-cursor .85s step-end infinite;
+  font-weight: 500;
+}
+
+/* TaskSpec tier color */
+.spec-score .tier { color: var(--ink-3); text-transform: uppercase; font-size: .68rem; letter-spacing: .1em; transition: color .25s; }
+.spec-score .tier[data-tier="weak"]   { color: var(--ink-4); }
+.spec-score .tier[data-tier="meh"]    { color: var(--warn); }
+.spec-score .tier[data-tier="strong"] { color: var(--ok); font-weight: 700; }
+
+/* Flashcard progress dots */
+.flash-dots {
+  display: flex; gap: 6px; justify-content: center;
+  margin: 12px 0 0;
+}
+.flash-dots .fd {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--rule-2);
+  transition: all .25s cubic-bezier(.2,.7,.2,1);
+}
+.flash-dots .fd.seen { background: color-mix(in oklch, var(--cyan) 50%, var(--rule-2)); }
+.flash-dots .fd.cur {
+  background: var(--cyan);
+  width: 18px; border-radius: 4px;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--cyan) 18%, transparent);
+}
+
+/* Compare hover outline */
+.compare-col { transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s; }
+.compare-col:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 8px 24px rgba(18,24,40,.06);
+}
+.compare-col.good:hover { border-color: var(--ok); }
+.compare-col.bad:hover  { border-color: var(--bad); }
+
+/* Diff line hover highlight */
+.diff-line { transition: background .2s; }
+.diff-line:hover {
+  background: color-mix(in oklch, var(--cyan) 4%, transparent);
+}
+
+
+/* ============================================================
+ * 17 — v3 GLOBAL POLISH PASS
+ * Fixes the "unfinished dashed box" feel on quiz options,
+ * elevates buttons, introduces radio-fill animation,
+ * adds global scene transition, unifies interactive states.
+ * ============================================================ */
+
+/* ---- Quiz options: turn into polished radio-style choices ---- */
+.quiz-opts { display: grid; gap: 10px; margin-top: 12px; }
+.quiz-opt {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 18px 14px 14px;
+  text-align: left;
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  border-radius: 10px;
+  font-size: .92rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.2,.7,.2,1),
+              border-color .2s, background .2s, box-shadow .2s;
+  overflow: hidden;
+}
+.quiz-opt::before {
+  /* animated hover sheen */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 20%,
+    color-mix(in oklch, var(--cyan) 8%, transparent) 50%,
+    transparent 80%);
+  transform: translateX(-120%);
+  transition: transform .6s cubic-bezier(.2,.7,.2,1);
+  pointer-events: none;
+}
+.quiz-opt:hover:not(:disabled)::before { transform: translateX(120%); }
+.quiz-opt:hover:not(:disabled) {
+  border-color: color-mix(in oklch, var(--cyan) 60%, var(--rule-2));
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(18,24,40,.05);
+}
+.quiz-opt:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.quiz-opt .letter {
+  display: inline-flex;
+  width: 28px; height: 28px;
+  align-items: center; justify-content: center;
+  border: 1.5px solid var(--rule-2);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: .72rem;
+  color: var(--ink-3);
+  background: var(--canvas);
+  position: relative;
+  transition: all .2s cubic-bezier(.2,.7,.2,1);
+}
+.quiz-opt:hover:not(:disabled) .letter {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: scale(1.06);
+}
+/* correct state */
+.quiz-opt.correct {
+  border-color: var(--ok);
+  background: color-mix(in oklch, var(--ok) 7%, var(--paper));
+  animation: m-correct-glow .6s ease-out;
+}
+.quiz-opt.correct .letter {
+  background: var(--ok);
+  color: white;
+  border-color: var(--ok);
+  transform: scale(1.1);
+}
+.quiz-opt.correct .letter::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid; place-items: center;
+  color: white;
+  font-size: .9rem;
+  font-weight: 700;
+  animation: m-check-draw .4s cubic-bezier(.2,.7,.2,1) .1s both;
+}
+/* wrong state */
+.quiz-opt.wrong {
+  border-color: var(--bad);
+  background: color-mix(in oklch, var(--bad) 5%, var(--paper));
+  animation: m-shake .4s cubic-bezier(.36,.07,.19,.97);
+}
+.quiz-opt.wrong .letter {
+  background: var(--bad);
+  color: white;
+  border-color: var(--bad);
+}
+.quiz-opt:disabled {
+  cursor: default;
+  opacity: .62;
+}
+.quiz-opt.correct:disabled,
+.quiz-opt.wrong:disabled { opacity: 1; }
+
+@keyframes m-correct-glow {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--ok) 50%, transparent); }
+  60% { box-shadow: 0 0 0 14px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes m-shake {
+  10%, 90% { transform: translate3d(-1px,0,0); }
+  20%, 80% { transform: translate3d(2px,0,0); }
+  30%, 50%, 70% { transform: translate3d(-3px,0,0); }
+  40%, 60% { transform: translate3d(3px,0,0); }
+}
+@keyframes m-check-draw {
+  from { transform: scale(.3) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0);      opacity: 1; }
+}
+
+/* ---- Quiz explanation box ---- */
+.quiz-explanation {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: color-mix(in oklch, var(--cyan) 5%, var(--paper));
+  border-left: 3px solid var(--cyan);
+  border-radius: 0 8px 8px 0;
+  font-size: .9rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+  animation: m-explanation-in .5s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes m-explanation-in {
+  from { opacity: 0; transform: translateY(-6px); max-height: 0; padding-top: 0; padding-bottom: 0; }
+  to   { opacity: 1; transform: translateY(0);    max-height: 400px; }
+}
+
+/* ---- TaskSpec toggle polish (replace the "unfinished box" feel) ---- */
+.spec-toggle {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .25s cubic-bezier(.2,.7,.2,1);
+}
+.spec-toggle:hover { border-color: color-mix(in oklch, var(--cyan) 50%, var(--rule-2)); transform: translateY(-1px); }
+.spec-toggle .tog {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 20px;
+  background: var(--rule-2);
+  transition: background .25s;
+  flex-shrink: 0;
+}
+.spec-toggle .tog::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: left .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s;
+}
+.spec-toggle.on .tog {
+  background: var(--cyan);
+}
+.spec-toggle.on .tog::after {
+  left: 18px;
+  box-shadow: 0 1px 3px rgba(18,24,40,.35), 0 0 8px color-mix(in oklch, var(--cyan) 40%, transparent);
+}
+.spec-toggle .body .lbl { font-weight: 600; color: var(--ink-1); font-size: .88rem; }
+.spec-toggle .body .hint { font-size: .76rem; color: var(--ink-3); margin-top: 2px; line-height: 1.45; }
+.spec-toggle.on { border-color: color-mix(in oklch, var(--cyan) 40%, var(--rule-2)); background: color-mix(in oklch, var(--cyan) 3%, var(--paper)); }
+
+/* ---- Unified button polish ---- */
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  /* ripple on click */
+  content: '';
+  position: absolute;
+  left: var(--rx, 50%); top: var(--ry, 50%);
+  width: 0; height: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: width .4s, height .4s, opacity .6s;
+  pointer-events: none;
+}
+.btn:active::after {
+  width: 260px; height: 260px;
+  opacity: .15;
+  transition: width 0s, height 0s, opacity 0s;
+}
+.btn.primary:hover { background: color-mix(in oklch, var(--ink-1) 92%, var(--cyan)); transform: translateY(-1px); }
+
+/* ---- Page transition (scene change) ---- */
+html.cx-page-leaving body {
+  animation: m-page-leave .32s cubic-bezier(.2,.7,.2,1) forwards;
+}
+html.cx-page-entering body {
+  animation: m-page-enter .42s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes m-page-leave {
+  from { opacity: 1; filter: blur(0); }
+  to   { opacity: 0; filter: blur(6px); transform: translateY(-14px); }
+}
+@keyframes m-page-enter {
+  from { opacity: 0; filter: blur(10px); transform: translateY(18px); }
+  to   { opacity: 1; filter: blur(0);    transform: translateY(0); }
+}
+
+/* ---- Bespoke widget host frame (used by L*.js widgets) ---- */
+.bespoke-host {
+  margin: 28px 0;
+  padding: 0;
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 0 var(--rule-2), 0 20px 40px -30px rgba(18,24,40,.25);
+}
+.bespoke-host::before {
+  /* subtle inner top accent */
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: .6;
+}
+.bespoke-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: .74rem;
+  letter-spacing: .1em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--rule-2);
+  background: linear-gradient(180deg,
+    color-mix(in oklch, var(--cyan) 3%, var(--paper)),
+    var(--paper));
+}
+.bespoke-header .kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--canvas);
+  border: 1px solid var(--rule-2);
+  border-radius: 4px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.bespoke-header .kind::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: m-glow-pulse 2s ease-in-out infinite;
+}
+.bespoke-body { padding: 24px; min-height: 360px; }
+
+/* ---- XP celebration flash ---- */
+.xp-flash {
+  position: fixed;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  transform: translate(-50%, -50%);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--cyan);
+  pointer-events: none;
+  z-index: 10000;
+  animation: m-xp-float 1.2s cubic-bezier(.2,.7,.2,1) forwards;
+  text-shadow: 0 0 8px color-mix(in oklch, var(--cyan) 60%, transparent);
+}
+@keyframes m-xp-float {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(.5); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+}
+
+/* ---- Lesson completion celebration ---- */
+@keyframes m-celebrate-sweep {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.lesson-complete-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: linear-gradient(120deg,
+    transparent 30%,
+    color-mix(in oklch, var(--cyan) 20%, transparent) 50%,
+    transparent 70%);
+  background-size: 200% 100%;
+  animation: m-celebrate-sweep 1.4s cubic-bezier(.2,.7,.2,1);
+}
+
+/* ---- Ambient particle layer (homepage) ---- */
+.particle-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: .5;
+}
+
+/* ---- TOC active pip pulse ---- */
+.lesson-toc li.cur .pip {
+  animation: m-pip-pulse 2s ease-in-out infinite;
+}
+@keyframes m-pip-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--cyan) 50%, transparent); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ---- Fix flashcard perspective depth ---- */
+.flash-stage { perspective: 1200px; }
+.flashcard {
+  transform-style: preserve-3d;
+  transition: transform .62s cubic-bezier(.2,.8,.2,1);
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard .back   { transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flashcard .front  { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flashcard.flipping {
+  animation: m-card-pop .62s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes m-card-pop {
+  50% { transform: rotateY(90deg) scale(1.04); }
+}
+
+/* ---- Reduced-motion safeguards for the new stuff ---- */
+@media (prefers-reduced-motion: reduce) {
+  .quiz-opt::before,
+  .flashcard.flipping,
+  .lesson-complete-flash,
+  .xp-flash,
+  .particle-layer {
+    animation: none !important;
+    transition: none !important;
+  }
+}

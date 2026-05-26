@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>09 · AI Tools Ecosystem — Codex Course</title>
+  <meta name="description" content="Claude Code, Copilot, Cursor, Aider, Cline — the AI coding landscape. Which tool fits which workflow, and how they connect to your IDE."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="09 · AI Tools Ecosystem — Codex Course"/>
+  <meta property="og:description" content="Claude Code, Copilot, Cursor, Aider, Cline — the AI coding landscape. Which tool fits which workflow, and how they connect to your IDE."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/09-tools.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="09 · AI Tools Ecosystem — Codex Course"/>
+  <meta name="twitter:description" content="Claude Code, Copilot, Cursor, Aider, Cline — the AI coding landscape. Which tool fits which workflow, and how they connect to your IDE."/>
+  <link rel="canonical" href="../lessons/09-tools.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"AI Tools Ecosystem",
+    "description":"Claude Code, Copilot, Cursor, Aider, Cline — the AI coding landscape. Which tool fits which workflow, and how they connect to your IDE.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":9
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-09">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 09 · track 03 — in the loop</div>
+    <h1>The AI Tools<br/>Ecosystem.</h1>
+    <p class="subtitle">Claude Code, Copilot, Cursor, Aider, Cline — each solves a different slice of the problem. Picking the wrong one for a job is expensive. Picking the right one is a force multiplier.</p>
+    <div class="meta">
+      <span>&#9203; <b>11 min read</b></span>
+      <span>&#9670; <b>3 interactives</b></span>
+      <span>&#10022; <b>+50 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>The AI coding landscape fragmented fast. In 2023 there was essentially one tool. In 2025 there are five major categories, each with a different philosophy: inline completions, chat-driven editing, CLI agents, IDE-native agents, and autonomous PR generators. They are not interchangeable.</p>
+        <p>The mistake most developers make is treating their first tool as a permanent tool — defaulting to Copilot autocomplete for tasks that need a full agent, or spinning up an autonomous agent for a one-liner fix that would take seconds in an IDE. The cost is compounded daily.</p>
+        <p>This lesson is a map. Know the landscape, and you spend your time in flow rather than fighting your toolchain.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The five major tools</h2>
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">GitHub Copilot</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The inline completer</h3>
+          <p class="small muted" style="margin-top:8px;">Lives in your editor. Autocompletes at the cursor. Best for: boilerplate, repetitive patterns, filling out function bodies you already know the shape of. Worst for: architectural decisions, multi-file refactors, anything that requires reading context beyond the open file.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">Cursor</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The IDE-native agent</h3>
+          <p class="small muted" style="margin-top:8px;">A VSCode fork with AI deeply woven in. Chat with the whole codebase as context. Agent mode can run terminal commands, edit multiple files, and iterate. Best for: interactive brownfield exploration, multi-file edits where you want to watch and steer in real time.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">Claude Code</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The terminal-first agent</h3>
+          <p class="small muted" style="margin-top:8px;">Runs in your existing terminal. Full repo access, shell execution, no dedicated IDE. Best for: developers who live in the terminal and want a capable agent that doesn't change their editor. Integrates naturally with git, CI, and custom scripts via hooks.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">Aider</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The open-source CLI agent</h3>
+          <p class="small muted" style="margin-top:8px;">Open-source, model-agnostic CLI. You pick the model (GPT-4, Claude, Gemini). Best for: teams that want to bring their own API keys, want full auditability, or need to run air-gapped. Strong git integration — it commits as it goes.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">Cline (formerly Claude Dev)</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The VSCode extension agent</h3>
+          <p class="small muted" style="margin-top:8px;">VSCode extension that gives you an agentic AI inside your existing editor, not a fork. Supports multiple models. Best for: teams already on VSCode who want agent-level power without switching editors. MCP support makes it highly extensible.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">Codex (OpenAI)</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The cloud PR agent</h3>
+          <p class="small muted" style="margin-top:8px;">The subject of this course. Runs in an isolated cloud sandbox. Async — you submit a task, come back to a PR. Best for: high-volume parallel work, tasks you can fully specify upfront, freeing your local machine for interactive work.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Choosing by task shape</h2>
+      <div class="prose">
+        <p>The right tool depends on the task shape, not on loyalty to a vendor. A rough decision tree:</p>
+        <ul>
+          <li><strong>You know what you want and it's one file</strong> → Copilot autocomplete is fastest. Don't spawn an agent.</li>
+          <li><strong>You want to explore a codebase you don't know</strong> → Cursor or Cline. Chat with context, ask questions, steer in real time.</li>
+          <li><strong>You have a well-specified task and want your hands free</strong> → Codex (cloud) or Aider (local). Write the spec, let it run, review the PR.</li>
+          <li><strong>You live in the terminal and want a capable REPL-style agent</strong> → Claude Code. Fast, composable, hooks into your existing workflow.</li>
+          <li><strong>You need model flexibility or air-gapped operation</strong> → Aider. Bring your own model.</li>
+        </ul>
+      </div>
+
+      <div id="w-compare"></div>
+    </section>
+
+    <section id="s4">
+      <h2>MCP servers: extending the agents</h2>
+      <div class="prose">
+        <p>MCP stands for Model Context Protocol — a standard for connecting AI agents to external tools, data sources, and services. Think of it as a plugin system for your agent.</p>
+        <p>Without MCP, an agent can only see your local filesystem and run shell commands. With MCP, it can query a database, search the web, create GitHub issues, read Slack threads, or call any API — all through a standard interface the agent already knows how to use.</p>
+        <p>The architecture is simple:</p>
+      </div>
+
+<pre class="code"><span class="tok-c"># How MCP works (conceptually)</span>
+
+<span class="tok-c"># 1. You configure MCP servers in your agent's config</span>
+<span class="tok-c">#    (e.g. ~/.claude/settings.json for Claude Code)</span>
+
+<span class="tok-c"># 2. Each server exposes "tools" — named functions the agent can call</span>
+<span class="tok-c">#    e.g. mcp__github__create_issue({ title, body, labels })</span>
+<span class="tok-c">#         mcp__postgres__query({ sql })</span>
+<span class="tok-c">#         mcp__slack__send_message({ channel, text })</span>
+
+<span class="tok-c"># 3. The agent decides when to call them, just like any other tool</span>
+<span class="tok-c">#    You don't have to orchestrate the calls manually</span>
+
+<span class="tok-c"># Example: Claude Code with GitHub and Postgres MCP servers</span>
+<span class="tok-c"># Agent can now: read the DB schema, open a GitHub issue,</span>
+<span class="tok-c"># and commit a migration — all in one session</span>
+</pre>
+
+      <div class="prose" style="margin-top:14px;">
+        <p>Supported by: Claude Code, Cline, Cursor (via extensions), and a growing list of other agents. MCP servers exist for GitHub, GitLab, Postgres, Supabase, Stripe, Slack, Google Drive, Jira, Linear, and dozens more. You can also write custom MCP servers for your internal tools.</p>
+        <p>The practical upside: your agent can participate in your full toolchain, not just your local filesystem. A task that previously required manual steps ("run the query, paste the result into the prompt") becomes a single agent-handled loop.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>IDE integration patterns</h2>
+      <div class="prose">
+        <p>Even non-IDE tools (Codex, Aider, Claude Code) integrate with your editor workflow. The common patterns:</p>
+        <ul>
+          <li><strong>Diff review in your editor:</strong> Codex and Aider both produce git diffs. Open the PR in your editor's git UI to review — same flow as any human PR.</li>
+          <li><strong>Running agents on save:</strong> Some teams configure Claude Code or Aider to run a quick check (lint, type check, failing tests only) on every file save. Tight feedback loop without context-switching.</li>
+          <li><strong>Editor context for the CLI:</strong> Claude Code can read your currently-open files from many editors via filesystem watching. You don't have to paste files — just reference them by name.</li>
+          <li><strong>Parallel sessions:</strong> Use git worktrees (next lesson) to run an agent on a feature branch while you keep working in main. No context conflicts between the sessions.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L09"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('tools', [
+    {id:'s1', label:'The landscape'},
+    {id:'s2', label:'The five major tools'},
+    {id:'s3', label:'Choosing by task shape'},
+    {id:'s4', label:'MCP servers'},
+    {id:'s5', label:'IDE integration'},
+    {id:'s6', label:'Quick check'},
+  ]);
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Same task, two tool choices',
+    badLabel: 'Over-engineered',
+    goodLabel: 'Right-sized',
+    bad: 'Task: add a missing JSDoc comment to one function.\n\nApproach: spin up a Codex cloud task, write a spec, wait 4 minutes for the sandbox, get a PR, open a review.\n\nCost: ~5 minutes, 2 API calls, a PR to manage.',
+    good: 'Task: add a missing JSDoc comment to one function.\n\nApproach: cursor on the function, trigger Copilot inline, tab-complete the comment.\n\nCost: ~8 seconds. Done.\n\nSave the agent for tasks the autocompleter can\'t do.',
+    note: 'Agents have overhead: sandbox spin-up, context loading, PR creation. That overhead is worth paying for a 200-line feature. It is not worth paying for a docstring. Match the tool to the task scope.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'tools', cpId: 'q1',
+    question: 'You need to explore an unfamiliar 80k-line codebase and understand how the authentication flow works before making any changes. Which tool fits best?',
+    options: [
+      'GitHub Copilot — it\'s always on and knows your code.',
+      'Cursor or Cline — IDE-native agents with whole-codebase chat let you ask questions and explore interactively before touching anything.',
+      'Codex — submit a task: "explain the auth flow."',
+      'Aider — open-source and model-agnostic.',
+    ],
+    correct: 1,
+    explanation: 'Exploration is interactive and open-ended — you don\'t know what you\'re looking for yet. IDE-native agents (Cursor, Cline) excel here because you can ask follow-up questions, jump to definitions, and steer the conversation as understanding develops. Codex is optimized for well-specified tasks, not open-ended exploration.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'tools', cpId: 'q2',
+    question: 'What does an MCP server enable that an agent without MCP cannot do?',
+    options: [
+      'Write code faster.',
+      'Connect to external tools, databases, and APIs (GitHub, Postgres, Slack, etc.) through a standard interface the agent can call directly.',
+      'Run inside a sandboxed environment.',
+      'Understand more programming languages.',
+    ],
+    correct: 1,
+    explanation: 'MCP (Model Context Protocol) is a plugin standard. It lets agents call named tools that talk to external systems — a Postgres MCP server lets the agent run SQL queries; a GitHub MCP server lets it open issues. Without MCP, the agent is limited to the local filesystem and shell. With it, the agent can participate in your full toolchain.'
+  });
+</script>
+
+<script src="../js/lessons/L09.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

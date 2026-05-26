@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>01 · The Stack, Top to Bottom — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 01 · track 01 — foundations</div>
+    <h1>The stack,<br/>top to bottom.</h1>
+    <p class="subtitle">Every data system you'll ever design is the same six layers in different clothes. Source, log, processing, storage, serving, consumption. Get this picture in your head and the rest of the course is just zooming in.</p>
+    <div style="margin-top:18px; padding:14px 18px; background:oklch(0.97 0.006 80); border-radius:10px; border:1px solid oklch(0.86 0.01 80);">
+      <div style="font-family:var(--mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.5 0.02 250); font-weight:600; margin-bottom:8px;">Learning objectives</div>
+      <ul style="font-family:var(--sans); font-size:0.9rem; line-height:1.65; margin:0; padding-left:1.2em; color:oklch(0.32 0.02 250);">
+        <li>Name and describe the six canonical data stack layers</li>
+        <li>Explain why each layer exists and what it is optimised for</li>
+        <li>Recognise the latency/throughput and schema-on-write/read trade-offs</li>
+        <li>Know which layer answers analytics queries and why production OLTP must not</li>
+      </ul>
+    </div>
+    <div class="meta">
+      <span>⏱ <b>12 min</b></span>
+      <span>◆ <b>4 simulations</b></span>
+      <span>✦ <b>+85 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Open any data-engineering job description, any system-design interview, any "modern data stack" diagram from a vendor selling you something. Squint. They are all the same shape. Six layers, top to bottom.</p>
+        <p>You will hear different names for them. <strong>Bronze, silver, gold.</strong> <strong>OLTP, OLAP, DWH, mart.</strong> <strong>Source, ingest, transform, store, serve.</strong> The vocabularies differ; the geometry doesn't. Bytes are born somewhere. They flow into a log. Something processes them. They land in storage. A query engine answers questions about them. A human or a model finally consumes the answer.</p>
+        <p>The trick to thinking like an IC5 is to hold this whole picture in your head at once — and to know, for any byte in the system, <em>what layer it is in and why</em>. Lose track of that and you'll spend your career debugging "the data is wrong" tickets that have nothing to do with your code.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Watch one event flow</h2>
+      <div class="prose"><p>Press play. A single click on a checkout button — let's say a <code>$48.90</code> order from Brazil — has to make it from a phone all the way to the dashboard your VP looks at on Monday. It crosses every one of these layers. <em>Burst</em> shows what production looks like.</p></div>
+      <div id="w-flow"></div>
+    </section>
+
+    <section id="s3">
+      <h2>What each layer is actually for</h2>
+      <div class="prose">
+        <p>Each layer exists because the layer below it has the wrong shape for the layer above. That sentence is the entire field, compressed.</p>
+        <ol>
+          <li><strong>Source.</strong> Where bytes are born. App backends writing to Postgres, mobile clients firing analytics events, IoT sensors, third-party webhooks. The schema here is whatever the engineer who shipped the feature picked on a Tuesday. <em>Optimised for: write throughput, transactional correctness.</em></li>
+          <li><strong>Log.</strong> An ordered, durable, partitioned, append-only record of everything that happened. Kafka, Kinesis, Pub/Sub. The cleanest abstraction in the whole stack — it decouples producers from consumers in time and space. If your log is healthy, every other layer can be rebuilt. <em>Optimised for: linear writes, replay, fan-out.</em></li>
+          <li><strong>Processing.</strong> Where shape changes. Filter, enrich, aggregate, join, window. Spark and Flink and Beam all live here. The hard distinction here is <em>batch</em> (jobs over bounded data) vs <em>stream</em> (jobs over unbounded data) — same algebra, different runtime.</li>
+          <li><strong>Storage.</strong> Bytes that survive the next deploy. Object stores (S3, GCS) for the bulk; open table formats (Iceberg, Delta) for ACID; warehouses (Snowflake, BigQuery) for managed query. <em>Optimised for: cheap-per-GB, columnar scans, durability.</em></li>
+          <li><strong>Serving.</strong> Sub-second answers. OLAP engines for BI, vector stores for ML retrieval, key-value stores for online features, search indexes for "find me X." Different shapes for different read patterns.</li>
+          <li><strong>Consumption.</strong> Dashboards, alerts, ML model inputs, billing systems, fraud rules. The whole point. The reason any of the lower layers exist.</li>
+        </ol>
+      </div>
+      <div class="callout"><span class="icon">▸</span><div><b>The interview move.</b> When asked to "design X data system," start by drawing this six-layer skeleton on the board, then mark which layers the question is actually about. Most questions live in 2-3 layers; the others are obvious.</div></div>
+    </section>
+
+    <section id="s4">
+      <h2>Two forces shape every layer</h2>
+      <div class="prose">
+        <p>Every data layer is the result of two forces fighting:</p>
+        <ul>
+          <li><strong>Latency vs throughput.</strong> Source systems are tuned for low-latency single-row writes. Storage layers are tuned for high-throughput columnar scans. The gap between them is why we need processing layers.</li>
+          <li><strong>Schema-on-write vs schema-on-read.</strong> Postgres demands you declare the schema before you can insert. A data lake lets you dump JSON now and figure out the columns later. Both have a cost; the cost is just paid at different times.</li>
+        </ul>
+        <p>When someone asks "should this be a stream or a batch job?" — they're asking which side of the latency/throughput spectrum the answer needs to be on. When someone asks "should we ETL or ELT?" — they're asking when you want to pay the schema tax.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s6">
+      <h2>The vocab you actually need</h2>
+      <div class="prose"><p>You'll hear these words for the rest of the course. Click each card.</p></div>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'mental-model';
+initLesson(LID, [
+  { id: 's1', label: 'The six-layer truth' },
+  { id: 's2', label: 'Watch one event flow' },
+  { id: 's3', label: 'What each layer is for' },
+  { id: 's4', label: 'Two forces' },
+  { id: 's5', label: 'Quick check' },
+  { id: 's6', label: 'Vocab' },
+]);
+
+D.StackFlow(document.getElementById('w-flow'), {
+  lessonId: LID, cpId: 'flow',
+  layers: [
+    { name: 'source',     tools: ['Postgres','iOS SDK','Stripe'] },
+    { name: 'log',        tools: ['Kafka','Kinesis'] },
+    { name: 'processing', tools: ['Flink','Spark','dbt'] },
+    { name: 'storage',    tools: ['S3','Iceberg','Parquet'] },
+    { name: 'serving',    tools: ['Snowflake','Trino','DynamoDB'] },
+    { name: 'consume',    tools: ['Looker','API','Feature store'] },
+  ]
+});
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'Which layer rebuilds the others?',
+  question: 'A junior asks: "If we lost everything except one of the six layers, which one would let us rebuild the most of the rest?" What\'s the right answer — and why?',
+  options: [
+    'The source databases — they\'re where the truth lives.',
+    'The log — it\'s the ordered record of everything that happened.',
+    'The warehouse — it has the cleanest data.',
+    'The dashboards — that\'s what people actually use.',
+  ],
+  correct: 1,
+  explanation: 'The <b>log</b> is the canonical history. Source DBs only hold current state — you can\'t reconstruct yesterday\'s rows from today\'s table. The warehouse is downstream of transformations that may be lossy. Dashboards are aggregations of aggregations. The log is the only layer where every event lives, in order, durable. This is why "Kafka as the source of truth" is a legitimate architecture.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Where does this query live?',
+  question: 'Marketing wants to know: "How many users from each country bought something in the last 24 hours?" Which layer should answer this — and which layer should they <em>not</em> hit directly?',
+  options: [
+    'They should query the source Postgres directly. It has the freshest data.',
+    'They should hit the Kafka log. It\'s the source of truth.',
+    'They should query the serving layer (warehouse / OLAP). The source DB shouldn\'t be touched by analytics.',
+    'They should ask an engineer to export a CSV.',
+  ],
+  correct: 2,
+  explanation: 'Hitting production OLTP for analytics is a <em>classic</em> failure mode — long-running aggregation queries lock rows, hold connections, and degrade the actual product. That\'s why we have the storage/serving layers: cheap, columnar, isolated from the write path. The whole stack downstream of the source exists precisely so analytics never touches the OLTP DB.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'OLTP', q: 'Online Transactional Processing', a: 'The source-layer DBs that power your product. Tuned for many small writes and key-lookups. Postgres, MySQL, DynamoDB. Bad at large scans.' },
+    { term: 'OLAP', q: 'Online Analytical Processing', a: 'The serving-layer engines for analytics. Tuned for columnar scans over huge tables. Snowflake, BigQuery, Trino, ClickHouse.' },
+    { term: 'ETL vs ELT', q: 'Why do we say ELT now?', a: 'ETL (extract → transform → load) means you pay the transform cost <em>before</em> landing in the warehouse. ELT (extract → load → transform) means you dump raw into the warehouse and transform in-place using its compute. ELT won because warehouses got cheap.' },
+    { term: 'Bronze / Silver / Gold', q: 'The medallion architecture', a: 'A naming convention from Databricks. Bronze = raw landed data. Silver = cleaned, deduped, conformed. Gold = aggregated, business-ready. Useful as a mental model for staging.' },
+    { term: 'Lakehouse', q: 'Why is this word everywhere?', a: 'A "lake" + "warehouse" hybrid: cheap object-store files (Parquet on S3) wrapped in a table format (Iceberg/Delta) that gives you ACID, time-travel, and schema evolution — the things lakes used to lack.' },
+    { term: 'Schema on read vs write', q: 'Where you pay the schema tax', a: 'Schema-on-write (Postgres): structure declared upfront, rejected if violated. Schema-on-read (lake): write whatever, the reader interprets. Trade rigour for flexibility.' },
+  ]
+});
+</script>
+
+</body>
+</html>

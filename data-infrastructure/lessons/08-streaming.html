@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>08 · Streaming: Kafka, Watermarks, Windows — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 08 · track 03 — processing</div>
+    <h1>Streaming: Kafka,<br/>watermarks, windows.</h1>
+    <p class="subtitle">Kafka's mental model in five minutes. Event time vs processing time — the distinction that breaks every junior. Watermarks, windows, and late data. The exact reason your stream job's results "look wrong."</p>
+    <div class="meta">
+      <span>⏱ <b>16 min</b></span>
+      <span>◆ <b>4 simulations</b></span>
+      <span>✦ <b>+105 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <div class="callout" style="margin-bottom:18px;"><span class="icon">◎</span><div><b>Learning objectives.</b> After this lesson you can: (1) explain the difference between event time and processing time and why it matters for window results; (2) describe how watermarks work and the latency/completeness trade-off; (3) distinguish at-most-once, at-least-once, and exactly-once delivery semantics and explain how each is achieved in Kafka; (4) compare Flink and Spark Structured Streaming on the key dimensions an IC5 engineer cares about; (5) choose the right window type for a given aggregation requirement.</div></div>
+        <p>Streaming systems compute over <em>unbounded</em> input. There is no "end of file." The consumer must produce useful answers continuously, with bounded latency, while new data keeps arriving — and arriving out-of-order, and arriving late, and sometimes never arriving at all.</p>
+        <p>The whole field is engineered around two clocks that disagree: <strong>event time</strong> (when the thing happened in the real world, encoded in the event) and <strong>processing time</strong> (when your system saw it). They diverge constantly. A user's phone goes offline at 14:32, queues 200 events, comes back online at 14:47 and uploads them all at once. Event time of those events: 14:32. Processing time: 14:47. Your stream job has to choose which one to use, and the choice is almost always event time.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Kafka: the canonical log</h2>
+      <div id="w-kafka"></div>
+      <div class="prose">
+        <p>Five concepts fit on the back of a napkin:</p>
+        <ul>
+          <li><strong>Topic</strong> — a named append-only log. <code>orders</code>, <code>page_views</code>.</li>
+          <li><strong>Partition</strong> — a topic is split into N partitions; each partition is an independent ordered log. Ordering is per-partition, not per-topic.</li>
+          <li><strong>Producer</strong> — writes records to a topic. Picks a partition by hashing a key, or round-robin if no key.</li>
+          <li><strong>Consumer group</strong> — a set of consumer processes that share the work of reading a topic. Kafka assigns each partition to exactly one consumer in the group. Add consumers, work spreads. Up to the partition count, after which extra consumers idle.</li>
+          <li><strong>Offset</strong> — each consumer group remembers where it last read in each partition. Read is non-destructive; rewinding to an old offset replays history.</li>
+        </ul>
+      </div>
+      <div class="callout"><span class="icon">▸</span><div><b>The two interview gotchas.</b> (1) <em>Partition count is the parallelism cap.</em> If you'll ever want 100 consumers, create at least 100 partitions up front — increasing later breaks key-to-partition mappings. (2) <em>Ordering is per-key, not global.</em> Two events for <code>user_id=42</code> always land in the same partition, so they're ordered. Two events for different users may interleave.</div></div>
+    </section>
+
+    <section id="s3">
+      <h2>Event time vs processing time</h2>
+      <div class="prose">
+        <p>Imagine a "count of events per minute" job. At 14:35 (processing time) you see an event with event-time 14:32. Does it count toward the <strong>14:32 bucket</strong> (event time) or the <strong>14:35 bucket</strong> (processing time)? Almost always you want event time — that's what business users mean. But event time is hard, because <em>you don't know when the event-time minute is "complete."</em> An event for 14:32 might still arrive at 14:50.</p>
+        <p>This is what <strong>watermarks</strong> exist to solve. A watermark is the system's promise: <em>"I think I've seen all events with event-time ≤ T."</em> When the watermark passes 14:33, the engine emits the result for the 14:32 minute and assumes it's done. Late data that arrives after the watermark is either dropped, sent to a dead-letter, or triggers a "late update" that revises the result.</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>The watermark, watched</h2>
+      <div id="w-wm"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>Watermark slack is a real knob.</b> Set it tight (1 second behind max event time): low latency, lots of late data dropped. Set it loose (5 minutes behind): few drops, but every result is 5 minutes late. Production systems usually pick something tied to the p99 of observed lateness — and accept a 0.1% drop rate as the cost of timeliness.</div></div>
+    </section>
+
+    <section id="s5">
+      <h2>Window types</h2>
+      <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.84rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
+            <th style="padding: 8px;">Window</th><th style="padding: 8px;">Shape</th><th style="padding: 8px;">Use for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Tumbling</td><td style="padding:8px;">Fixed, non-overlapping (every minute, every hour)</td><td style="padding:8px; color:var(--ink-2);">"events per minute"</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Hopping (Sliding)</td><td style="padding:8px;">Fixed, overlapping (every 30s, sized 5min)</td><td style="padding:8px; color:var(--ink-2);">moving averages, smooth dashboards</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Session</td><td style="padding:8px;">Variable, gap-based (closes after T seconds of inactivity)</td><td style="padding:8px; color:var(--ink-2);">user sessions, IoT bursts</td></tr>
+          <tr><td style="padding:8px; color:var(--cyan-deep);">Global</td><td style="padding:8px;">One window forever; uses custom triggers</td><td style="padding:8px; color:var(--ink-2);">running totals with manual flush</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="s5b">
+      <h2>Delivery semantics: at-most-once, at-least-once, exactly-once</h2>
+      <div class="prose">
+        <p>Every streaming system makes a promise about what happens when something fails. The three levels, in ascending complexity:</p>
+        <ul>
+          <li><strong>At-most-once.</strong> Each message is delivered zero or one times. If the consumer crashes after reading but before processing, the message is lost. The consumer advances its offset before processing. <em>Simplest, but data loss is possible.</em> Acceptable only for non-critical metrics (e.g. approximate page-view counters where loss is tolerable).</li>
+          <li><strong>At-least-once.</strong> Each message is delivered one or more times. The consumer commits its offset only after successfully processing. On crash and restart, unacked messages are redelivered. <em>No data loss, but duplicates are possible.</em> The consumer must be idempotent (able to safely process the same message twice). This is the default for most Kafka consumers and most streaming frameworks out of the box.</li>
+          <li><strong>Exactly-once.</strong> Each message is processed exactly once, with no duplicates and no loss. Hard to achieve in a distributed system. Kafka provides the building blocks: (a) <em>idempotent producers</em> (sequence numbers prevent broker-side duplicate writes), (b) <em>transactional producers</em> (atomic multi-partition writes), (c) <em>read-committed consumers</em> (only see committed transactions). Together these form the "exactly-once semantics" (EOS) API — but both producer and consumer must participate. If the sink (e.g. a database) doesn't support transactional writes, you need a different approach (e.g. upsert with a deduplication key).</li>
+        </ul>
+        <div class="callout"><span class="icon">▸</span><div><b>The IC5 nuance.</b> "Exactly-once" in streaming usually means "effectively exactly-once" — the output is as-if each message was processed once, even if it was actually processed multiple times and later deduplicated. True end-to-end exactly-once requires every component (source, stream processor, sink) to participate. In practice, at-least-once + idempotent sink is the pragmatic choice for most production systems.</div></div>
+      </div>
+    </section>
+
+    <section id="s5c">
+      <h2>Flink vs Spark Structured Streaming</h2>
+      <div class="prose">
+        <p>Two engines dominate production streaming in 2026. Both are mature and capable; the right choice depends on your latency target, team skillset, and existing infrastructure:</p>
+      </div>
+      <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.82rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
+            <th style="padding: 8px;"></th><th style="padding: 8px;">Apache Flink</th><th style="padding: 8px;">Spark Structured Streaming</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Processing model</td><td style="padding:8px;">True streaming (record-by-record, pipeline-based)</td><td style="padding:8px;">Micro-batch (processes small batches at a configured trigger interval)</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Latency</td><td style="padding:8px; color:var(--ok);">Sub-second (milliseconds possible)</td><td style="padding:8px; color:var(--warn);">Seconds (micro-batch interval; configurable but typically 1-30s)</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">State management</td><td style="padding:8px; color:var(--ok);">First-class: RocksDB-backed, incremental checkpoints, queryable state</td><td style="padding:8px;">Managed via Spark's structured state store; less flexible for complex stateful ops</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Exactly-once</td><td style="padding:8px; color:var(--ok);">Native EOS via checkpoints + 2-phase commit to sinks</td><td style="padding:8px;">EOS via WAL + idempotent sinks; depends on sink support</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Event time / watermarks</td><td style="padding:8px; color:var(--ok);">First-class, per-operator watermarks, flexible late-data handling</td><td style="padding:8px;">Watermark support in Structured Streaming; less expressive than Flink for complex patterns</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Ecosystem fit</td><td style="padding:8px;">Strong for dedicated streaming infrastructure; Confluent Cloud, Kinesis, CDC</td><td style="padding:8px; color:var(--ok);">Natural for teams already on Spark/Databricks; unified batch+streaming codebase</td></tr>
+          <tr><td style="padding:8px; color:var(--cyan-deep);">Sweet spot</td><td style="padding:8px;">Low-latency streaming, complex stateful logic, fraud detection, CEP</td><td style="padding:8px;">Spark shops wanting near-real-time without a separate streaming cluster</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><span class="icon">▸</span><div><b>The IC5 decision rule.</b> If latency must be sub-second, or you need complex stateful processing (pattern matching, sessionization, joins across multiple streams), pick Flink. If your team lives in Spark/Databricks and the latency target is >5 seconds, Structured Streaming gets you streaming without paying the operational cost of a separate Flink cluster. Don't pick Flink just because it's "more real streaming" — it's operationally heavier and the micro-batch model is fine for most analytical use cases.</div></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+      <div id="q3"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Key takeaways</h2>
+      <div class="prose">
+        <ul>
+          <li><strong>Always use event time for business aggregations.</strong> Processing time is non-deterministic — the same event produces different results depending on when it arrived. Event time is what the business means; use it, even though it's harder.</li>
+          <li><strong>Watermarks are a latency/completeness trade-off knob.</strong> Tight watermark = low latency, more dropped late data. Loose watermark = less dropped data, higher latency on all results. Set to p99 of observed event lateness for your workload.</li>
+          <li><strong>At-least-once + idempotent sink is usually the right call.</strong> True end-to-end exactly-once requires every component to participate; at-least-once with a deduplicating upsert sink achieves the same observable result at lower complexity.</li>
+          <li><strong>Flink for sub-second and complex state; Spark Structured Streaming for Spark shops.</strong> Don't over-engineer: the micro-batch model handles most analytical streaming needs. Reach for Flink when latency or state complexity genuinely demands it.</li>
+          <li><strong>Kafka partition count is the parallelism ceiling.</strong> You cannot have more active consumers (in a group) than partitions. Size partitions at design time; increasing them later breaks key ordering.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s8">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'streaming';
+initLesson(LID, [
+  { id: 's1', label: 'Two clocks' },
+  { id: 's2', label: 'Kafka, in 5 min' },
+  { id: 's3', label: 'Event vs processing time' },
+  { id: 's4', label: 'Watermark visualization' },
+  { id: 's5', label: 'Window types' },
+  { id: 's5b', label: 'Delivery semantics' },
+  { id: 's5c', label: 'Flink vs Spark SS' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Key takeaways' },
+  { id: 's8', label: 'Vocab' },
+]);
+
+D.KafkaTopic(document.getElementById('w-kafka'), { lessonId: LID, cpId: 'kafka' });
+D.Watermark(document.getElementById('w-wm'), { lessonId: LID, cpId: 'wm' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'Partition count',
+  question: 'A team picks 4 partitions for their <code>page_views</code> topic. A year later they want 50 consumers in the consumer group for parallelism. What\'s wrong?',
+  options: [
+    'Nothing; Kafka auto-scales.',
+    '46 of those consumers will be idle. Partition count is the upper bound on consumer-group parallelism, and you can\'t cleanly increase partition count without breaking key-to-partition consistency.',
+    'They need more brokers.',
+    'They should use Kinesis.',
+  ],
+  correct: 1,
+  explanation: 'Each partition is assigned to exactly one consumer per group. With 4 partitions, only 4 consumers can do work. The fix has to come at design time: <em>over-provision partitions.</em> 100-1000 partitions for a high-throughput topic is normal. You can increase partitions later, but it changes which partition a given key hashes to — breaking ordering for already-in-flight keys. Plan up front.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Late data policy',
+  question: 'Your stream job aggregates "revenue per minute." Watermark is 30 seconds behind max event time. An event with event-time 14:32:15 arrives at 14:34:00 (processing time). What happens?',
+  options: [
+    'It\'s included in the 14:32 result.',
+    'Depends on policy: drop / dead-letter / late-update. By default most engines <em>drop</em> events past the watermark; the 14:32 window has already been emitted as final.',
+    'It\'s included in the 14:34 result (re-bucketed by processing time).',
+    'It triggers a re-computation of all windows.',
+  ],
+  correct: 1,
+  explanation: 'The event arrived 1m45s after its event time, but the watermark slack was only 30 seconds — so the 14:32 window closed at ~14:32:45 (event-time + slack). By 14:34 the result was already emitted downstream. Default behavior: drop. Configurable behavior: dead-letter for inspection, or "allowed lateness" with a re-fire window that emits a corrected late-update result. Picking among these is an SLA decision.'
+});
+
+W.Quiz(document.getElementById('q3'), {
+  lessonId: LID, cpId: 'q3', title: 'Session windows',
+  question: 'You\'re computing "user session duration" — a session is a sequence of events with no gap longer than 30 minutes. Which window type fits?',
+  options: [
+    'Tumbling, every 30 minutes.',
+    'Session, with a 30-minute inactivity gap. Tumbling would split a long session across multiple windows; session windows close dynamically when the gap is hit.',
+    'Hopping, sized 30 minutes.',
+    'Global, with a manual trigger.',
+  ],
+  correct: 1,
+  explanation: 'Session windows are exactly the right tool. They\'re per-key (e.g. per user), and the engine maintains an open window that stays alive as long as events keep arriving within the gap. The window closes — and the result is emitted — once <code>watermark - last_event > gap</code>. Tumbling can\'t do this: a 32-minute session that crosses a tumble boundary becomes two reported sessions.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Compacted topic', q: 'What is it?', a: 'A Kafka topic where the broker keeps only the most recent value per key, deleting older versions. Acts like a stream-pretending-to-be-a-table. Good for "current state of X" use cases.' },
+    { term: 'ISR', q: 'In-Sync Replicas', a: 'The replicas of a partition that are caught up to the leader. Writes ack\'d by ISR are durable. <code>min.insync.replicas</code> is the durability knob — set ≥ 2 in production.' },
+    { term: 'At-most-once', q: 'How is it achieved, and when is it acceptable?', a: 'Consumer commits offset before processing. A crash loses the in-flight message. Acceptable only for non-critical, approximate metrics where small data loss is tolerable. Never acceptable for financial data.' },
+    { term: 'At-least-once', q: 'How is it achieved?', a: 'Consumer commits offset only after successful processing. On crash + restart, unacked messages are redelivered → duplicates possible. Requires an idempotent consumer (processing the same message twice is safe). Default for most Kafka consumers.' },
+    { term: 'Exactly-once', q: 'How does Kafka achieve it?', a: 'Three components: (1) idempotent producers (sequence numbers prevent broker duplicate writes), (2) transactional producers (atomic multi-partition writes), (3) read-committed consumers (see only committed transactions). Both producer and consumer must opt in. Sink must also be transactional or idempotent — otherwise you get "effectively exactly-once" via upsert deduplication.' },
+    { term: 'Backpressure', q: 'What happens when a consumer is slow?', a: 'In Kafka the lag grows but the broker is fine — Kafka decouples producer speed from consumer speed. In Flink, slow downstream operators apply backpressure upstream via the network buffer; eventually sources slow.' },
+    { term: 'Allowed lateness', q: 'Window setting', a: 'How long after the watermark closes a window the engine still accepts late events. Default 0. Setting it to e.g. 5 minutes lets late data emit a "corrected" update. Downstream consumers must handle revisions.' },
+  ]
+});
+</script>
+
+</body>
+</html>

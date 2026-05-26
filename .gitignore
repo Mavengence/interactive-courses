@@ -1,4 +1,13 @@
-.DS_Store
-*.log
 node_modules/
-.env
+.DS_Store
+*.local.md
+NOTES.md
+TODO.md
+CLAUDE.md
+AGENTS.md
+.claude/
+.agents/
+plans/
+discuss-*.md
+STATUS.md
+INTEGRATION.md

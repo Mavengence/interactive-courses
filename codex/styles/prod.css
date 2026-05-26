@@ -1,0 +1,765 @@
+/* =====================================================================
+   prod.css  —  production polish overlay
+   Loaded AFTER motion.css + home.css + lesson.css to tone the site down
+   to an editorial, professional register.
+   ===================================================================== */
+
+/* ---------- 1. KILL: Ambient / decorative motion ---------- */
+
+/* The aurora/particle backdrop under the hero — gone. */
+.hero-scanline,
+.hero-glow,
+.hero-sparks,
+canvas.ambient-particles,
+.ambient-particles { display: none !important; }
+
+/* The subtle hero grid stays but we stop the drift animation. */
+.hero-grid-bg {
+  animation: none !important;
+  opacity: 0.35 !important;
+}
+
+/* No page-transition cover. */
+.page-transition,
+.page-transition-cover { display: none !important; }
+
+/* Any leftover confetti scaffolding from widgets — hide. The widgets.js
+   still fires ctx.confetti() for big events; we suppress ALL small-event
+   celebrations by only letting the capstone (lesson 12) call it. */
+.confetti-small { display: none !important; }
+
+
+/* ---------- 2. HERO: calm, editorial ---------- */
+
+.hero {
+  padding: 48px 0 24px !important;        /* was ~120px 0 */
+  background: transparent !important;     /* no gradients */
+}
+.hero-inner { padding: 0 !important; }
+
+.hero-rail {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-dim, #7a8394);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.hero-title {
+  font-size: clamp(40px, 5vw, 64px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 0 18px 0 !important;
+  font-weight: 650;
+}
+.hero-title .l1 { display: block; }
+.hero-title .l2 { display: block; }
+
+/* Static highlight, no swipe. */
+.hero-title em {
+  font-style: normal;
+  background: rgba(45,125,255,0.16);
+  padding: 0 4px;
+  border-radius: 2px;
+  animation: none !important;
+}
+.hero-title em::before,
+.hero-title em::after { display: none !important; }
+
+/* No blinking caret after the headline — it reads as theme, not function. */
+.hero-title .blink-caret { display: none !important; }
+
+.hero-lede {
+  font-size: 17px !important;
+  line-height: 1.55 !important;
+  color: var(--text-dim, #6e7685);
+  max-width: 640px;
+  margin: 0 0 24px 0 !important;
+}
+
+/* CTAs: keep primary prominent, secondary is just a text link. */
+.hero-cta {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+}
+.hero-cta .btn {
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease !important;
+}
+
+/* Hero meta — discreet caption row. */
+.hero-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 12px !important;
+  color: var(--text-dim, #7a8394) !important;
+  letter-spacing: 0.02em;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 14px;
+  margin-top: 4px !important;
+}
+.hero-meta b { font-weight: 600; color: var(--text, #e8ecf2); }
+
+/* ---------- 3. KILL: giant stat band ---------- */
+
+.stats-band { display: none !important; }
+
+
+/* ---------- 4. KILL: separate "badges" grid section ---------- */
+
+.progress-section#badges { display: none !important; }
+
+
+/* ---------- 5. DEMOTE: codex-loop diagram ---------- */
+
+/* Keep it but shrink drastically. It's useful as a "what this looks like"
+   teaser — at editorial scale, not theatrical scale. */
+.hero-diagram {
+  margin-top: 28px !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  background: rgba(255,255,255,0.015) !important;
+  box-shadow: none !important;
+}
+.hero-diagram .hd-head {
+  padding: 8px 14px !important;
+  font-size: 11px !important;
+  color: var(--text-dim, #7a8394) !important;
+  letter-spacing: 0.04em;
+}
+.hero-diagram .hd-body {
+  gap: 1px !important;
+  background: rgba(255,255,255,0.04);
+}
+.hero-diagram .hd-col {
+  padding: 18px 18px 16px !important;
+  background: var(--bg, #0b0d10);
+}
+.hero-diagram .hd-col h3 {
+  font-size: 14px !important;
+  margin: 6px 0 4px 0 !important;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.hero-diagram .hd-col p {
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+  color: var(--text-dim, #7a8394) !important;
+  margin: 0 0 10px 0 !important;
+}
+.hero-diagram .hd-col .label {
+  font-size: 10px !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim, #7a8394) !important;
+}
+.hero-diagram .mini {
+  font-size: 11px !important;
+  padding: 8px 10px !important;
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 3px !important;
+}
+
+
+/* ---------- 6. COURSE OUTLINE: unified tracks+lessons ---------- */
+
+.course-outline {
+  padding: 56px 0 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.course-outline .outline-head {
+  margin-bottom: 28px;
+}
+.course-outline .outline-head .eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim, #7a8394);
+  display: block;
+  margin-bottom: 8px;
+}
+.course-outline .outline-head h2 {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+.course-outline .outline-head p {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-dim, #7a8394);
+  max-width: 640px;
+  margin: 0;
+}
+
+.track-block {
+  padding: 28px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+@media (max-width: 780px) {
+  .track-block {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+.track-block:last-of-type { border-bottom: 1px solid rgba(255,255,255,0.06); }
+
+.track-block .track-meta .track-tag {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent, #2d7dff);
+  font-weight: 600;
+}
+.track-block .track-meta h3 {
+  font-size: 20px;
+  font-weight: 650;
+  margin: 6px 0 6px 0;
+  letter-spacing: -0.01em;
+}
+.track-block .track-meta p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim, #7a8394);
+  margin: 0 0 12px 0;
+}
+.track-block .track-meta .track-status {
+  font-size: 11px;
+  color: var(--text-dim, #7a8394);
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  letter-spacing: 0.02em;
+}
+
+.lesson-list { display: grid; grid-template-columns: 1fr; gap: 0; }
+.lesson-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 2px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text, #e8ecf2);
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease;
+  outline: none;
+}
+.lesson-row:first-child { border-top: 1px solid rgba(255,255,255,0.05); }
+.lesson-row:hover,
+.lesson-row:focus-visible {
+  background: rgba(45,125,255,0.04);
+  border-bottom-color: rgba(45,125,255,0.35);
+}
+.lesson-row .lr-num {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 12px;
+  color: var(--text-dim, #7a8394);
+  letter-spacing: 0.02em;
+}
+.lesson-row:hover .lr-num,
+.lesson-row:focus-visible .lr-num { color: var(--accent, #2d7dff); }
+.lesson-row .lr-body .lr-title {
+  font-size: 15px;
+  font-weight: 550;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+.lesson-row .lr-body .lr-sub {
+  font-size: 12px;
+  color: var(--text-dim, #7a8394);
+  line-height: 1.45;
+}
+.lesson-row .lr-meta {
+  display: flex;
+  gap: 10px;
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: var(--text-dim, #7a8394);
+  letter-spacing: 0.02em;
+  align-items: center;
+  white-space: nowrap;
+}
+.lesson-row.done .lr-num::before {
+  content: '✓';
+  color: var(--ok, #4ade80);
+  margin-right: 4px;
+}
+.lesson-row.done .lr-meta::after {
+  content: 'completed';
+  color: var(--ok, #4ade80);
+  font-weight: 500;
+}
+
+
+/* ---------- 7. NAVBAR: quiet and professional ---------- */
+
+.topbar {
+  background: rgba(11,13,16,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  box-shadow: none !important;
+}
+.topbar-inner {
+  padding: 10px 22px !important;
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Brand: quieter, no ornate letter-spaced COURSE wordmark on the right. */
+.topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text, #e8ecf2);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+.topbar .brand:hover { color: var(--accent, #2d7dff); }
+.topbar .brand .mark {
+  width: 22px; height: 22px; display: inline-flex;
+  align-items: center; justify-content: center;
+  color: var(--accent, #2d7dff);
+}
+.topbar .brand .mark svg { width: 18px; height: 18px; }
+.topbar .brand .mk-caret,
+.topbar .brand .mk-bar { stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; animation: none !important; }
+
+.topbar .brand-word { display: flex; flex-direction: column; gap: 0; line-height: 1.05; }
+.topbar .brand { color: #e8ecf2 !important; }
+.topbar .brand-word-1 { font-size: 14px; font-weight: 650; letter-spacing: -0.005em; color: #e8ecf2 !important; }
+.topbar .brand-divider { display: none !important; }
+.topbar .brand-word-2 { display: none !important; }
+.topbar .brand-tagline { font-size: 11px; color: #9aa3b2; letter-spacing: 0; font-weight: 400; }
+
+/* Current-page caption between brand and right-side nav. */
+.topbar .tb-crumb {
+  font-size: 12px;
+  color: var(--text-dim, #7a8394);
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  letter-spacing: 0.01em;
+}
+
+.topbar nav {
+  margin-left: auto;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.topbar nav a {
+  font-size: 13px;
+  color: #b5bdca;
+  text-decoration: none;
+  transition: color 120ms ease;
+  font-weight: 500;
+}
+.topbar nav a:hover { color: var(--text, #e8ecf2); }
+
+/* XP pill → quiet progress badge. */
+.topbar .xp-pill,
+.topbar .progress-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim, #7a8394);
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  padding: 4px 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 3px;
+  background: transparent;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  box-shadow: none !important;
+}
+.topbar .xp-pill .spark,
+.topbar .xp-pill b { display: none !important; }
+.topbar .xp-pill::before,
+.topbar .progress-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-dim, #7a8394);
+}
+.topbar .xp-pill.has-progress::before,
+.topbar .progress-badge.has-progress::before {
+  background: var(--accent, #2d7dff);
+}
+
+/* Outline button in navbar. */
+.topbar .btn-outline-trigger {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 3px;
+  color: var(--text, #e8ecf2);
+  background: transparent;
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: inherit;
+}
+.topbar .btn-outline-trigger:hover {
+  border-color: var(--accent, #2d7dff);
+  color: var(--accent, #2d7dff);
+}
+
+
+/* ---------- 8. LESSON CARDS / ROWS: calm hover ---------- */
+
+/* Neutralize ALL tilt rules that may have been set elsewhere. */
+.lesson-card,
+.track-card,
+.card,
+.hero-diagram .hd-col,
+.lesson-row {
+  transform: none !important;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease !important;
+  perspective: none !important;
+}
+.lesson-card:hover,
+.track-card:hover,
+.card:hover,
+.hero-diagram .hd-col:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Tilt handler disabled — prod.js will remove data-tilt attrs. */
+
+
+/* ---------- 9. OUTLINE DRAWER (slide-in from right) ---------- */
+
+.outline-drawer-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(11,13,16,0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  z-index: 200;
+}
+.outline-drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.outline-drawer {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(420px, 90vw);
+  background: #0b0d10;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  z-index: 210;
+  transform: translateX(100%);
+  transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.outline-drawer.open { transform: translateX(0); }
+.outline-drawer .od-head {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.outline-drawer .od-head h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.outline-drawer .od-close {
+  background: transparent;
+  border: 0;
+  color: var(--text-dim, #7a8394);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 14px;
+  transition: color 120ms ease;
+}
+.outline-drawer .od-close:hover { color: var(--text, #e8ecf2); }
+.outline-drawer .od-body {
+  overflow-y: auto;
+  padding: 10px 0 30px 0;
+  flex: 1;
+}
+.outline-drawer .od-track {
+  padding: 12px 20px 8px 20px;
+}
+.outline-drawer .od-track-tag {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim, #7a8394);
+  margin-bottom: 4px;
+}
+.outline-drawer .od-track-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #e8ecf2);
+  margin-bottom: 6px;
+}
+.outline-drawer .od-lessons { display: flex; flex-direction: column; }
+.outline-drawer .od-lesson {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 10px;
+  padding: 10px 20px;
+  color: var(--text, #e8ecf2);
+  text-decoration: none;
+  font-size: 13px;
+  transition: background 120ms ease, color 120ms ease;
+  border-left: 2px solid transparent;
+}
+.outline-drawer .od-lesson:hover {
+  background: rgba(45,125,255,0.05);
+  border-left-color: rgba(45,125,255,0.35);
+}
+.outline-drawer .od-lesson.current {
+  background: rgba(45,125,255,0.08);
+  border-left-color: var(--accent, #2d7dff);
+}
+.outline-drawer .od-lesson.done .od-lesson-num { color: var(--ok, #4ade80); }
+.outline-drawer .od-lesson-num {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: var(--text-dim, #7a8394);
+}
+.outline-drawer .od-lesson-title {
+  font-weight: 500;
+  line-height: 1.3;
+}
+.outline-drawer .od-lesson-meta {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  color: var(--text-dim, #7a8394);
+  white-space: nowrap;
+  align-self: center;
+}
+
+
+/* ---------- 10. LESSON SHELL: shrink hero ---------- */
+
+.lesson-hero {
+  padding: 28px 0 20px !important;
+}
+.lesson-hero .eyebrow,
+.lesson-hero .lesson-eyebrow {
+  font-size: 11px !important;
+  letter-spacing: 0.12em !important;
+  margin-bottom: 10px !important;
+  color: var(--text-dim, #7a8394) !important;
+}
+.lesson-hero .eyebrow::before,
+.lesson-hero .lesson-eyebrow::before { content: '' !important; display: none !important; }
+.lesson-hero h1,
+.lesson-hero .lesson-title {
+  font-size: clamp(28px, 3.5vw, 40px) !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.015em !important;
+  font-weight: 650 !important;
+  margin: 0 0 12px 0 !important;
+}
+.lesson-hero .lede,
+.lesson-hero .lesson-sub,
+.lesson-hero p.sub {
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+  max-width: 600px !important;
+  color: var(--text-dim, #7a8394) !important;
+}
+.lesson-hero .meta,
+.lesson-hero .lesson-meta {
+  font-size: 11px !important;
+  color: var(--text-dim, #7a8394) !important;
+  margin-top: 12px !important;
+  letter-spacing: 0.02em !important;
+}
+.lesson-hero .meta b,
+.lesson-hero .lesson-meta b { color: var(--text, #e8ecf2); font-weight: 600; }
+
+
+/* ---------- 11. READING PROGRESS: keep only ONE ---------- */
+
+.scroll-progress { display: none !important; }   /* lateral rail — gone */
+.reading-progress,
+#reading-progress {
+  position: fixed;
+  top: 48px;        /* just under topbar */
+  left: 0; right: 0;
+  height: 2px;
+  background: transparent;
+  z-index: 50;
+  pointer-events: none;
+}
+.reading-progress .rp-bar,
+#reading-progress .rp-bar {
+  height: 100%;
+  background: var(--accent, #2d7dff);
+  width: 0%;
+  transition: width 80ms linear;
+}
+
+
+/* ---------- 12. QUIZ + TASKSPEC + FLASHCARDS: calm feedback ---------- */
+
+/* Quiz option hover — soft tint, no ripple shockwave. */
+.quiz-opt {
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 3px !important;
+  padding: 12px 14px !important;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease !important;
+  transform: none !important;
+  cursor: pointer;
+}
+.quiz-opt:hover {
+  border-color: rgba(45,125,255,0.4) !important;
+  background: rgba(45,125,255,0.03) !important;
+  transform: none !important;
+}
+.quiz-opt.is-correct {
+  border-color: rgba(74,222,128,0.5) !important;
+  background: rgba(74,222,128,0.05) !important;
+}
+.quiz-opt.is-wrong {
+  border-color: rgba(244,114,114,0.4) !important;
+  background: rgba(244,114,114,0.04) !important;
+  animation: none !important;
+}
+.quiz-ripple { display: none !important; }
+
+/* Flashcards — keep 3D flip, kill scan-line. */
+.flashcard::after,
+.flashcard .scan-line { display: none !important; }
+.flashcard {
+  transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+
+/* ---------- 13. LANGUAGE / COPY overrides via JS ---------- */
+
+/* Set by prod.js — style the new labels. */
+.completion-link {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--text-dim, #7a8394);
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 3px;
+  transition: all 120ms ease;
+  cursor: pointer;
+  background: transparent;
+}
+.completion-link:hover {
+  color: var(--accent, #2d7dff);
+  border-color: rgba(45,125,255,0.4);
+}
+.completion-link.completed {
+  color: var(--ok, #4ade80);
+  border-color: rgba(74,222,128,0.4);
+  background: rgba(74,222,128,0.04);
+  cursor: default;
+}
+.completion-link.completed::before { content: '✓ '; }
+
+
+/* ---------- 14. HERO CTA BUTTON polish ---------- */
+
+.btn {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px !important;
+  border-radius: 3px !important;
+  letter-spacing: 0 !important;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.btn.primary,
+.btn.cyan {
+  background: var(--accent, #2d7dff) !important;
+  color: #fff !important;
+  border: 1px solid var(--accent, #2d7dff) !important;
+}
+.btn.primary:hover,
+.btn.cyan:hover {
+  background: #1c6ae8 !important;
+  border-color: #1c6ae8 !important;
+  transform: none !important;
+}
+.btn.lg { padding: 12px 18px !important; font-size: 14px !important; }
+
+
+/* ---------- 15. FINAL CTA BAND: editorial ---------- */
+
+.cta-band {
+  padding: 64px 0 !important;
+  background: transparent !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
+  margin-top: 32px;
+}
+.cta-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+.cta-band h2 {
+  font-size: 22px;
+  font-weight: 650;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+.cta-band p {
+  font-size: 14px;
+  color: var(--text-dim, #7a8394);
+  margin: 0;
+  max-width: 420px;
+}
+
+
+/* ---------- 16. FOOTER: keep minimal ---------- */
+
+.site-foot {
+  padding: 28px 0 !important;
+  border-top: 1px solid rgba(255,255,255,0.04) !important;
+  font-size: 11px !important;
+  color: var(--text-dim, #7a8394) !important;
+  letter-spacing: 0 !important;
+}
+.site-foot a {
+  color: var(--text-dim, #7a8394);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(255,255,255,0.15);
+  padding-bottom: 1px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.site-foot a:hover {
+  color: var(--text, #e8ecf2);
+  border-bottom-color: rgba(255,255,255,0.3);
+}
+
+
+/* ---------- 17. respect reduced-motion (already in motion.css; reinforce) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>04 · Anatomy of a Task Spec — Codex Course</title>
+  <meta name="description" content="Goal, constraints, acceptance criteria, out-of-scope. Four lines, and your success rate doubles."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="04 · Anatomy of a Task Spec — Codex Course"/>
+  <meta property="og:description" content="Goal, constraints, acceptance criteria, out-of-scope. Four lines, and your success rate doubles."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/04-task-spec.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="04 · Anatomy of a Task Spec — Codex Course"/>
+  <meta name="twitter:description" content="Goal, constraints, acceptance criteria, out-of-scope. Four lines, and your success rate doubles."/>
+  <link rel="canonical" href="../lessons/04-task-spec.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Anatomy of a Task Spec",
+    "description":"Goal, constraints, acceptance criteria, out-of-scope. Four lines, and your success rate doubles.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":4
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-04">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 04 · track 02 — task craft</div>
+    <h1>Anatomy of a<br/>Task Spec.</h1>
+    <p class="subtitle">Goal, constraints, acceptance criteria, out-of-scope. Four lines, and your success rate roughly doubles.</p>
+    <div class="meta">
+      <span>⏱ <b>12 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+50 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>If <code>AGENTS.md</code> is the agent's onboarding doc, the <strong>task spec</strong> is the single Jira ticket it works from. It's what gets pasted into the task field when you kick off a run. Everything else — the repo context, the conventions, the tests — is already there. The spec is where you describe the work.</p>
+        <p>Most people write the spec as a one-line request: "add pagination to the users endpoint." Sometimes that works. Usually it produces a plausible-but-not-quite-right PR that needs two rounds of revision. The problem isn't that Codex is dumb. The problem is that the one-line spec is <em>four specs collapsed together</em> — goal, constraints, acceptance, scope — and the agent gets to pick one interpretation for each.</p>
+
+        <h3 style="margin-top:1.25rem;">The core principle: describe the shape, not the steps</h3>
+        <p>The single most important rule in task-spec writing: <strong>describe what the end state should look like, not how to get there.</strong> Don't instruct the agent step-by-step ("first, open the file, then add a function…"). Instead, describe the outcome: what behavior should exist, what tests should pass, what should not change.</p>
+        <p>Why? Because the agent is better than you at finding implementation paths inside a codebase it just read. What it cannot do is read your mind. When you describe the shape — "users can page through <code>/users</code>, 20 per page, via <code>?page=N</code>, keeping the existing response schema" — the agent picks the right implementation. When you describe steps, you're fighting the model's own judgment, and often losing.</p>
+
+        <p>Unpack the four parts and the success rate roughly doubles. Here's the anatomy:</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The four parts</h2>
+      <div class="grid-2" style="margin-top:10px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">01 · goal</div>
+          <h3 style="margin-top:6px;">What outcome are we after?</h3>
+          <p class="small muted" style="margin-top:8px;">One sentence. The user-facing, behavioral change you want — not the implementation steps. "Users should be able to paginate through /users, 20 per page." Not "write a pagination function." Describe the shape, not the steps.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">02 · constraints</div>
+          <h3 style="margin-top:6px;">What shape must the solution take?</h3>
+          <p class="small muted" style="margin-top:8px;">The non-negotiables. "Don't change the response schema." "Must work with existing query params." "No new dependencies." These close off whole branches of bad design.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">03 · acceptance</div>
+          <h3 style="margin-top:6px;">How will we know it's done?</h3>
+          <p class="small muted" style="margin-top:8px;">The checklist the PR must pass. "A new test covers page 1, page 2, and out-of-range. <code>make test</code> passes. No deprecation warnings." Concrete, checkable. Codex will literally run these.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">04 · out of scope</div>
+          <h3 style="margin-top:6px;">What are we explicitly not doing?</h3>
+          <p class="small muted" style="margin-top:8px;">The negative space. "Don't touch auth." "Don't refactor the query builder even if it's tempting." Prevents the agent from "helpfully" enlarging the PR and breaking unrelated things.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Build one</h2>
+      <div class="prose"><p>Toggle the parts of a strong spec for the task "add pagination to <code>/users</code>." Watch the assembled spec on the right strengthen as you add each piece.</p></div>
+      <div id="w-spec"></div>
+    </section>
+
+    <section id="s4">
+      <h2>Same task, three quality tiers</h2>
+      <div class="prose"><p>Three specs. All three ask for the same thing. Only one of them gets the PR right on the first try.</p></div>
+      <div id="w-compare"></div>
+
+      <div class="prose" style="margin-top:20px;">
+        <h3>Anatomy of the strong version</h3>
+        <p>The strong spec isn't longer because the author is fussy. It's longer because it closes the ambiguities that would each, individually, cost you a round of revisions:</p>
+        <ul>
+          <li><strong>"20 per page"</strong> — Codex won't have to guess the default page size.</li>
+          <li><strong>"<code>?page=N</code> query param"</strong> — closes off cursor-based pagination, offset hacks, and response-envelope redesigns.</li>
+          <li><strong>"Keep the existing response schema; add a <code>pagination</code> field"</strong> — tells the agent exactly where the new data goes.</li>
+          <li><strong>"<code>make test</code> must pass"</strong> — concrete, checkable.</li>
+          <li><strong>"Don't change the filtering logic"</strong> — guards against the refactor urge.</li>
+        </ul>
+        <p>The strong spec is roughly 80 words. Writing it takes sixty seconds. The alternative is a PR-review round-trip that costs you twenty minutes.</p>
+        <p>Notice what the strong version doesn't do: it never says "first open <code>api/users.py</code>, then find the list function, then add an offset parameter." It describes the end state. The agent reads the codebase and finds the right place. That's the whole point of delegating.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L04"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('task-spec', [
+    {id:'s1', label:'Shape, not steps'},
+    {id:'s2', label:'The four parts'},
+    {id:'s3', label:'Build one'},
+    {id:'s4', label:'Three quality tiers'},
+    {id:'s5', label:'Quick check'},
+  ]);
+
+  W.TaskSpec(document.getElementById('w-spec'), {
+    lessonId:'task-spec', cpId:'spec-1', threshold: 4,
+    title:'Assemble a task spec for "/users pagination"',
+    desc:'Toggle each section on if you\'d include it. Aim for at least four.',
+    goal:'Users can page through /users, 20 per page, via ?page=N.',
+    items:[
+      { section:'Goal', hint:'The behavior. One sentence. Not the code.', body:['Users can page through /users results.','20 items per page, via ?page=N.'] },
+      { section:'Constraints', hint:'The rails. "Do this within these limits."', body:['Keep the existing response schema.','No new dependencies.','Offset-based, not cursor.'] },
+      { section:'Acceptance criteria', hint:'The checklist the PR must pass.', body:['New test: page 1, page 2, out-of-range.','make test passes.','make lint passes.'] },
+      { section:'Out of scope', hint:'The "don\'t help me" list.', body:['Don\'t change filtering logic.','Don\'t touch /users/:id.','Don\'t add caching.'] },
+      { section:'Nice-to-haves', hint:'Optional. Gives the agent room to go beyond if cheap.', body:['A total-count field, if trivial.'] },
+      { section:'My emotional state', hint:'Not useful. Really, don\'t.', body:['I am tired and need this to just work.'] },
+    ]
+  });
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Three shapes of the same task',
+    badLabel: 'Weak — one line',
+    goodLabel: 'Strong — four parts',
+    bad: '<b>task:</b>\nadd pagination to /users',
+    good: '<b>Goal</b>\nUsers can page through GET /users results via ?page=N, 20 items per page.\n\n<b>Constraints</b>\n- Keep existing response schema; add a top-level "pagination" object.\n- Offset-based (?page=N), not cursor.\n- No new dependencies.\n\n<b>Acceptance</b>\n- Tests cover page 1, page 2, out-of-range (page=999 → empty).\n- make test &amp;&amp; make lint pass.\n- Existing filters (?role, ?status) still work.\n\n<b>Out of scope</b>\n- Don\'t touch /users/:id.\n- Don\'t refactor the filter builder.',
+    note: '<b>Middle tier, omitted for space:</b> goal + acceptance, no constraints or scope. Gets pagination working but "helpfully" rewrites the filter builder. Ninety percent of the code is right. The other ten costs you an afternoon.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'task-spec', cpId: 'q1',
+    question: 'You spec a task with a clear goal and three acceptance criteria, but no "out of scope" section. What\'s the likely failure mode?',
+    options: [
+      'The PR will be too small and miss edge cases.',
+      'The agent will "helpfully" expand the PR into nearby code — refactoring things you didn\'t ask about — making it hard to review.',
+      'Codex will refuse to work without explicit scope.',
+      'Nothing — out-of-scope sections are decorative.'
+    ],
+    correct: 1,
+    explanation: 'Codex leans toward being helpful. Without a "do not touch" list, it treats the whole area around your goal as fair game. Out-of-scope sections are the cheapest, highest-leverage part of the spec for keeping PRs reviewable.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'task-spec', cpId: 'q2',
+    question: 'Which is the better acceptance criterion?',
+    options: [
+      '"Make sure it works well."',
+      '"The existing /users integration tests pass, plus three new tests: page 1 returns 20 items, page 2 returns the next 20, page=999 returns an empty array."',
+      '"It should be production-ready."',
+      '"Don\'t break anything."',
+    ],
+    correct: 1,
+    explanation: 'Codex will literally run your acceptance criteria when they\'re executable. "Works well" isn\'t runnable — the agent has to interpret it. The concrete version is a checklist the agent uses as its own stopping condition. Write acceptance like tests. Ideally, write them <i>as</i> tests (next lesson).'
+  });
+</script>
+
+<script src="../js/lessons/L04.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

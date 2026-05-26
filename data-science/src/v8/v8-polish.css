@@ -1,0 +1,147 @@
+/* ==========================================================
+ * v8 polish layer — readability, contrast, text-fit guardrails
+ * Loaded AFTER all other stylesheets so these rules win.
+ * ========================================================== */
+
+/* ---------- Global guardrails ---------- */
+.panel-body, .sim-row, .sim-plots, .plot-wrap, .sim-controls {
+  min-width: 0;            /* allow flex/grid children to shrink */
+}
+.panel-body { overflow: visible; }
+
+/* Prevent numeric labels / long strings from blowing layouts */
+.mono, .sim-stats .v, .cm-val, .ab-verdict-v,
+.panel-meta, .hero-meta .m .v, .chip {
+  word-break: normal;
+  overflow-wrap: anywhere;
+  hyphens: none;
+}
+
+/* Hero hook / prose: use pretty wrap, cap width */
+.hero-hook, .prose { text-wrap: pretty; }
+
+/* Section h2 sizing — prevent overflow on narrow viewports */
+.h2 { word-break: break-word; hyphens: auto; }
+
+/* ---------- Controls ---------- */
+.sim-ctrl label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 8px; font-size: 12px; color: var(--ink-2);
+  font-weight: 600; margin-bottom: 6px;
+}
+.sim-ctrl label .mono {
+  color: var(--ink-1); font-family: var(--font-mono);
+  font-size: 11.5px; font-weight: 700;
+  background: var(--bg-hi); padding: 2px 7px; border-radius: 4px;
+  border: 1px solid var(--hair);
+}
+
+.sim-ctrl input[type=range] { width: 100%; accent-color: var(--violet); }
+
+/* ---------- Stats strip — consistent, readable ---------- */
+.sim-stats {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 14px; background: var(--panel);
+  border: 1px solid var(--hair-2); border-radius: 10px;
+  min-width: 0;
+}
+.sim-stats > div { min-width: 0; }
+.sim-stats .k {
+  font-family: var(--font-mono); font-size: 9.5px;
+  font-weight: 700; color: var(--ink-3);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sim-stats .v {
+  font-family: var(--font-serif); font-size: 26px;
+  color: var(--ink-1); line-height: 1.05;
+  letter-spacing: -0.02em; margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.sim-stats .sub {
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--ink-4); margin-top: 3px; letter-spacing: 0.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Confusion-matrix values — high contrast, tabular */
+.cm-val {
+  font-variant-numeric: tabular-nums;
+  font-size: 32px !important;
+}
+.cm-lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* A/B verdict */
+.ab-verdict-v { font-variant-numeric: tabular-nums; }
+
+/* ---------- SVG text readability ---------- */
+.plot-wrap svg text {
+  font-family: var(--font-mono);
+  fill: var(--ink-2);               /* darker than ink-3 for readability */
+  font-variant-numeric: tabular-nums;
+}
+.plot-wrap svg text[text-anchor="middle"] { dominant-baseline: middle; }
+
+/* Grid lines — lighter so they don't fight with data */
+.plot-wrap svg line[stroke="#A49D9A"] { stroke: #B8B1AE; }
+
+/* ---------- Panel head contrast ---------- */
+.panel-title .lab {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--ink-1); color: var(--bg-elev);
+  padding: 3px 8px; border-radius: 4px;
+  white-space: nowrap;
+}
+.panel-meta {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 40%;
+}
+
+/* ---------- Callouts: ensure readable copy ---------- */
+.callout-item { font-size: 14px; line-height: 1.6; }
+.callout-item b, .callout-item strong { color: var(--ink-1); }
+
+/* Takeaway items */
+.takeaway-item { text-wrap: pretty; }
+
+/* ---------- Hero: clamp title on narrow ---------- */
+@media (max-width: 1100px) {
+  .hero-title { font-size: 56px; }
+  .sim-row { grid-template-columns: 1fr !important; }
+  .sim-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- Sidebar item: prevent truncation issues ---------- */
+.sb-title, .sb-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Button legibility ---------- */
+.btn.btn-primary { color: #FBF8F1; }
+.btn .kbd { margin-left: 4px; }
+
+/* ---------- Focus ring (accessibility) ---------- */
+.btn:focus-visible, .sim-ctrl input:focus-visible, .sb-item:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+/* ---------- Plot head — consistent, readable ---------- */
+.sim-plot-head {
+  color: var(--ink-2);      /* was ink-3 */
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--hair);
+}
+.sim-plot-head .hint { color: var(--ink-3); }
+
+/* ---------- Strong colors in cm cells ---------- */
+.cm-cell[style*="rgba(91,62,232,0.08)"] .cm-val { color: var(--violet) !important; }
+.cm-cell[style*="rgba(232,160,49,0.08)"] .cm-val { color: var(--amber) !important; }
+.cm-cell[style*="rgba(216,58,58,0.08)"] .cm-val { color: var(--bad) !important; }
+
+/* ---------- Axis ticks ---------- */
+.plot-wrap svg text {
+  font-size: 10px;
+}

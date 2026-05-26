@@ -1,37 +1,552 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Data Engineering Fundamentals</title>
-<meta name="description" content="An interactive crash course on building production data pipelines. 10 chapters, 15 live simulators, no signup, runs in your browser." />
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-<link rel="stylesheet" href="lib/theme-tokens.css?v=24" />
-<link rel="stylesheet" href="styles.css?v=24" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Courses · timloehr.me</title>
+  <meta name="description" content="Four interactive, zero-signup courses on data engineering, data science, infrastructure, and AI-assisted development" />
+  <meta property="og:title" content="Interactive Courses · timloehr.me" />
+  <meta property="og:description" content="Four interactive, zero-signup courses on data engineering, data science, infrastructure, and AI-assisted development" />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0d14;
+      --bg-card:     #13131f;
+      --bg-card-hov: #181828;
+      --border:      rgba(255,255,255,0.07);
+      --border-hov:  rgba(255,255,255,0.14);
+      --text:        #e8e8f0;
+      --text-muted:  #6b6b8a;
+      --text-dim:    #9999b8;
+      --accent-1:    #7c6fff;   /* violet  */
+      --accent-2:    #38bdf8;   /* sky     */
+      --accent-3:    #34d399;   /* emerald */
+      --accent-4:    #f472b6;   /* pink    */
+      --glow-1:      rgba(124,111,255,0.18);
+      --glow-2:      rgba(56,189,248,0.15);
+      --glow-3:      rgba(52,211,153,0.15);
+      --glow-4:      rgba(244,114,182,0.15);
+      --radius:      16px;
+      --mono:        'JetBrains Mono', monospace;
+      --sans:        'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Noise texture overlay ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* ─── Ambient background blobs ─── */
+    .bg-blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .bg-blobs span {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.25;
+    }
+    .bg-blobs span:nth-child(1) {
+      width: 600px; height: 600px;
+      background: var(--accent-1);
+      top: -200px; left: -150px;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .bg-blobs span:nth-child(2) {
+      width: 500px; height: 500px;
+      background: var(--accent-2);
+      top: 30%; right: -180px;
+      animation: drift 22s ease-in-out infinite alternate-reverse;
+    }
+    .bg-blobs span:nth-child(3) {
+      width: 400px; height: 400px;
+      background: var(--accent-3);
+      bottom: -100px; left: 25%;
+      animation: drift 26s ease-in-out infinite alternate;
+    }
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 20px) scale(1.08); }
+    }
+
+    /* ─── Layout ─── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ─── Header ─── */
+    header {
+      padding: 64px 0 56px;
+      text-align: center;
+    }
+
+    .header-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      margin-bottom: 28px;
+    }
+    .header-eyebrow .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent-3);
+      box-shadow: 0 0 8px var(--accent-3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.55));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-sub {
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      max-width: 560px;
+      margin: 0 auto 0;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 28px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+    .header-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ─── Divider ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin-bottom: 52px;
+    }
+
+    /* ─── Grid ─── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 680px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Card ─── */
+    .card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition:
+        transform 0.25s cubic-bezier(.2,.8,.2,1),
+        border-color 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+
+    /* Animated top-border gradient line */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      background: var(--card-gradient, linear-gradient(90deg, var(--accent-1), var(--accent-2)));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Glow behind card on hover */
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--radius);
+      background: var(--card-glow, var(--glow-1));
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.3s ease;
+      filter: blur(20px);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-hov);
+      background: var(--bg-card-hov);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .card:hover::before { opacity: 1; }
+    .card:hover::after  { opacity: 1; }
+
+    /* Per-card accent colors */
+    .card-1 { --card-gradient: linear-gradient(90deg, #7c6fff, #38bdf8); --card-glow: var(--glow-1); }
+    .card-2 { --card-gradient: linear-gradient(90deg, #38bdf8, #34d399); --card-glow: var(--glow-2); }
+    .card-3 { --card-gradient: linear-gradient(90deg, #34d399, #fbbf24); --card-glow: var(--glow-3); }
+    .card-4 { --card-gradient: linear-gradient(90deg, #f472b6, #fb923c); --card-glow: var(--glow-4); }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+    .card-1 .card-icon { background: rgba(124,111,255,0.12); }
+    .card-2 .card-icon { background: rgba(56,189,248,0.12); }
+    .card-3 .card-icon { background: rgba(52,211,153,0.12); }
+    .card-4 .card-icon { background: rgba(244,114,182,0.12); }
+
+    .card-number {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin-bottom: 22px;
+      flex: 1;
+    }
+
+    /* ─── Tags ─── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.03);
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .card:hover .tag {
+      border-color: var(--border-hov);
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ─── CTA ─── */
+    .card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      transition: color 0.2s, gap 0.2s;
+      margin-top: auto;
+    }
+    .card-cta .arrow {
+      font-size: 1rem;
+      transition: transform 0.2s cubic-bezier(.2,.8,.2,1);
+    }
+    .card:hover .card-cta {
+      color: #fff;
+      gap: 12px;
+    }
+    .card:hover .card-cta .arrow {
+      transform: translateX(4px);
+    }
+
+    /* Per-card CTA accent */
+    .card-1:hover .card-cta { color: #a89fff; }
+    .card-2:hover .card-cta { color: #7dd3fc; }
+    .card-3:hover .card-cta { color: #6ee7b7; }
+    .card-4:hover .card-cta { color: #f9a8d4; }
+
+    /* ─── Footer ─── */
+    footer {
+      text-align: center;
+      padding: 48px 0 0;
+      border-top: 1px solid var(--border);
+      margin-top: 72px;
+    }
+    footer p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      line-height: 1.8;
+    }
+    footer a {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: #fff; }
+
+    /* ─── Focus states (accessibility) ─── */
+    .card:focus-visible {
+      outline: 2px solid var(--accent-1);
+      outline-offset: 4px;
+    }
+
+    /* ─── Fade-in animation ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    header { animation: fadeUp 0.6s ease both; }
+    .card:nth-child(1) { animation: fadeUp 0.6s 0.1s ease both; }
+    .card:nth-child(2) { animation: fadeUp 0.6s 0.18s ease both; }
+    .card:nth-child(3) { animation: fadeUp 0.6s 0.26s ease both; }
+    .card:nth-child(4) { animation: fadeUp 0.6s 0.34s ease both; }
+    footer { animation: fadeUp 0.6s 0.42s ease both; }
+  </style>
 </head>
 <body>
-<div id="root"></div>
+  <div class="bg-blobs" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+  <div class="page">
+    <header>
+      <div class="header-eyebrow">
+        <span class="dot"></span>
+        timloehr.me
+      </div>
+      <h1>Interactive Courses</h1>
+      <p class="header-sub">
+        Four hands-on courses covering the modern data and AI stack.
+        Zero signup, zero build step — just open and learn.
+      </p>
+      <div class="header-meta">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          4 courses
+        </span>
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Self-paced
+        </span>
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Free &amp; open
+        </span>
+      </div>
+    </header>
 
-<script type="text/babel" src="src/chapters/shared.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch_Overview.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch0_StackSims.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch0_Fundamentals.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch1_Ingest.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch1_5_Streaming.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch2_Store.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch3_Compute.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch4_Orchestrate.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch5_Quality.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch6_Discover.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch7_Serve.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch8_Govern.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/Ch9_Capstone.jsx?v=24"></script>
-<script type="text/babel" src="src/chapters/App.jsx?v=24"></script>
+    <div class="divider" aria-hidden="true"></div>
+
+    <main>
+      <div class="grid" role="list">
+
+        <!-- Card 1: Data Engineering -->
+        <a
+          href="./data-engineering-fundamentals/"
+          class="card card-1"
+          role="listitem"
+          aria-label="Data Engineering Fundamentals — Start course"
+        >
+          <div class="card-icon" aria-hidden="true">⚙️</div>
+          <div class="card-number">Course 01</div>
+          <h2 class="card-title">Data Engineering Fundamentals</h2>
+          <p class="card-subtitle">
+            Build production-grade data pipelines from the ground up. Master ETL patterns,
+            batch &amp; streaming architectures, and the tools used by data teams at scale.
+          </p>
+          <div class="tags" aria-label="Technologies covered">
+            <span class="tag">Python</span>
+            <span class="tag">SQL</span>
+            <span class="tag">Airflow</span>
+            <span class="tag">dbt</span>
+            <span class="tag">Spark</span>
+            <span class="tag">Kafka</span>
+          </div>
+          <span class="card-cta">
+            Start course <span class="arrow" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Card 2: Data Science -->
+        <a
+          href="./data-science/"
+          class="card card-2"
+          role="listitem"
+          aria-label="Data Science Fundamentals — Start course"
+        >
+          <div class="card-icon" aria-hidden="true">📊</div>
+          <div class="card-number">Course 02</div>
+          <h2 class="card-title">Data Science Fundamentals</h2>
+          <p class="card-subtitle">
+            From exploratory analysis to model deployment. Learn statistical thinking,
+            ML fundamentals, and how to communicate insights that drive decisions.
+          </p>
+          <div class="tags" aria-label="Technologies covered">
+            <span class="tag">Python</span>
+            <span class="tag">pandas</span>
+            <span class="tag">scikit-learn</span>
+            <span class="tag">PyTorch</span>
+            <span class="tag">MLflow</span>
+          </div>
+          <span class="card-cta">
+            Start course <span class="arrow" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Card 3: Data Infrastructure -->
+        <a
+          href="./data-infrastructure/"
+          class="card card-3"
+          role="listitem"
+          aria-label="Data Infrastructure — Start course"
+        >
+          <div class="card-icon" aria-hidden="true">🏗️</div>
+          <div class="card-number">Course 03</div>
+          <h2 class="card-title">Data Infrastructure</h2>
+          <p class="card-subtitle">
+            Design and operate cloud-native data platforms. Cover warehousing, lakehouse
+            architectures, IaC, and the reliability engineering principles behind big data systems.
+          </p>
+          <div class="tags" aria-label="Technologies covered">
+            <span class="tag">Snowflake</span>
+            <span class="tag">BigQuery</span>
+            <span class="tag">Terraform</span>
+            <span class="tag">Docker</span>
+            <span class="tag">Kubernetes</span>
+          </div>
+          <span class="card-cta">
+            Start course <span class="arrow" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Card 4: AI Coding -->
+        <a
+          href="./codex/"
+          class="card card-4"
+          role="listitem"
+          aria-label="AI Coding with Claude — Start course"
+        >
+          <div class="card-icon" aria-hidden="true">🤖</div>
+          <div class="card-number">Course 04</div>
+          <h2 class="card-title">AI Coding with Claude</h2>
+          <p class="card-subtitle">
+            Ship production software faster with AI-assisted development. Learn prompt engineering
+            for code, agentic workflows, and how to maintain quality while moving at speed.
+          </p>
+          <div class="tags" aria-label="Technologies covered">
+            <span class="tag">Claude</span>
+            <span class="tag">Claude Code</span>
+            <span class="tag">MCP</span>
+            <span class="tag">Agents</span>
+            <span class="tag">Evals</span>
+          </div>
+          <span class="card-cta">
+            Start course <span class="arrow" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+      </div>
+    </main>
+
+    <footer>
+      <p>
+        Built by <a href="https://timloehr.me" target="_blank" rel="noopener">Tim Löhr</a>
+        &nbsp;·&nbsp;
+        <a href="https://github.com/Mavengence/interactive-courses" target="_blank" rel="noopener">GitHub</a>
+        &nbsp;·&nbsp;
+        MIT License
+      </p>
+      <p style="margin-top:8px;">
+        No build step &nbsp;·&nbsp; No signup &nbsp;·&nbsp; Open source
+      </p>
+    </footer>
+  </div>
 </body>
 </html>

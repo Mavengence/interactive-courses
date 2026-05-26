@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>05 · The Lakehouse: Iceberg, Delta, Hudi — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+<link rel="stylesheet" href="../styles/lesson-diagrams.css?v=1"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 05 · track 02 — storage</div>
+    <h1>The lakehouse:<br/>ACID, finally.</h1>
+    <p class="subtitle">Iceberg, Delta, Hudi. Three table formats that put a transactional metadata layer on top of Parquet files in object storage. Snapshots, time travel, schema evolution — and the format war, ranked.</p>
+    <div class="meta">
+      <span>⏱ <b>15 min</b></span>
+      <span>◆ <b>4 simulations</b></span>
+      <span>✦ <b>+95 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <div class="callout" style="margin-bottom:18px;"><span class="icon">◎</span><div><b>Learning objectives.</b> After this lesson you can: (1) explain the five-layer Iceberg metadata stack and trace a read and a write through it; (2) describe how optimistic concurrency control delivers ACID semantics on object storage; (3) compare Iceberg, Delta, and Hudi on engine support, update strategy, and sweet spot; (4) distinguish Copy-on-Write from Merge-on-Read and pick the right one for a given workload.</div></div>
+        <p>For a decade, the data lake was a directory of Parquet files on S3, and that was it. It was wonderful — cheap, durable, scalable — and it was missing everything: no atomic writes, no schema evolution, no time travel, no concurrent updates without corruption, no idea which files belonged to which version of the table. To delete one user's data for GDPR, you rewrote the entire dataset.</p>
+        <p>The lakehouse fixes this with one architectural move: <strong>add a metadata layer on top of the file layout that tracks which files belong to which version of the table.</strong> Three formats compete to be that layer:</p>
+        <ul>
+          <li><strong>Apache Iceberg</strong> — born at Netflix, donated to Apache, the reference implementation people pick for openness. Engine-agnostic.</li>
+          <li><strong>Delta Lake</strong> — born at Databricks, open-sourced under Linux Foundation, deeply integrated with Spark. Now interoperates with Iceberg via UniForm.</li>
+          <li><strong>Apache Hudi</strong> — born at Uber, optimized for streaming upserts and CDC. Niche but excellent at its niche.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The metadata layer, in three layers</h2>
+      <figure class="ld-fig" id="fig-iceberg-meta">
+        <div class="ld-fig-head">
+          <span class="ld-fig-num">Fig. 02 · iceberg metadata stack</span>
+          <span class="ld-fig-title">Five layers of pointers between a table name and its rows</span>
+          <span class="ld-fig-sub">read top → down · write bottom → up</span>
+        </div>
+        <div class="ld-fig-stage">
+          <svg class="ld-svg" viewBox="0 0 880 560" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Iceberg metadata layers">
+            <defs>
+              <marker id="ld-meta-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/>
+              </marker>
+            </defs>
+
+            <!-- read direction rail (left) -->
+            <g transform="translate(36,40)">
+              <line x1="6" y1="0" x2="6" y2="500" stroke="var(--rule-2)" stroke-width="1" stroke-dasharray="3 4"/>
+              <text x="6" y="-10" class="ld-mini" text-anchor="middle" fill="var(--ink-3)">READ</text>
+              <path d="M 6 504 L 1 494 M 6 504 L 11 494" stroke="var(--ink-3)" fill="none"/>
+            </g>
+            <!-- write direction rail (right) -->
+            <g transform="translate(844,40)">
+              <line x1="0" y1="0" x2="0" y2="500" stroke="var(--rule-2)" stroke-width="1" stroke-dasharray="3 4"/>
+              <text x="0" y="-10" class="ld-mini" text-anchor="middle" fill="var(--ink-3)">WRITE</text>
+              <path d="M 0 -4 L -5 6 M 0 -4 L 5 6" stroke="var(--ink-3)" fill="none"/>
+            </g>
+
+            <!-- Layer 1: Catalog -->
+            <g transform="translate(110,40)">
+              <rect class="ld-lh-layer-cat" x="0" y="0" width="690" height="68" rx="8" stroke-width="1.4"/>
+              <text class="ld-lh-layer-label" x="14" y="20" fill="oklch(0.45 0.12 80)">CATALOG</text>
+              <text class="ld-sub" x="84" y="20">Glue · Hive · Nessie · REST</text>
+              <text class="ld-label" x="14" y="44" font-weight="600">orders</text>
+              <text class="ld-label" x="84" y="44" fill="var(--ink-3)">→</text>
+              <text class="ld-label" x="104" y="44" font-family="var(--mono)">s3://lake/orders/metadata/v18.json</text>
+              <text class="ld-mini" x="14" y="60" fill="var(--ink-3)">one row per table · single source of truth for "current"</text>
+            </g>
+
+            <!-- arrow -->
+            <path class="ld-lh-arrow" d="M 455 110 L 455 134" marker-end="url(#ld-meta-arrow)"/>
+
+            <!-- Layer 2: metadata.json -->
+            <g transform="translate(110,138)">
+              <rect class="ld-lh-layer-meta" x="0" y="0" width="690" height="80" rx="8" stroke-width="1.4"/>
+              <text class="ld-lh-layer-label" x="14" y="20" fill="var(--cyan-deep)">METADATA.JSON</text>
+              <text class="ld-sub" x="180" y="20">snapshot history, schemas, partition specs</text>
+              <!-- snapshot history mini -->
+              <g transform="translate(14,32)" font-family="var(--mono)" font-size="10.5px" fill="var(--ink-2)">
+                <rect x="0" y="0" width="86" height="36" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="6" y="14" font-weight="600">snap v16</text><text x="6" y="28" fill="var(--ink-3)">12:31</text>
+                <rect x="92" y="0" width="86" height="36" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="98" y="14" font-weight="600">snap v17</text><text x="98" y="28" fill="var(--ink-3)">12:33</text>
+                <rect x="184" y="0" width="86" height="36" rx="3" fill="var(--cyan-wash)" stroke="var(--cyan-ink)" stroke-width="1.5"/>
+                <text x="190" y="14" font-weight="700" fill="var(--cyan-deep)">snap v18 ●</text><text x="190" y="28" fill="var(--cyan-deep)">12:46 · current</text>
+              </g>
+              <text class="ld-mini" x="400" y="48" fill="var(--ink-3)">current_snapshot → manifest_list path</text>
+              <text class="ld-mini" x="400" y="62" fill="var(--ink-3)">+ schema_id, spec_id, properties</text>
+            </g>
+
+            <path class="ld-lh-arrow" d="M 455 220 L 455 244"/>
+
+            <!-- Layer 3: manifest_list -->
+            <g transform="translate(110,248)">
+              <rect class="ld-lh-layer-mfl" x="0" y="0" width="690" height="74" rx="8" stroke-width="1.4"/>
+              <text class="ld-lh-layer-label" x="14" y="20" fill="oklch(0.4 0.15 270)">MANIFEST_LIST</text>
+              <text class="ld-sub" x="170" y="20">Avro · one row per manifest</text>
+              <!-- mini manifest entries -->
+              <g transform="translate(14,30)" font-family="var(--mono)" font-size="10px" fill="var(--ink-2)">
+                <rect x="0" y="0" width="200" height="34" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="6" y="13" font-weight="600">mf-a8…avro</text>
+                <text x="6" y="26" fill="var(--ink-3)">part: 2024-04 · 12 files</text>
+                <rect x="208" y="0" width="200" height="34" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="214" y="13" font-weight="600">mf-c1…avro</text>
+                <text x="214" y="26" fill="var(--ink-3)">part: 2024-05 · 9 files</text>
+                <rect x="416" y="0" width="200" height="34" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="422" y="13" font-weight="600">mf-e3…avro</text>
+                <text x="422" y="26" fill="var(--ink-3)">part: 2024-06 · 14 files</text>
+              </g>
+              <text class="ld-mini" x="14" y="68" fill="var(--ink-3)">range stats per manifest let queries skip whole manifests</text>
+            </g>
+
+            <path class="ld-lh-arrow" d="M 455 324 L 455 348"/>
+
+            <!-- Layer 4: manifests -->
+            <g transform="translate(110,352)">
+              <rect class="ld-lh-layer-mf" x="0" y="0" width="690" height="74" rx="8" stroke-width="1.4"/>
+              <text class="ld-lh-layer-label" x="14" y="20" fill="oklch(0.38 0.13 145)">MANIFEST</text>
+              <text class="ld-sub" x="120" y="20">Avro · one row per data file</text>
+              <g transform="translate(14,30)" font-family="var(--mono)" font-size="10px" fill="var(--ink-2)">
+                <rect x="0" y="0" width="200" height="34" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="6" y="13" font-weight="600">part-001.parquet</text>
+                <text x="6" y="26" fill="var(--ink-3)">128 MB · 1.2M rows · min/max</text>
+                <rect x="208" y="0" width="200" height="34" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="214" y="13" font-weight="600">part-002.parquet</text>
+                <text x="214" y="26" fill="var(--ink-3)">132 MB · 1.3M rows · min/max</text>
+                <rect x="416" y="0" width="200" height="34" rx="3" fill="var(--paper)" stroke="var(--rule-2)"/>
+                <text x="422" y="13" font-weight="600">part-003.parquet</text>
+                <text x="422" y="26" fill="var(--ink-3)">96 MB · 0.9M rows · min/max</text>
+              </g>
+              <text class="ld-mini" x="14" y="68" fill="var(--ink-3)">per-file column stats let queries skip individual files</text>
+            </g>
+
+            <path class="ld-lh-arrow" d="M 455 426 L 455 450"/>
+
+            <!-- Layer 5: data -->
+            <g transform="translate(110,454)">
+              <rect class="ld-lh-layer-data" x="0" y="0" width="690" height="56" rx="8" stroke-width="1.4"/>
+              <text class="ld-lh-layer-label" x="14" y="20" fill="var(--ink)">DATA FILES</text>
+              <text class="ld-sub" x="130" y="20">Parquet · the actual rows</text>
+              <!-- file glyphs -->
+              <g transform="translate(330,28)">
+                <g transform="translate(0,0)"><rect width="42" height="20" rx="2" fill="var(--paper-2)" stroke="var(--rule-2)"/><text x="21" y="14" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">.pq</text></g>
+                <g transform="translate(48,0)"><rect width="42" height="20" rx="2" fill="var(--paper-2)" stroke="var(--rule-2)"/><text x="21" y="14" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">.pq</text></g>
+                <g transform="translate(96,0)"><rect width="42" height="20" rx="2" fill="var(--paper-2)" stroke="var(--rule-2)"/><text x="21" y="14" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">.pq</text></g>
+                <g transform="translate(144,0)"><rect width="42" height="20" rx="2" fill="var(--paper-2)" stroke="var(--rule-2)"/><text x="21" y="14" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">.pq</text></g>
+                <g transform="translate(192,0)"><rect width="42" height="20" rx="2" fill="var(--paper-2)" stroke="var(--rule-2)"/><text x="21" y="14" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">.pq</text></g>
+                <g transform="translate(240,0)"><rect width="42" height="20" rx="2" fill="var(--paper-2)" stroke="var(--rule-2)"/><text x="21" y="14" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">.pq</text></g>
+                <text x="300" y="14" font-family="var(--mono)" font-size="10" fill="var(--ink-3)">… × N</text>
+              </g>
+            </g>
+
+            <!-- atomic CAS callout -->
+            <g transform="translate(620,12)">
+              <rect x="0" y="0" width="240" height="22" rx="11" fill="var(--cyan-wash)" stroke="var(--cyan-ink)" stroke-width="1"/>
+              <circle cx="14" cy="11" r="4" fill="var(--cyan-deep)"/>
+              <text x="26" y="15" font-family="var(--mono)" font-size="10.5px" font-weight="600" fill="var(--cyan-deep)">commit = atomic CAS on this pointer</text>
+            </g>
+            <path d="M 740 36 Q 740 60 700 70" fill="none" stroke="var(--cyan-ink)" stroke-width="1" stroke-dasharray="3 3"/>
+          </svg>
+        </div>
+        <figcaption class="ld-fig-cap">
+          <b>Reads walk down, writes walk up.</b> A read resolves <code>orders</code> → <code>v18.json</code> via the catalog, picks the current snapshot, prunes manifests by partition stats, prunes files by column stats, then opens just those Parquet files. A write does the opposite — writes new data, then a new manifest, then a new manifest list, then a new <code>metadata.json</code>, and finally a single <em>atomic compare-and-swap</em> on the catalog pointer. That CAS is the entire commit.
+        </figcaption>
+      </figure>
+      <div class="prose">
+        <p>A read goes top-to-bottom. The catalog tells you the current metadata file. The metadata file points to the current snapshot's manifest list. The manifest list lets you skip whole manifests via partition stats. Each surviving manifest tells you which data files to actually read — and you can prune those further via per-file column stats. Then you read just those Parquet files.</p>
+        <p>A write is the reverse. You write new data files. You write a new manifest pointing to them. You write a new manifest list. You write a new metadata file. Then — and this is the key — you do a single atomic compare-and-swap on the catalog pointer, from <code>v17.json</code> to <code>v18.json</code>. That's the commit. Either it succeeds and the new snapshot is live; or it fails and your draft files are orphaned (and cleaned up by VACUUM later).</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>ACID on object storage: optimistic concurrency control</h2>
+      <div class="prose">
+        <p>Object storage has no lock server. How can two concurrent writers avoid corrupting the table? The answer is <strong>optimistic concurrency control (OCC)</strong>: both writers proceed in parallel, and only the <em>last step</em> — swapping the catalog pointer — is serialized.</p>
+        <ol>
+          <li>Writer A and Writer B both read the current metadata pointer: <code>v18.json</code>.</li>
+          <li>Both write their new data, manifests, and metadata files in isolation.</li>
+          <li>Writer A commits first: the catalog atomically swaps from <code>v18.json</code> → <code>v19a.json</code>. Succeeds.</li>
+          <li>Writer B tries to swap <code>v18.json</code> → <code>v19b.json</code>. The CAS fails — <code>v18.json</code> is no longer current. Writer B either retries (reading the new base) or raises a conflict error.</li>
+        </ol>
+        <p>This gives you <strong>serializable isolation for non-conflicting writes</strong> at essentially zero cost. Most concurrent writers don't touch the same rows; OCC lets them all proceed and only serializes the metadata pointer swap. Row-level conflict detection (e.g. two writers updating the same row) is format-specific — Delta uses transaction logs with conflict predicates; Iceberg uses manifest-level conflict detection.</p>
+        <p><strong>Catalogs and the REST standard.</strong> The catalog is whatever service holds the <code>table name → current metadata file</code> mapping. Common options:</p>
+        <ul>
+          <li><strong>Hive Metastore (HMS)</strong> — the classic, a relational DB (usually MySQL) fronted by a Thrift service. Works everywhere; operationally heavy.</li>
+          <li><strong>AWS Glue Data Catalog</strong> — managed HMS-compatible service in AWS. Zero-ops for AWS shops.</li>
+          <li><strong>Project Nessie / REST catalog</strong> — git-for-data semantics (branches, tags, merges). Nessie is the reference implementation; the Iceberg REST catalog spec lets any HTTP server act as a catalog.</li>
+          <li><strong>Unity Catalog (Databricks)</strong> — governance-first, fine-grained access control, multi-cloud. The catalog of choice in the Databricks ecosystem.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Watch a table evolve</h2>
+      <div class="prose"><p>Click through the snapshot timeline. Each snapshot is a complete view of the table — by jumping back to an earlier one you get true <strong>time travel</strong> for free. A bad write at 13:01? Roll back to 12:33's snapshot in milliseconds.</p></div>
+      <div id="w-snap"></div>
+    </section>
+
+    <section id="s5">
+      <h2>CoW vs MoR — the real format war</h2>
+      <div class="prose">
+        <p>The deepest architectural decision in any lakehouse is how it handles updates and deletes. Object storage doesn't support in-place edits. So when you say <code>UPDATE orders SET status='shipped' WHERE id=42</code>, the engine has two strategies:</p>
+        <ul>
+          <li><strong>Copy-on-Write (CoW).</strong> Find the data file containing row 42. Rewrite it without that row. Add a new file with the updated row. Atomically swap. <em>Fast reads</em> (each row exists in exactly one file), <em>slow writes</em> (rewrites whole files for one-row changes), <em>write amplification</em>.</li>
+          <li><strong>Merge-on-Read (MoR).</strong> Don't touch the data file. Write a small "delete marker" file recording <em>"row 42 in file abc.parquet is dead"</em>. At read time, the engine reads the data file <em>and</em> the delete files, merges them on the fly, returns the merged result. <em>Fast writes</em>, <em>slower reads</em>, <em>compaction needed</em> to keep read latency reasonable.</li>
+        </ul>
+        <p>Iceberg supports both, picks per-table. Delta is CoW by default with deletion vectors as an MoR-flavored optimization. Hudi pioneered MoR and it's their default. Rule of thumb: <em>infrequent updates + read-heavy → CoW; frequent CDC-style updates → MoR.</em></p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Format comparison</h2>
+      <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.82rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
+            <th style="padding: 8px;"></th><th style="padding: 8px;">Iceberg</th><th style="padding: 8px;">Delta</th><th style="padding: 8px;">Hudi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Origin</td><td style="padding:8px;">Netflix → Apache</td><td style="padding:8px;">Databricks → LF</td><td style="padding:8px;">Uber → Apache</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Engine support</td><td style="padding:8px; color:var(--ok);">Broadest (Spark, Trino, Flink, Snowflake, BQ, Athena)</td><td style="padding:8px; color:var(--warn);">Best on Databricks; broadening</td><td style="padding:8px; color:var(--warn);">Spark, Flink, Presto</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Default updates</td><td style="padding:8px;">CoW (configurable MoR)</td><td style="padding:8px;">CoW + deletion vectors</td><td style="padding:8px;">MoR (CoW available)</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Partitioning</td><td style="padding:8px; color:var(--ok);">Hidden (transform-based, no stored column)</td><td style="padding:8px;">Hive-style + generated columns</td><td style="padding:8px;">Hive-style + custom keygens</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Schema evolution</td><td style="padding:8px; color:var(--ok);">Full (add/drop/rename/reorder, type promotion)</td><td style="padding:8px;">Add/drop/reorder; rename via column-mapping</td><td style="padding:8px;">Add/drop</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Catalog</td><td style="padding:8px;">HMS, Glue, Nessie, REST (any)</td><td style="padding:8px;">HMS, Unity Catalog (native)</td><td style="padding:8px;">HMS, custom</td></tr>
+          <tr><td style="padding:8px; color:var(--cyan-deep);">Sweet spot</td><td style="padding:8px;">Multi-engine OSS warehouse</td><td style="padding:8px;">Spark / Databricks shop</td><td style="padding:8px;">Streaming CDC ingest</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><span class="icon">▸</span><div><b>The 2026 reality.</b> Iceberg has won the multi-engine open standard. Snowflake, BigQuery, Athena, Databricks all read it natively. Pick Iceberg unless you have a specific reason — and "I'm a heavy Databricks shop" is one of the few good ones.</div></div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Key takeaways</h2>
+      <div class="prose">
+        <ul>
+          <li><strong>The metadata layer is the product.</strong> Iceberg/Delta/Hudi are not storage systems — they are metadata management layers on top of Parquet on object storage. ACID comes from atomic CAS on the catalog pointer, not from the storage layer itself.</li>
+          <li><strong>OCC, not locking.</strong> Concurrent writers use optimistic concurrency control: both write in parallel; only the final catalog pointer swap is serialized. Conflict = retry, not deadlock.</li>
+          <li><strong>CoW vs MoR is a read/write trade-off.</strong> Read-heavy, infrequent updates → CoW. CDC-style high-frequency upserts → MoR. Most formats support both; choose per table.</li>
+          <li><strong>Iceberg hidden partitioning removes a class of bugs.</strong> Hive-style partitions require writers to maintain a separate physical column; hidden partitioning (Iceberg) derives it from the source column, so changing the partition granularity is a metadata-only migration.</li>
+          <li><strong>Pick Iceberg for multi-engine.</strong> If queries come from more than one engine (e.g. Spark writes, Trino reads, Athena ad-hoc), Iceberg's engine-agnostic spec is the safest long-term bet.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s9">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'lakehouse';
+initLesson(LID, [
+  { id: 's1', label: 'Why a lakehouse' },
+  { id: 's2', label: 'The metadata layer' },
+  { id: 's3', label: 'ACID & catalogs' },
+  { id: 's4', label: 'Snapshot timeline' },
+  { id: 's5', label: 'CoW vs MoR' },
+  { id: 's6', label: 'Format comparison' },
+  { id: 's7', label: 'Quick check' },
+  { id: 's8', label: 'Key takeaways' },
+  { id: 's9', label: 'Vocab' },
+]);
+
+D.SnapshotTimeline(document.getElementById('w-snap'), { lessonId: LID, cpId: 'snap' });
+
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'GDPR delete',
+  question: 'You\'re running an Iceberg table with CoW updates. A user requests deletion of all their rows — there are ~50 of them, scattered across 30 of your 4,800 data files. What happens during the DELETE?',
+  options: [
+    'The 50 rows are rewritten in place.',
+    'A delete marker file is written; nothing else changes.',
+    'The 30 affected data files are rewritten without those rows; a new snapshot points to the new files; the old files become orphaned and are cleaned up by VACUUM.',
+    'The whole table is rewritten.',
+  ],
+  correct: 2,
+  explanation: 'Under CoW, only the <em>files containing the deleted rows</em> get rewritten — not the whole table. The new snapshot atomically points to the new files. Crucially, the old files survive until VACUUM runs (typically a 7-day retention) — which is what enables time travel back to before the delete. For GDPR you usually run an immediate VACUUM after to actually purge the bytes.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'CoW vs MoR for CDC',
+  question: 'You\'re building a pipeline that mirrors a Postgres source via CDC — typically 2 million row updates per minute. Which format strategy fits?',
+  options: [
+    'CoW. Always.',
+    'MoR. CDC produces many small upserts; CoW would rewrite huge files for tiny changes — write amplification kills you. MoR appends delete-then-insert markers; periodic compaction merges them.',
+    'Doesn\'t matter; the engine handles it.',
+    'Use CSV.',
+  ],
+  correct: 1,
+  explanation: 'High-frequency upserts are the textbook case for MoR. CoW\'s write amplification — rewriting a 256MB file to change one row — would destroy your throughput and IO budget. MoR writes small delta files quickly; reads merge on the fly; a background compaction job rewrites things in larger chunks during quieter windows. This is exactly why Hudi was built.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Snapshot', q: 'What is in a snapshot?', a: 'A complete, immutable view of a table at a point in time. Just a manifest list pointing to manifests pointing to data files. Snapshots accumulate; old ones are pruned by retention policy.' },
+    { term: 'Time travel', q: 'How does it work?', a: 'Every snapshot is fully described by metadata. Reading <code>SELECT … AS OF TIMESTAMP \'2026-04-15\'</code> just resolves the snapshot active at that timestamp and reads <em>its</em> manifests. Free, fast, no special storage.' },
+    { term: 'VACUUM', q: 'Why do you run it?', a: 'To garbage-collect data files no longer referenced by any retained snapshot. Without VACUUM, deleted/updated data accumulates forever. Default retention: 7 days. Set short for GDPR; long for safety.' },
+    { term: 'Hidden partitioning', q: 'Iceberg\'s killer feature vs Hive-style', a: 'Hive-style partitioning stores a separate physical column (e.g. <code>order_date</code>) that writers must populate. Iceberg hidden partitioning derives the partition value from a transform on an existing column (e.g. <code>days(order_ts)</code>). No extra column, no partition column in the schema, no rewrites when you change granularity.' },
+    { term: 'OCC', q: 'Optimistic concurrency control', a: 'Both writers proceed; conflict is detected at commit time via a compare-and-swap on the metadata pointer. The losing writer retries. No locks, no deadlocks, no coordination service needed.' },
+    { term: 'Compaction', q: 'Why is it needed?', a: 'Streaming writes produce many small files. Many small files = bad query performance + bad object-storage cost. Compaction periodically rewrites them into fewer, larger files. Background, non-blocking.' },
+    { term: 'Z-order', q: 'When does it help?', a: 'When queries filter on multiple columns equally (not one-and-done). Z-ordering interleaves bits of the column values so files are clustered in <em>multi-dimensional</em> space. Both <code>WHERE country=X</code> and <code>WHERE category=Y</code> prune well.' },
+  ]
+});
+</script>
+
+</body>
+</html>

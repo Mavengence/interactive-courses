@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>10 · Idempotency, Backfills, Exactly-Once — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 10 · track 04 — at scale</div>
+    <h1>Idempotency, backfills,<br/>exactly-once.</h1>
+    <p class="subtitle">The only delivery guarantee that matters in interviews — and why it's almost always a lie. How to make pipelines genuinely re-runnable. The backfill operation done right. The two-phase commit story Kafka tells.</p>
+    <div class="meta">
+      <span>⏱ <b>15 min</b></span>
+      <span>◆ <b>3 simulations</b></span>
+      <span>✦ <b>+90 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <h2>The three delivery guarantees</h2>
+      <div class="prose">
+        <p>Every messaging or pipeline system promises one of three:</p>
+        <ul>
+          <li><strong>At-most-once.</strong> Messages may be lost; never duplicated. Cheap. Used for fire-and-forget metrics.</li>
+          <li><strong>At-least-once.</strong> Messages are never lost; may be duplicated. The default for almost every distributed system. Cheap to implement; pushes deduplication onto consumers.</li>
+          <li><strong>Exactly-once.</strong> Messages are processed exactly once. Sounds great. Almost always means something subtler than you think.</li>
+        </ul>
+        <p>The dirty truth: <em>"exactly-once" is at-least-once delivery + idempotent processing.</em> The system can't actually prevent the message from being delivered twice — it can only ensure that the second delivery has no observable effect. So "exactly-once" really means "the side effects are idempotent." If your sink is a Kafka topic with transactional commits, that idempotency is built in. If your sink is "POST to a credit card processor," exactly-once is your problem to solve.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Idempotency in practice</h2>
+      <div class="prose"><p>Three patterns to make any operation idempotent. Memorize them.</p></div>
+      <div class="idem-grid">
+        <div class="idem-card">
+          <div class="idem-num">01</div>
+          <div class="idem-title">UPSERT by key</div>
+          <div class="idem-when">the common one — fact tables, dim updates</div>
+          <div class="idem-vis">
+            <svg viewBox="0 0 240 110" class="idem-svg" preserveAspectRatio="xMidYMid meet">
+              <text x="8" y="14" class="idem-svg-h">existing rows</text>
+              <rect x="8" y="20" width="100" height="20" fill="var(--paper-2)" stroke="var(--rule)"/>
+              <text x="14" y="34" class="idem-svg-row">id=42 · plan=free</text>
+              <text x="132" y="14" class="idem-svg-h">new batch</text>
+              <rect x="132" y="20" width="100" height="20" fill="oklch(0.95 0.05 215)" stroke="#cf8a3f"/>
+              <text x="138" y="34" class="idem-svg-row">id=42 · plan=pro</text>
+              <line x1="120" y1="60" x2="120" y2="74" stroke="var(--ink-3)" stroke-width="1.2" marker-end="url(#idem-arr)"/>
+              <text x="8" y="92" class="idem-svg-h">result</text>
+              <rect x="8" y="76" width="224" height="20" fill="oklch(0.95 0.05 155)" stroke="#3f8264"/>
+              <text x="14" y="90" class="idem-svg-row">id=42 · plan=pro  ·  matched on key, value updated</text>
+              <defs><marker id="idem-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/></marker></defs>
+            </svg>
+          </div>
+          <pre class="idem-sql">MERGE INTO fact_orders dst
+USING new_orders src
+  ON dst.order_id = src.order_id
+WHEN MATCHED THEN UPDATE SET ...
+WHEN NOT MATCHED THEN INSERT ...</pre>
+          <div class="idem-prop">re-runnable · order-independent</div>
+        </div>
+
+        <div class="idem-card">
+          <div class="idem-num">02</div>
+          <div class="idem-title">Windowed overwrite</div>
+          <div class="idem-when">daily aggregates, rolling cohorts</div>
+          <div class="idem-vis">
+            <svg viewBox="0 0 240 110" class="idem-svg" preserveAspectRatio="xMidYMid meet">
+              <text x="8" y="14" class="idem-svg-h">agg_daily</text>
+              <rect x="8" y="20" width="60" height="20" fill="var(--paper-2)" stroke="var(--rule)"/>
+              <text x="14" y="34" class="idem-svg-row">04-14 · 130</text>
+              <rect x="68" y="20" width="60" height="20" fill="oklch(0.95 0.05 25)" stroke="#b85a4a" stroke-dasharray="2 2"/>
+              <text x="74" y="34" class="idem-svg-row">04-15 · 142</text>
+              <rect x="128" y="20" width="60" height="20" fill="var(--paper-2)" stroke="var(--rule)"/>
+              <text x="134" y="34" class="idem-svg-row">04-16 · 117</text>
+              <text x="74" y="58" class="idem-svg-h">↓ DELETE ∧ INSERT day=04-15 in one tx</text>
+              <rect x="8" y="76" width="60" height="20" fill="var(--paper-2)" stroke="var(--rule)"/>
+              <text x="14" y="90" class="idem-svg-row">04-14 · 130</text>
+              <rect x="68" y="76" width="60" height="20" fill="oklch(0.95 0.05 155)" stroke="#3f8264"/>
+              <text x="74" y="90" class="idem-svg-row">04-15 · 158</text>
+              <rect x="128" y="76" width="60" height="20" fill="var(--paper-2)" stroke="var(--rule)"/>
+              <text x="134" y="90" class="idem-svg-row">04-16 · 117</text>
+            </svg>
+          </div>
+          <pre class="idem-sql">BEGIN;
+DELETE FROM agg_daily
+  WHERE day = '2026-04-15';
+INSERT INTO agg_daily
+  SELECT … WHERE day = '2026-04-15';
+COMMIT;</pre>
+          <div class="idem-prop">atomic · safe to retry whole window</div>
+        </div>
+
+        <div class="idem-card">
+          <div class="idem-num">03</div>
+          <div class="idem-title">Dedup by event_id</div>
+          <div class="idem-when">streaming sinks, at-least-once consumers</div>
+          <div class="idem-vis">
+            <svg viewBox="0 0 240 110" class="idem-svg" preserveAspectRatio="xMidYMid meet">
+              <text x="8" y="14" class="idem-svg-h">incoming events</text>
+              <g font-family="JetBrains Mono" font-size="9" fill="var(--ink-2)">
+                <rect x="8" y="20" width="50" height="18" fill="oklch(0.95 0.05 215)" stroke="#5b8a8f"/>
+                <text x="13" y="32">e:abc12</text>
+                <rect x="62" y="20" width="50" height="18" fill="oklch(0.95 0.05 215)" stroke="#5b8a8f"/>
+                <text x="67" y="32">e:def34</text>
+                <rect x="116" y="20" width="50" height="18" fill="oklch(0.92 0.08 25)" stroke="#b85a4a"/>
+                <text x="121" y="32">e:abc12</text>
+                <rect x="170" y="20" width="50" height="18" fill="oklch(0.95 0.05 215)" stroke="#5b8a8f"/>
+                <text x="175" y="32">e:ghi56</text>
+              </g>
+              <text x="118" y="56" class="idem-svg-h" text-anchor="middle">↓ INSERT … ON CONFLICT DO NOTHING</text>
+              <text x="8" y="74" class="idem-svg-h">sink (PRIMARY KEY event_id)</text>
+              <g font-family="JetBrains Mono" font-size="9" fill="var(--ink-2)">
+                <rect x="8" y="80" width="50" height="18" fill="oklch(0.95 0.05 155)" stroke="#3f8264"/>
+                <text x="13" y="92">abc12</text>
+                <rect x="62" y="80" width="50" height="18" fill="oklch(0.95 0.05 155)" stroke="#3f8264"/>
+                <text x="67" y="92">def34</text>
+                <rect x="116" y="80" width="50" height="18" fill="var(--paper-2)" stroke="var(--rule)" stroke-dasharray="2 2"/>
+                <text x="121" y="92" fill="var(--ink-3)">skipped</text>
+                <rect x="170" y="80" width="50" height="18" fill="oklch(0.95 0.05 155)" stroke="#3f8264"/>
+                <text x="175" y="92">ghi56</text>
+              </g>
+            </svg>
+          </div>
+          <pre class="idem-sql">INSERT INTO sink (event_id, …)
+VALUES (…)
+ON CONFLICT (event_id)
+  DO NOTHING;</pre>
+          <div class="idem-prop">producer must emit stable id</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Backfill, the right way</h2>
+      <div class="prose"><p>A backfill is the operation of re-running a pipeline over historical input — usually because the original run had a bug, or you need to populate new columns. Backfills are where bad pipelines reveal themselves.</p></div>
+      <div id="w-bdag"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>The IC5 backfill checklist.</b> (1) Does my job take an explicit window parameter, not "yesterday"? (2) Will running window N twice produce the same result? (3) Will running windows N and N+1 in parallel produce the same result as serially? (4) Can I run a backfill without breaking the live job? If any answer is no, fix that before you ever push.</div></div>
+    </section>
+
+    <section id="s4">
+      <h2>How Kafka achieves exactly-once</h2>
+      <div class="prose">
+        <p>Kafka's transactional API is the cleanest implementation of streaming exactly-once you'll see. Three pieces:</p>
+        <ol>
+          <li><strong>Idempotent producer.</strong> Every producer gets a producer ID (PID) assigned by the broker on first connection. Every record gets a monotonically increasing sequence number per (PID, partition). The broker deduplicates in-memory: if a record with sequence N arrives and N was already accepted, it's silently dropped. This covers producer-level retries.</li>
+          <li><strong>Transactions across topics.</strong> A producer can <code>beginTransaction()</code>, write to multiple topics/partitions, then <code>commitTransaction()</code> or <code>abortTransaction()</code>. Until commit, consumers with <code>isolation.level=read_committed</code> don't see any of the records. Atomicity is enforced by a <em>transaction coordinator</em> (a broker-side component keyed by <code>transactional.id</code>).</li>
+          <li><strong>Consumer offsets in the transaction.</strong> The consumer's offset commit is written to <code>__consumer_offsets</code> inside the same transaction as the output records. So <em>"I read offsets M–N and produced these records"</em> either both commit or both abort. This is what makes a consume-transform-produce pipeline exactly-once for the Kafka-to-Kafka case.</li>
+        </ol>
+        <p>Result: a Kafka-to-Kafka pipeline can guarantee exactly-once end-to-end. As soon as the sink is anything other than another Kafka topic — a Postgres DB, an HTTP API, an S3 file — it's back on you to make the side effect idempotent. <strong>Flink's two-phase commit sink</strong> extends this: Flink checkpoints write a pre-commit to the external sink (e.g., Iceberg stage files), then the commit is triggered only after the Kafka offset commit succeeds — bridging Kafka's transactional exactly-once to external sinks that support a commit/abort protocol.</p>
+        <div style="margin-top: 12px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 16px; font-family: var(--mono); font-size: 0.8rem;">
+          <div style="color: var(--ink-3); margin-bottom: 6px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;">kafka exactly-once: scope table</div>
+          <table style="width:100%; border-collapse: collapse; font-size: 0.78rem;">
+            <thead><tr style="border-bottom: 1px solid var(--rule); color: var(--ink-3);">
+              <th style="padding:4px 8px; text-align:left;">Pipeline</th>
+              <th style="padding:4px 8px; text-align:left;">Guarantee</th>
+              <th style="padding:4px 8px; text-align:left;">Mechanism</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom: 1px dashed var(--rule-2);">
+                <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Kafka</td>
+                <td style="padding:4px 8px; color: #3f8264;">Exactly-once</td>
+                <td style="padding:4px 8px; color: var(--ink-2);">Transactional API, offset commit in tx</td>
+              </tr>
+              <tr style="border-bottom: 1px dashed var(--rule-2);">
+                <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Iceberg (via Flink)</td>
+                <td style="padding:4px 8px; color: #3f8264;">Effectively exactly-once</td>
+                <td style="padding:4px 8px; color: var(--ink-2);">Flink 2PC sink + checkpoint</td>
+              </tr>
+              <tr style="border-bottom: 1px dashed var(--rule-2);">
+                <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Postgres</td>
+                <td style="padding:4px 8px; color: #cf8a3f;">At-least-once + idempotent</td>
+                <td style="padding:4px 8px; color: var(--ink-2);">UPSERT on key or ON CONFLICT DO NOTHING</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → HTTP API</td>
+                <td style="padding:4px 8px; color: #b85a4a;">At-least-once only</td>
+                <td style="padding:4px 8px; color: var(--ink-2);">Idempotency key (client-generated UUID)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="s4b">
+      <h2>Dead-letter queues: the proof of intent</h2>
+      <div class="prose">
+        <p>A pipeline that claims exactly-once semantics but silently drops malformed records is lying — it's <em>at-most-once</em> with extra steps. The IC5 move is a <strong>dead-letter queue (DLQ)</strong>: any record that fails processing or schema validation is routed to a dedicated topic or table, not discarded.</p>
+        <p>A well-designed DLQ captures:</p>
+        <ul>
+          <li>The original raw bytes of the failed record (don't rely on deserialization succeeding)</li>
+          <li>The exception type and message</li>
+          <li>The source topic, partition, and offset — so you can replay the record once the bug is fixed</li>
+          <li>A timestamp and consumer group ID for tracing</li>
+        </ul>
+        <p>The DLQ doesn't fix the bug — it makes failures <em>observable and recoverable</em> instead of invisible and permanent. In Kafka, implement this with a try/catch in your consumer loop; in Flink, use <code>getSideOutput()</code> with a tagged <code>OutputTag</code> for poison records. Alert on non-zero DLQ throughput the same way you'd alert on non-zero error rate in a web API.</p>
+      </div>
+      <div class="callout"><span class="icon">▸</span><div><b>Interview test.</b> If asked "how do you handle bad records in your pipeline?" — "I drop them with a log line" is a red flag at IC5. The answer is a DLQ with the original bytes, the exception, and the source offset, plus an alert on non-zero DLQ writes and a documented replay procedure. This is the difference between a pipeline that looks correct and one that is demonstrably correct.</div></div>
+    </section>
+
+    <section id="s5">
+      <h2>Schema evolution: the hidden third axis</h2>
+      <div class="prose">
+        <p>A backfill that you didn't anticipate: the schema changed. Six months ago you ingested events with 12 fields. Today's events have 14 — two new fields were added. You want to backfill the new columns into old data.</p>
+        <p>Three compatibility modes you'll see in schema registries:</p>
+        <ul>
+          <li><strong>Backward.</strong> New schema can read old data. (Old field deleted? OK, just ignored. New field added? Must have a default.) Lets you upgrade <em>consumers</em> first.</li>
+          <li><strong>Forward.</strong> Old schema can read new data. (New field? Old reader ignores. Removed field? Old reader gets a null/default.) Lets you upgrade <em>producers</em> first.</li>
+          <li><strong>Full.</strong> Both. The strictest, most flexible setting. Default for new pipelines.</li>
+        </ul>
+        <p>Set the registry to <code>FULL</code> by default. The day a producer ships a breaking change without coordinating, you'll be glad the registry rejected it.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'idempotency';
+initLesson(LID, [
+  { id: 's1', label: 'Three guarantees' },
+  { id: 's2', label: 'Idempotency patterns' },
+  { id: 's3', label: 'Backfill, properly' },
+  { id: 's4', label: 'Kafka exactly-once' },
+  { id: 's4b', label: 'Dead-letter queues' },
+  { id: 's5', label: 'Schema evolution' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Vocab' },
+]);
+
+D.BackfillDAG(document.getElementById('w-bdag'), { lessonId: LID, cpId: 'bdag' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'The truth about exactly-once',
+  question: 'A vendor pitches "exactly-once delivery." What\'s the right interview-grade response?',
+  options: [
+    '"Great, that solves duplicates."',
+    '"Exactly-once <em>delivery</em> across a network is impossible. What you really mean is at-least-once delivery + idempotent processing — and for sinks that aren\'t the same vendor\'s system, idempotency is still my problem."',
+    '"Does it support TLS?"',
+    '"How does it compare to at-most-once?"',
+  ],
+  correct: 1,
+  explanation: 'Distributed systems can\'t prevent duplicate <em>deliveries</em> — networks fail, ACKs are lost, retries happen. What you can engineer is <em>idempotent side effects</em>: the second delivery produces no incremental change. Within Kafka\'s transactional ecosystem this is automatic. The moment your sink leaves Kafka — DB, HTTP, S3 — you\'re responsible for the idempotency. Saying "exactly-once" without naming the sink is a tell.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Backfill design',
+  question: 'You wrote a job that runs daily for "yesterday\'s data." A bug is found, going back 90 days. What change do you make to the job before backfilling?',
+  options: [
+    'Just run it 90 times.',
+    'Parameterize the date window — accept <code>--start_date</code>/<code>--end_date</code> instead of hard-coding "yesterday." Then verify (a) running any single window twice is a no-op, and (b) running windows in parallel is safe. Then backfill.',
+    'Restore from snapshot.',
+    'Add more logging.',
+  ],
+  correct: 1,
+  explanation: 'Hard-coding "yesterday" guarantees the job <em>cannot</em> backfill. Parameterizing the window is the structural fix. Then the two idempotency checks — re-run-safe and parallel-safe — let you fan out the backfill across windows efficiently. Production-grade pipelines accept window parameters from day one for exactly this reason.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Idempotency key', q: 'How do APIs do it?', a: 'The client picks a UUID, sends it as <code>Idempotency-Key</code> header. Server records it; on duplicate request with the same key, returns the cached response without re-executing. Stripe, Square, etc. all do this.' },
+    { term: 'Two-phase commit', q: 'When and why', a: '2PC coordinates a transaction across multiple resources (e.g. DB + queue). Slow, fragile under coordinator failure. Modern pipelines avoid it via outbox pattern + idempotent consumers.' },
+    { term: 'Outbox', q: 'Why it beats 2PC', a: 'Single-DB transaction writes the row <em>and</em> the event-to-publish to an "outbox" table. CDC streams the outbox. No distributed transaction, but the event is captured iff the row commits.' },
+    { term: 'Hot backfill', q: 'When is it OK?', a: 'When backfill runs touch the same partitions as live writes, you risk lock contention or version conflicts. "Cold" backfills run during off-peak. "Hot" backfills require row-level idempotency + ability to reconcile concurrent writes.' },
+    { term: 'Watermark in batch', q: 'Yes, batch has them too', a: 'Most batch systems track "high water mark" — the latest input timestamp processed — for incremental jobs. Backfill is "set the watermark back, re-run forward." dbt does this implicitly via <code>{{this}}.max(ts)</code>.' },
+  ]
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,393 @@
+/* ============================================================
+   a11y.css — Final contrast layer.
+   Loaded LAST. Fixes every WCAG-failing selector identified by
+   the DOM contrast auditor. All values pass AA (4.5:1 for body,
+   3:1 for large text ≥ 18px or ≥ 14px bold).
+   Do not modify without re-running the contrast auditor (run_audit.py).
+   ============================================================ */
+
+@layer a11y {
+  :root {
+    /* Accessible palette additions — safe on canvas #FAF9F6 */
+    --a11y-text-secondary:  #4B5563;  /* 6.56:1  — replaces rgb(122,131,148) */
+    --a11y-text-tertiary:   #5F6670;  /* 5.51:1  — replaces dimmer muteds   */
+    --a11y-text-strong:     #1F2937;  /* 11.8:1  — near-black for emphasis  */
+    --a11y-text-inverse:    #E8ECF2;  /* 12.7:1 on dark ink bg              */
+    --a11y-code-string:     #8B6A00;  /* 4.97:1  — olive-gold on canvas     */
+    --a11y-link-strong:     #0047B3;  /* 7.44:1  — deep cobalt              */
+  }
+
+  /* ---------- Topbar chrome (lessons + home) ---------- */
+  div.topbar > div.topbar-inner > span.tb-crumb {
+    color: var(--a11y-text-secondary) !important;
+    font-weight: 500 !important;
+  }
+  div.topbar > div.topbar-inner > nav > span.progress-badge,
+  .topbar .progress-badge {
+    color: var(--a11y-text-secondary) !important;
+    font-weight: 500 !important;
+  }
+
+  /* ---------- Home hero meta + rail (the eyebrow and stat line) ---------- */
+  section.hero > div.hero-inner > div.container > div.hero-rail > span,
+  section.hero .hero-rail span {
+    color: var(--a11y-text-secondary) !important;
+  }
+  section.hero > div.hero-inner > div.container > div.hero-meta > span,
+  section.hero .hero-meta span {
+    color: var(--a11y-text-secondary) !important;
+  }
+  /* Stat-number emphasis (the "12" / "33" etc.) must be strong-ink */
+  div.hero-inner > div.container > div.hero-meta > span > b,
+  section.hero .hero-meta b {
+    color: var(--a11y-text-strong) !important;
+    font-weight: 700 !important;
+  }
+
+  /* ---------- Home hero diagram card ---------- */
+  /* Card background is white #FFF but tokens assumed canvas. Re-color text. */
+  div.hero-inner > div.container > div.hero-diagram > div.hd-head > span,
+  div.hero-inner .hero-diagram .hd-head span {
+    color: var(--a11y-text-secondary) !important;
+  }
+  /* The diagram body is a DARK panel (#0B0D10). Its h3/copy must be LIGHT. */
+  div.container > div.hero-diagram > div.hd-body,
+  .hero-diagram .hd-body {
+    /* Make sure the backing surface stays the dark ink everyone expects */
+    background: #0B0D10 !important;
+    color: var(--a11y-text-inverse) !important;
+  }
+  div.container > div.hero-diagram > div.hd-body > div.hd-col > h3,
+  .hero-diagram .hd-body .hd-col h3,
+  .hero-diagram .hd-body .hd-col p,
+  .hero-diagram .hd-body .hd-col code,
+  .hero-diagram .hd-body .hd-col li {
+    color: var(--a11y-text-inverse) !important;
+  }
+  .hero-diagram .hd-body .hd-col code {
+    background: rgba(255,255,255,0.06) !important;
+    color: #CFE8FF !important;  /* calm cyan on dark — 9.1:1 */
+  }
+  .hero-diagram .hd-body .hd-col .hd-num,
+  .hero-diagram .hd-body .hd-col .hd-label {
+    color: rgba(232,236,242,0.72) !important;
+  }
+
+  /* ---------- Home course outline ---------- */
+  section.tracks.course-outline > div.container > div.outline-head > p,
+  .course-outline .outline-head p {
+    color: var(--a11y-text-secondary) !important;
+  }
+  div.container > div.course-outline-body > div.track-block > div.track-meta > div.track-status,
+  .course-outline .track-block .track-meta .track-status {
+    color: var(--a11y-text-secondary) !important;
+    font-weight: 500 !important;
+  }
+  div.course-outline-body > div.track-block > div.lesson-list > a.lesson-row > span.lr-num,
+  .course-outline .track-block .lesson-list .lesson-row .lr-num {
+    color: var(--a11y-text-secondary) !important;
+    font-weight: 500 !important;
+  }
+  div.track-block > div.lesson-list > a.lesson-row > span.lr-body > span.lr-sub,
+  .course-outline .lesson-list .lesson-row .lr-sub {
+    color: var(--a11y-text-secondary) !important;
+  }
+  div.track-block > div.lesson-list > a.lesson-row > span.lr-meta > span,
+  .course-outline .lesson-list .lesson-row .lr-meta span {
+    color: var(--a11y-text-secondary) !important;
+  }
+
+  /* ---------- Home CTA band + footer ---------- */
+  section.cta-band > div.container.cta-inner > div > p,
+  .cta-band .cta-inner p {
+    color: var(--a11y-text-secondary) !important;
+  }
+  div.container > footer.site-foot > div,
+  footer.site-foot > div {
+    color: var(--a11y-text-secondary) !important;
+  }
+  div.container > footer.site-foot > div.r > a,
+  footer.site-foot .r a {
+    color: var(--a11y-link-strong) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 3px !important;
+    text-decoration-thickness: 1px !important;
+  }
+  div.container > footer.site-foot > div.r > a:hover,
+  footer.site-foot .r a:hover {
+    color: var(--a11y-text-strong) !important;
+  }
+  div.container > footer.site-foot > div.r > span,
+  footer.site-foot .r span {
+    color: var(--a11y-text-secondary) !important;
+  }
+
+  /* ---------- Mark as completed button ---------- */
+  div.lesson-body > main.lesson-content > div > div > button.completion-link,
+  .completion-link,
+  button.completion-link {
+    color: var(--a11y-text-secondary) !important;
+    font-weight: 500 !important;
+    border-color: var(--a11y-text-tertiary) !important;
+  }
+  .completion-link:hover,
+  button.completion-link:hover {
+    color: var(--a11y-text-strong) !important;
+    border-color: var(--a11y-text-strong) !important;
+    background: rgba(31,41,55,0.05) !important;
+  }
+
+  /* ---------- Lesson 03 bespoke widget: PR branch label ---------- */
+  #cx-L03-pr-branch {
+    color: #374151 !important;  /* 9.74:1 on #F5F5F5 */
+    font-weight: 500 !important;
+  }
+
+  /* ---------- Lesson 05 bespoke widget: toast text ---------- */
+  /* Toast uses off-white-on-off-white → make it dark ink on a dark pill */
+  section.reveal > div.bespoke-host > div.bespoke-body > div.cx-L05-container > div.cx-L05-toast,
+  .cx-L05-container .cx-L05-toast,
+  .cx-L05-toast.cx-L05-toast-show {
+    background: #0B0D10 !important;
+    color: #FAF9F6 !important;
+    box-shadow: 0 10px 32px rgba(11,13,16,0.28) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+  }
+
+  /* ---------- Lesson 07 bespoke widget: syntax highlighter ---------- */
+  /* Yellow strings on off-white are 1.35:1 — unreadable. Darken to olive-gold. */
+  div.cx-L07-wrapper > div.cx-L07-diff-container > div.cx-L07-line > span.cx-L07-code > span.cx-L07-string,
+  .cx-L07-wrapper .cx-L07-string {
+    color: var(--a11y-code-string) !important;  /* #8B6A00 — 4.97:1 */
+    font-weight: 500 !important;
+  }
+  /* Also harden other fragile syntax tokens if they exist (defensive) */
+  .cx-L07-wrapper .cx-L07-keyword   { color: #AA1D87 !important; }  /* 5.45:1 — violet  */
+  .cx-L07-wrapper .cx-L07-comment   { color: #5F6670 !important; }  /* 5.51:1           */
+  .cx-L07-wrapper .cx-L07-function  { color: var(--a11y-link-strong) !important; }
+  .cx-L07-wrapper .cx-L07-number    { color: #B4530E !important; }  /* 4.87:1 — rust    */
+
+  /* ---------- Lesson 10 bespoke widget: Launch button ---------- */
+  /* Off-white text on off-white button. Give it a dark pill. */
+  div.bespoke-body > div.cx-L10-wrapper > div.cx-L10-task-board > div.cx-L10-task-card > button,
+  .cx-L10-task-card > button,
+  .cx-L10-task-board .cx-L10-task-card button {
+    background: #0B0D10 !important;
+    color: #FAF9F6 !important;
+    border: 1px solid #0B0D10 !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+  }
+  .cx-L10-task-card > button:hover,
+  .cx-L10-task-board .cx-L10-task-card button:hover {
+    background: #0E6AF0 !important;
+    border-color: #0E6AF0 !important;
+    color: #FFFFFF !important;
+  }
+
+  /* ===========================================================
+     Global safety nets — any element still using the 122,131,148
+     muted tint inherited from motion.css / prod.css gets upgraded.
+     Kept narrow to text-bearing selectors so we don't darken
+     decorative icons or ascii art.
+     =========================================================== */
+  p, li, span, small, em, i, strong, b, a, button, td, th, caption, figcaption, label {
+    /* Only override if the element is inheriting the old muted tint */
+  }
+  /* Hard replacement for the specific raw RGB still sneaking in */
+  [style*="color: rgb(122, 131, 148)"],
+  [style*="color:#7A8394"],
+  [style*="color: #7A8394"] {
+    color: var(--a11y-text-secondary) !important;
+  }
+}
+
+/* ============================================================
+   VISIBILITY GUARANTEE (outside @layer — hard override)
+   motion.css sets opacity:0 on every lesson section and waits
+   for an IntersectionObserver to add .in. If JS is slow, the
+   observer misses, or the page is printed, whole lessons render
+   blank. This block keeps everything visible from first paint.
+   ============================================================ */
+.lesson-content > section,
+.reveal,
+.reveal-left,
+.reveal-scale,
+.reveal-stagger > * {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  will-change: auto !important;
+  animation: none !important;
+}
+
+
+/* ============================================================
+   FINAL FIX PASS — kill the blue top-of-page line and rebuild
+   the sidebar CONTENTS menu (circle • number • label) cleanly.
+   Loaded last, so these rules win the cascade.
+   ============================================================ */
+
+/* 1. KILL THE BLUE LINE (reading-progress bar pinned under topbar) */
+.reading-progress,
+#reading-progress,
+.scroll-progress,
+.reading-progress .rp-bar,
+#reading-progress .rp-bar {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 2. Neutralize any other page-top accent strip (body::before etc.) */
+body::before,
+body.grid::before,
+body.grid > main::before {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* 3. SIDEBAR "CONTENTS" TOC — rebuilt as a 3-column grid.
+      [dot 14px] [num 28px] [label 1fr] */
+
+/* wipe stray rails, markers and pips */
+.lesson-sidebar::before,
+.lesson-sidebar ul::before,
+.lesson-sidebar li::before,
+.lesson-sidebar li::marker,
+.lesson-toc::before,
+.toc .pip,
+.lesson-sidebar .pip {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  border: 0 !important;
+}
+
+/* container */
+.lesson-sidebar {
+  position: sticky !important;
+  top: 88px !important;
+  align-self: start !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* heading */
+.lesson-sidebar .toc-head {
+  font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: #4B5563 !important;
+  padding: 0 0 10px 4px !important;
+  margin: 0 0 8px !important;
+  border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+/* list + rows */
+.lesson-sidebar ul,
+.lesson-sidebar ol {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.lesson-sidebar li {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* row: 3-col grid */
+.lesson-sidebar li a {
+  display: grid !important;
+  grid-template-columns: 14px 28px 1fr !important;
+  column-gap: 10px !important;
+  align-items: center !important;
+  padding: 7px 10px 7px 4px !important;
+  border-radius: 6px !important;
+  border-left: 2px solid transparent !important;
+  color: #1A1A1A !important;
+  text-decoration: none !important;
+  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif) !important;
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease !important;
+}
+
+/* column 1: the dot */
+.lesson-sidebar li a::before {
+  content: '' !important;
+  display: block !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: 1.5px solid rgba(0,0,0,0.28) !important;
+  justify-self: center !important;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease !important;
+}
+
+/* column 2: the number */
+.lesson-sidebar li a .n,
+.lesson-sidebar li a .num {
+  grid-column: 2 !important;
+  display: inline-block !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  text-align: left !important;
+  font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #6B7280 !important;
+  letter-spacing: 0.04em !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  position: static !important;
+  transform: none !important;
+}
+
+/* hover */
+.lesson-sidebar li a:hover {
+  background: rgba(0, 85, 184, 0.06) !important;
+  border-left-color: #0055B8 !important;
+  color: #0A0A0A !important;
+}
+.lesson-sidebar li a:hover::before {
+  border-color: #0055B8 !important;
+  background: rgba(0, 85, 184, 0.12) !important;
+}
+.lesson-sidebar li a:hover .n,
+.lesson-sidebar li a:hover .num { color: #0055B8 !important; }
+
+/* active / scroll-spy */
+.lesson-sidebar li a.active,
+.lesson-sidebar li a[aria-current="true"] {
+  background: rgba(0, 85, 184, 0.08) !important;
+  border-left-color: #0055B8 !important;
+  color: #0A0A0A !important;
+  font-weight: 500 !important;
+}
+.lesson-sidebar li a.active::before,
+.lesson-sidebar li a[aria-current="true"]::before {
+  background: #0055B8 !important;
+  border-color: #0055B8 !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 0 3px rgba(0, 85, 184, 0.18) !important;
+}
+.lesson-sidebar li a.active .n,
+.lesson-sidebar li a.active .num {
+  color: #0055B8 !important;
+  font-weight: 600 !important;
+}

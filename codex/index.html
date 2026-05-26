@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Codex Course — A terminal-first playbook for the OpenAI coding agent</title>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="Codex Course — a terminal-first playbook for Codex"/>
+  <meta property="og:description" content="Twelve self-paced lessons on working with Codex: the mental model, the sandbox, the task spec, review, iteration, parallelism, and patterns."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="./"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Codex Course — a terminal-first playbook for Codex"/>
+  <meta name="twitter:description" content="Twelve self-paced lessons on working with Codex: the mental model, the sandbox, the task spec, review, iteration, parallelism, and patterns."/>
+  <link rel="canonical" href="./"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"Course",
+    "name":"Codex Course",
+    "description":"A terminal-first, 12-lesson course on OpenAI Codex, the autonomous coding agent. Practical drills, session replays, no fluff.",
+    "provider":{"@type":"Organization","name":"Codex Course"},
+    "inLanguage":"en",
+    "numberOfLessons":12,
+    "hasCourseInstance":{"@type":"CourseInstance","courseMode":"online","courseWorkload":"PT2H"}
+  }
+  </script>
+
+<meta name="description" content="Twelve self-paced lessons on AI-assisted development: the mental model, task specs, review, parallelism, patterns, and the full workflow from idea to shipped PR."/>
+<link rel="stylesheet" href="styles/core.css?v=2"/>
+<link rel="stylesheet" href="styles/home.css?v=2"/>
+<link rel="stylesheet" href="styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="styles/motion.css?v=2"/>
+<link rel="stylesheet" href="styles/prod.css?v=1"/>
+<link rel="stylesheet" href="styles/theme.css?v=1"/>
+<link rel="stylesheet" href="styles/a11y.css?v=1"/>
+  <link rel="stylesheet" href="./styles/final.css">
+
+</head>
+<body class="grid">
+
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-scanline"></div>
+  <div class="hero-inner">
+    <div class="container">
+      <div class="hero-rail">
+        <span class="dot"></span>
+        <span>codex / course</span>
+        <span class="spacer"></span>
+        <span>v1.0 · 12 lessons · ~2h</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="l1">An agent in</span>
+        <span class="l2">your <em>repo</em>.<span class="blink-caret">_</span></span>
+      </h1>
+      <p class="hero-lede">
+        Codex is not an assistant. It is an autonomous engineer that opens pull requests on your behalf, running in an isolated sandbox, reading your code, running your tests, and handing back a diff. Learn to work with one in 12 short lessons.
+      </p>
+      <div class="hero-cta">
+        <a href="lessons/01-mental-model.html" class="btn primary lg">Start lesson 01</a>
+        <a href="#tracks" class="btn lg">Browse course</a>
+      </div>
+      <div class="hero-meta">
+        <span><b>12</b> lessons</span>
+        <span><b>33</b> interactive drills</span>
+        <span><b>~2h</b> total</span>
+        <span><b>$0</b> — just a web page</span>
+      </div>
+
+      <!-- signature diagram: the Codex loop -->
+      <div class="hero-diagram">
+        <div class="hd-head">
+          <span class="dots"><span></span><span></span><span></span></span>
+          <span>the codex loop · every task, every time</span>
+          <span class="title">loop.svg</span>
+        </div>
+        <div class="hd-body">
+          <div class="hd-col">
+            <div class="label"><span>input</span><span class="num">01</span></div>
+            <h3>You write a task</h3>
+            <p>A few sentences describing what you want done: a clear goal, a tight scope, and real acceptance criteria.</p>
+            <div class="mini"><span class="c"># task.md</span>
+<span class="k">goal:</span> <span class="s">fix the N+1 in /users/[id]</span>
+<span class="k">done when:</span> <span class="s">test passes, p99 &lt; 50ms</span></div>
+          </div>
+          <div class="hd-col">
+            <div class="label"><span>sandbox</span><span class="num">02</span></div>
+            <h3>Codex works alone</h3>
+            <p>It clones your repo into a fresh sandbox, reads, edits, runs tests, and retries. No network access unless you grant it.</p>
+            <div class="mini"><span class="c">$ cloning repo…</span>
+<span class="c">$ running pytest…</span>
+<span class="c">$ 47 passed, 1 failed</span>
+<span class="c">$ patching users.py…</span></div>
+          </div>
+          <div class="hd-col">
+            <div class="label"><span>output</span><span class="num">03</span></div>
+            <h3>You receive a pull request</h3>
+            <p>You receive a patch, a summary of what it did, and the test output. You review it like any human PR: approve, comment, and merge.</p>
+            <div class="mini"><span class="k">+</span><span class="s"> 34 additions</span>
+<span class="k">-</span><span class="e"> 12 deletions</span>
+<span class="k">✓</span><span class="s"> 48/48 tests passing</span>
+<span class="c"># ready for review</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-band">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat"><div class="n" data-to="12">0</div><div class="l">lessons</div></div>
+      <div class="stat"><div class="n" data-to="33">0</div><div class="l">drills & replays</div></div>
+      <div class="stat"><div class="n" data-to="4">0</div><div class="l">tracks</div></div>
+      <div class="stat"><div class="n" data-to="1">0</div><div class="l">daily loop to master</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks" id="tracks">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow cyan">/ the course</span>
+      <h2>Four tracks, twelve lessons, every one built around a real task</h2>
+      <p>Work through the tracks in order the first time, as each track builds on the last. You can come back to individual lessons as references when you are mid-task and something is not landing.</p>
+    </div>
+
+    <div id="tracks-out"></div>
+  </div>
+</section>
+
+<section class="progress-section" id="badges">
+  <div class="container">
+    <div class="progress-panel">
+      <div class="progress-intro">
+        <span class="eyebrow">/ progress</span>
+        <h2>Badges for the twelve lessons</h2>
+        <p>Every lesson you finish earns a badge. Every checkpoint inside earns XP, which persists in your browser. Keep it open while you practice on a real task at work.</p>
+        <div style="margin-top:18px;">
+          <span class="chip cyan" id="hp-xp">0 XP</span>
+          <span class="chip" id="hp-done">0 / 12 lessons</span>
+        </div>
+      </div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div>
+      <h2>Ready when you are</h2>
+      <p>Start at lesson 01. It takes ten minutes and will change how you write every task after.</p>
+    </div>
+    <a href="lessons/01-mental-model.html" class="btn cyan lg">Start</a>
+  </div>
+</section>
+
+<div class="container">
+  <footer class="site-foot">
+    <div>codex/course · v1.0</div>
+    <div class="r">
+      <a href="#" onclick="if(confirm('Reset all XP and lesson progress?')){Progress.reset();}return false;">reset progress</a>
+      <span>unaffiliated · built as a learning artifact</span>
+    </div>
+  </footer>
+</div>
+
+<script src="js/progress.js"></script>
+<script src="js/lessons.js"></script>
+<script src="js/topbar.js"></script>
+<script src="js/motion.js"></script>
+<script src="js/prod.js?v=1"></script>
+<script>
+  mountTopbar();
+
+  const tracksOut = document.getElementById('tracks-out');
+  TRACKS.forEach(track => {
+    const items = LESSONS.filter(l => l.track === track.id);
+    const done = items.filter(l => Progress.isDone(l.id)).length;
+    const pct = Math.round(done / items.length * 100);
+    tracksOut.insertAdjacentHTML('beforeend', `
+      <div class="track">
+        <div class="track-head">
+          <span class="track-badge">${track.label}</span>
+          <div>
+            <h2>${track.title}</h2>
+            <p class="hint">${track.hint}</p>
+          </div>
+          <div class="track-prog">
+            <div class="track-prog-bar"><div style="width:${pct}%"></div></div>
+            <span class="track-prog-num">${done}<span class="m"> / ${items.length} done</span></span>
+          </div>
+        </div>
+        <div class="lesson-grid">
+          ${items.map(l => {
+            const completed = Progress.isDone(l.id);
+            return `<a class="lesson-card${completed ? ' done':''}" href="${l.file}">
+              ${completed ? '<span class="check">✓</span>' : ''}
+              <div class="num"><span class="bracket">[</span>LESSON ${l.n}<span class="bracket">]</span></div>
+              <h3>${l.title}</h3>
+              <div class="sub">${l.sub}</div>
+              <div class="hook">— ${l.hook}</div>
+              <div class="foot">
+                <span>${l.time}  ·  ${l.interactives} drills</span>
+                <span class="arrow">→</span>
+              </div>
+            </a>`;
+          }).join('')}
+        </div>
+      </div>
+    `);
+  });
+
+  // badges
+  const bg = document.getElementById('badges-grid');
+  LESSONS.forEach(l => {
+    const earned = Progress.isDone(l.id);
+    bg.insertAdjacentHTML('beforeend', `
+      <div class="badge ${earned ? 'earned' : 'locked'}">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="2" y="2" width="18" height="18" rx="4" stroke="currentColor" stroke-width="1.5"/>
+            <text x="11" y="14.5" text-anchor="middle" font-family="JetBrains Mono" font-size="7" font-weight="700" fill="currentColor">${l.n}</text>
+          </svg>
+        </div>
+        <div class="name">${l.title.replace(/— .*/, '').trim()}</div>
+        <div class="hint">${earned ? 'earned' : 'locked'}</div>
+      </div>
+    `);
+  });
+
+  document.getElementById('hp-xp').textContent = `${Progress.getXP()} XP`;
+  document.getElementById('hp-done').textContent = `${Progress.countCompleted()} / ${LESSONS.length} lessons`;
+
+  // Re-run motion init so the dynamically-built tracks/lessons/badges get reveal observers + tilt.
+  if (window.Motion && window.Motion.init) window.Motion.init();
+</script>
+
+  <script src="./js/final.js" defer></script>
+</body>
+</html>

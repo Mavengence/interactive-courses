@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>07 · Reviewing a Codex PR — Codex Course</title>
+  <meta name="description" content="It wrote 400 lines. Three are subtly wrong. Here's the review checklist that catches them — every time."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="07 · Reviewing a Codex PR — Codex Course"/>
+  <meta property="og:description" content="It wrote 400 lines. Three are subtly wrong. Here's the review checklist that catches them — every time."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/07-review.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="07 · Reviewing a Codex PR — Codex Course"/>
+  <meta name="twitter:description" content="It wrote 400 lines. Three are subtly wrong. Here's the review checklist that catches them — every time."/>
+  <link rel="canonical" href="../lessons/07-review.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Reviewing a Codex PR",
+    "description":"It wrote 400 lines. Three are subtly wrong. Here's the review checklist that catches them — every time.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":7
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-07">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 07 · track 03 — in the loop</div>
+    <h1>Reviewing a<br/>Codex PR.</h1>
+    <p class="subtitle">It wrote 400 lines. Three are subtly wrong. Here's the review checklist that catches them — every time.</p>
+    <div class="meta card">
+      <span>⏱ <b>14 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+55 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Reviewing a Codex PR is not the same as reviewing a human PR. The failure modes are different. The biases are different. The things you'd gloss over on a teammate's patch are the exact things worth scrutinizing on an agent's.</p>
+        <p>Humans make <em>interesting</em> mistakes — typos, off-by-ones, missed edge cases. Codex makes <em>plausible</em> mistakes. Code that looks right, has the right shape, passes the tests it wrote, and is subtly wrong in a way that only shows up at 3am on a Sunday.</p>
+        <p>The fix is not to trust less. It's to have a specific checklist, run it every time, and stop relying on the "I'll know it when I see it" reflex. Because you won't.</p>
+      </div>
+
+      <div class="pull-quote">Trust, but diff. Every line. Every time. It takes fifteen minutes and it's worth every one.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The review checklist</h2>
+      <div class="prose"><p>Six checks, in order. Each one catches a class of Codex-specific failure. Don't skip. Don't reorder — the early ones save you time on the late ones.</p></div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">check 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Does it do what you asked?</h3>
+          <p class="small muted" style="margin-top:8px;">Read the PR title and description against your task spec. Codex sometimes solves a <em>nearby</em> problem instead of the one you posed. Catch this first — it's the most expensive failure to miss.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">check 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Is it the right size?</h3>
+          <p class="small muted" style="margin-top:8px;">Skim the file list. If it touches more files than you expected, the agent did extra work. Sometimes that's fine; sometimes it's scope creep. Compare to what you'd expect a careful human to touch.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">check 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Do the new tests actually test?</h3>
+          <p class="small muted" style="margin-top:8px;">The #1 subtle failure. Tests that mock the thing they're supposed to verify. Tests that assert the code ran (not that it worked). Read every new test and ask: "would this fail if the implementation were broken?"</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">check 04</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Are there new dependencies?</h3>
+          <p class="small muted" style="margin-top:8px;">Search the diff for imports you don't recognize, or changes to <code>requirements.txt</code>/<code>package.json</code>. Codex is happy to pull in a new library. You should be less happy.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">check 05</div>
+          <h3 style="margin-top:6px;font-size:1rem;">What did it delete?</h3>
+          <p class="small muted" style="margin-top:8px;">The red lines are where bugs hide. Codex occasionally deletes things it thinks are redundant — a comment that was load-bearing, a test it reads as "outdated," a fallback that's actually the fallback.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">check 06</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Does it match the house style?</h3>
+          <p class="small muted" style="margin-top:8px;">Error handling, logging, naming, test structure. If it feels like someone else's code, that's usually a sign <code>AGENTS.md</code> was thin — and a signal to strengthen it for next time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>The subtly-wrong test — a real example</h2>
+      <div class="prose"><p>Here's a real pattern we see all the time. The spec asked for "a rate limiter on <code>/login</code>." The test file looks fine. Find the problem before scrolling.</p></div>
+
+<pre class="code"><span class="tok-c"># tests/api/test_login_rate_limit.py</span>
+
+<span class="tok-k">def</span> <span class="tok-n">test_login_rate_limit_blocks_after_5</span>(client, mocker):
+    <span class="tok-n">mock_limiter</span> = <span class="tok-n">mocker</span>.<span class="tok-n">patch</span>(<span class="tok-s">"api.auth.limiter.is_allowed"</span>)
+    <span class="tok-n">mock_limiter</span>.<span class="tok-n">return_value</span> = <span class="tok-k">False</span>
+
+    <span class="tok-n">response</span> = <span class="tok-n">client</span>.<span class="tok-n">post</span>(<span class="tok-s">"/login"</span>, json={...})
+
+    <span class="tok-k">assert</span> <span class="tok-n">response</span>.<span class="tok-n">status_code</span> == <span class="tok-n">429</span>
+    <span class="tok-n">mock_limiter</span>.<span class="tok-n">assert_called_once</span>()
+</pre>
+
+      <div class="prose">
+        <p>The test passes. The test proves nothing. It mocks <code>is_allowed</code> to return <code>False</code>, then asserts that <code>/login</code> returns 429 — which is what the <em>mock</em> made happen. The actual rate limiter could be completely broken. The test would still go green.</p>
+        <p>Compare with the version that actually verifies behavior:</p>
+      </div>
+
+<pre class="code"><span class="tok-c"># the one that actually tests something</span>
+
+<span class="tok-k">def</span> <span class="tok-n">test_login_blocks_at_6th_attempt</span>(client):
+    <span class="tok-k">for</span> _ <span class="tok-k">in</span> <span class="tok-n">range</span>(<span class="tok-n">5</span>):
+        <span class="tok-n">r</span> = <span class="tok-n">client</span>.<span class="tok-n">post</span>(<span class="tok-s">"/login"</span>, json={...})
+        <span class="tok-k">assert</span> <span class="tok-n">r</span>.<span class="tok-n">status_code</span> == <span class="tok-n">401</span>  <span class="tok-c"># bad creds, allowed</span>
+
+    <span class="tok-n">r</span> = <span class="tok-n">client</span>.<span class="tok-n">post</span>(<span class="tok-s">"/login"</span>, json={...})
+    <span class="tok-k">assert</span> <span class="tok-n">r</span>.<span class="tok-n">status_code</span> == <span class="tok-n">429</span>  <span class="tok-c"># blocked</span>
+</pre>
+    </section>
+
+    <section id="s4">
+      <h2>Spot the problems</h2>
+      <div class="prose"><p>Here's a diff. Find the issue before you scroll to the quiz.</p></div>
+      <div id="w-diff"></div>
+    </section>
+
+    <section id="s5">
+      <h2>The security pass</h2>
+      <div class="prose">
+        <p>AI-generated code has a characteristic security failure mode: it solves the stated problem correctly while ignoring the implied security constraint you assumed was obvious. The agent wasn't careless — it just wasn't told. A five-minute targeted pass after the functional review catches the most common class.</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">sec 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Input trust boundary</h3>
+          <p class="small muted" style="margin-top:8px;">Trace every user-controlled value. Does it flow into a query, a file path, a shell command, or an HTML response without sanitization? Codex frequently omits validation when the spec doesn't mention it.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">sec 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Authentication bypass</h3>
+          <p class="small muted" style="margin-top:8px;">New endpoints need auth guards. Codex often adds the endpoint correctly but forgets to apply the decorator, middleware, or policy that gates it. Grep every new route for your auth annotation.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">sec 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Secrets in source</h3>
+          <p class="small muted" style="margin-top:8px;">Hardcoded API keys, tokens, or connection strings appear when the agent copies an example from its training context. Grep the diff for anything that looks like a credential before merging.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">sec 04</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Error message leakage</h3>
+          <p class="small muted" style="margin-top:8px;">Agents tend to return raw exception text in API responses — easy to add, looks fine in tests. An <code>except e: return str(e)</code> leaks stack traces, schema details, and sometimes credentials to callers.</p>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:16px;">
+        <span class="icon">▸</span>
+        <div><b>Concrete grep pattern:</b> after every Codex PR, run <code>git diff main...HEAD | grep -E "(password|secret|token|api_key)\s*=" </code> and <code>grep -rn "except.*:" --include="*.py"</code> on changed files. Two commands, thirty seconds, catches the two most common AI-specific security misses.</div>
+      </div>
+
+      <div class="prose" style="margin-top:16px;">
+        <p>Here's a before/after that shows the pattern. Spec was: "add a <code>/debug/user</code> endpoint." The agent completed the task correctly — but:</p>
+      </div>
+
+<pre class="code"><span class="tok-c"># what Codex produced — functional, insecure</span>
+
+<span class="tok-k">@app</span>.<span class="tok-n">route</span>(<span class="tok-s">"/debug/user"</span>)           <span class="tok-c"># no auth guard</span>
+<span class="tok-k">def</span> <span class="tok-n">debug_user</span>():
+    <span class="tok-n">user_id</span> = <span class="tok-n">request</span>.<span class="tok-n">args</span>.<span class="tok-n">get</span>(<span class="tok-s">"id"</span>)  <span class="tok-c"># no validation</span>
+    <span class="tok-k">try</span>:
+        <span class="tok-n">u</span> = <span class="tok-n">db</span>.<span class="tok-n">session</span>.<span class="tok-n">query</span>(<span class="tok-n">User</span>).<span class="tok-n">get</span>(<span class="tok-n">user_id</span>)
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span>(<span class="tok-n">u</span>.<span class="tok-n">__dict__</span>)       <span class="tok-c"># exposes all columns</span>
+    <span class="tok-k">except</span> <span class="tok-k">Exception</span> <span class="tok-k">as</span> <span class="tok-n">e</span>:
+        <span class="tok-k">return</span> <span class="tok-n">str</span>(<span class="tok-n">e</span>), <span class="tok-n">500</span>              <span class="tok-c"># leaks stack trace</span>
+
+<span class="tok-c"># corrected version — same feature, secure</span>
+
+<span class="tok-k">@app</span>.<span class="tok-n">route</span>(<span class="tok-s">"/debug/user"</span>)
+<span class="tok-k">@require_admin</span>                         <span class="tok-c"># auth guard restored</span>
+<span class="tok-k">def</span> <span class="tok-n">debug_user</span>():
+    <span class="tok-n">user_id</span> = <span class="tok-n">int</span>(<span class="tok-n">request</span>.<span class="tok-n">args</span>.<span class="tok-n">get</span>(<span class="tok-s">"id"</span>, <span class="tok-n">0</span>))  <span class="tok-c"># validated</span>
+    <span class="tok-k">try</span>:
+        <span class="tok-n">u</span> = <span class="tok-n">db</span>.<span class="tok-n">session</span>.<span class="tok-n">query</span>(<span class="tok-n">User</span>).<span class="tok-n">get</span>(<span class="tok-n">user_id</span>)
+        <span class="tok-k">if not</span> <span class="tok-n">u</span>: <span class="tok-k">return</span> <span class="tok-n">jsonify</span>({<span class="tok-s">"error"</span>: <span class="tok-s">"not found"</span>}), <span class="tok-n">404</span>
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span>(<span class="tok-n">u</span>.<span class="tok-n">to_safe_dict</span>())  <span class="tok-c"># explicit field allowlist</span>
+    <span class="tok-k">except</span> <span class="tok-n">ValueError</span>:
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span>({<span class="tok-s">"error"</span>: <span class="tok-s">"invalid id"</span>}), <span class="tok-n">400</span>  <span class="tok-c"># safe message</span>
+</pre>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L07"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('review', [
+    {id:'s1', label:'Different failure modes'},
+    {id:'s2', label:'The checklist'},
+    {id:'s3', label:'Subtly-wrong tests'},
+    {id:'s4', label:'Spot the problems'},
+    {id:'s5', label:'Security pass'},
+    {id:'s6', label:'Quick check'},
+  ]);
+
+  W.Diff(document.getElementById('w-diff'), {
+    title: 'PR: "add caching to /users/:id" — what\'s wrong?',
+    file: 'api/users.py · +18 / −3',
+    lines: [
+      { t: ' ', s: 'from flask import Blueprint, jsonify' },
+      { t: '+', s: 'from functools import lru_cache' },
+      { t: ' ', s: '' },
+      { t: ' ', s: 'users_bp = Blueprint("users", __name__)' },
+      { t: ' ', s: '' },
+      { t: '+', s: '@lru_cache(maxsize=1000)' },
+      { t: '+', s: 'def _get_user_cached(user_id: int):' },
+      { t: '+', s: '    return db.session.query(User).filter(User.id == user_id).first()' },
+      { t: '+', s: '' },
+      { t: ' ', s: '@users_bp.route("/users/<int:user_id>")' },
+      { t: ' ', s: 'def get_user(user_id):' },
+      { t: '-', s: '    user = db.session.query(User).filter(User.id == user_id).first()' },
+      { t: '+', s: '    user = _get_user_cached(user_id)' },
+      { t: ' ', s: '    if not user:' },
+      { t: ' ', s: '        return jsonify({"error": "not found"}), 404' },
+      { t: ' ', s: '    return jsonify(user.to_dict())' },
+    ],
+    note: '<b>The bug:</b> <code>lru_cache</code> is process-local and never invalidated. When a user updates their profile, the next GET serves stale data until the server restarts. The test probably passed ("data is returned") — but the feature is broken. This is why <b>check 06</b> (match house style) matters: your repo probably uses Redis for caching, with a TTL and invalidation hooks. Codex reached for the simplest Python-standard answer. Reviewable in 30 seconds if you\'re looking for it.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'review', cpId: 'q1',
+    question: 'Codex opens a PR with 18 new passing tests. You\'re reviewing. What do you do FIRST with those tests?',
+    options: [
+      'Trust them — they\'re green, so they work.',
+      'Read each one and ask: "would this test fail if the implementation were wrong?" If the answer isn\'t obviously yes, the test proves nothing.',
+      'Delete them and write your own.',
+      'Skip to the implementation code; tests are a formality.',
+    ],
+    correct: 1,
+    explanation: 'The #1 subtle Codex failure is tests that verify mocks, not behavior. A green suite tells you <i>something</i> ran; it doesn\'t tell you it <i>worked</i>. For each test: remove the implementation mentally, ask "would this fail?" If no, the test is a placebo.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'review', cpId: 'q2',
+    question: 'The PR adds <code>from some-new-lib import magic</code> at the top. Your reaction?',
+    options: [
+      'Cool, new dep.',
+      'Flag it. Codex will happily pull in a library. You want to know what it is, whether it\'s maintained, and whether there\'s an in-house alternative before you ship it.',
+      'Tell Codex to remove it without reading what it does.',
+      'Run <code>npm audit</code> and move on.',
+    ],
+    correct: 1,
+    explanation: 'New dependencies are the slowest-moving security and maintenance cost in your repo. Codex doesn\'t feel that weight. You do. Check 04 exists specifically for this — every unfamiliar import gets a 30-second "is this the right call" review.'
+  });
+</script>
+
+<script src="../js/lessons/L07.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

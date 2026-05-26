@@ -1,0 +1,287 @@
+/* Data-widgets CSS — paired with js/data-widgets.js */
+
+/* shared chrome — extends base .w in lesson.css */
+.w-xp.earned { color: var(--ok); font-weight: 600; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+.dot.ok { background: var(--ok); }
+.dot.late { background: var(--warn); }
+.dot.drop { background: var(--bad); }
+.v-ok { color: var(--ok); }
+.v-warn { color: var(--warn); }
+.v-bad { color: var(--bad); }
+.mono { font-family: var(--mono); }
+.flash { animation: flashbg 0.4s; }
+@keyframes flashbg { 0% { background: var(--cyan-wash); } 100% { background: inherit; } }
+
+/* ============================================================
+ * 1. STACK FLOW — canvas-driven cinematic
+ * ============================================================ */
+.sf-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.sf-canvas-wrap { position: relative; min-height: 380px; padding: 8px; }
+.sf-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.sf-overlay { position: relative; display: grid; gap: 6px; padding: 4px; }
+.sf-lane { display: grid; grid-template-columns: 264px 1fr; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid transparent; border-radius: 8px; transition: background 0.4s, border-color 0.4s; min-height: 52px; }
+.sf-lane.hit { background: color-mix(in oklch, var(--accent) 6%, var(--paper)); border-color: color-mix(in oklch, var(--accent) 35%, transparent); animation: sfLaneHit 0.7s ease-out; }
+@keyframes sfLaneHit { 0% { transform: translateX(0); } 15% { transform: translateX(2px); } 100% { transform: translateX(0); } }
+.sf-lane-l { display: flex; align-items: center; gap: 12px; }
+.sf-num { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; color: var(--cyan-ink); letter-spacing: -0.04em; min-width: 36px; opacity: 0.7; }
+.sf-name { font-family: var(--mono); font-size: 0.84rem; font-weight: 600; color: var(--ink); }
+.sf-tools { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+.sf-tools span { font-family: var(--mono); font-size: 0.66rem; padding: 1px 6px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--paper-2); color: var(--ink-3); }
+.sf-pulse { height: 2px; }
+.sf-controls { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.sf-counter { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.sf-counter b { color: var(--ink); font-weight: 600; }
+
+/* ============================================================
+ * 2. CAP TRIANGLE
+ * ============================================================ */
+.capx-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.capx-canvas-wrap { position: relative; height: 480px; }
+.capx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.capx-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.capx-stat { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3); margin-left: auto; max-width: 460px; line-height: 1.5; }
+.cap-wrap { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: center; }
+@media (max-width: 720px) { .cap-wrap { grid-template-columns: 1fr; } .cap-svg { margin: 0 auto; } }
+.cap-svg { width: 100%; max-width: 360px; }
+.cap-side { display: flex; flex-direction: column; gap: 8px; }
+.cap-row { padding: 10px 12px; border: 1px solid var(--rule-2); border-radius: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.cap-row:hover { border-color: var(--cyan-ink); }
+.cap-row.on { border-color: var(--cyan-ink); background: var(--cyan-wash); }
+.cap-row b { font-family: var(--mono); font-size: 0.92rem; color: var(--cyan-deep); margin-right: 10px; }
+.cap-row span { font-size: 0.86rem; color: var(--ink-2); }
+.cap-row i { display: block; font-style: normal; font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); margin-top: 4px; }
+.cap-out { font-size: 0.86rem; padding: 8px 4px; }
+
+/* ============================================================
+ * 3. ROW vs COLUMN — canvas-driven
+ * ============================================================ */
+.rc-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.rc-canvas-wrap { position: relative; min-height: 400px; }
+.rc-canvas { display: block; width: 100%; height: 100%; min-height: 400px; }
+.rc-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.rc-counter { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.rc-counter b { color: var(--ink); font-weight: 600; }
+
+/* ============================================================
+ * 4. PARTITION SIM — canvas-driven
+ * ============================================================ */
+.ps-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.ps-canvas-wrap { position: relative; min-height: 360px; }
+.ps-canvas { display: block; width: 100%; height: 100%; min-height: 360px; }
+.ps-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.ps-q { font-family: var(--mono); font-size: 0.78rem; padding: 4px 10px; background: var(--paper-3); border-radius: 4px; color: var(--ink-2); }
+.ps-spacer { flex: 1; }
+.ps-sel { padding: 6px 10px; border: 1px solid var(--rule-2); border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; background: var(--paper); }
+.ps-stat { display: grid; grid-template-columns: auto auto auto auto auto auto auto auto; gap: 6px 14px; font-family: var(--mono); font-size: 0.8rem; padding: 8px 14px; border-top: 1px dashed var(--rule); align-items: center; }
+.ps-stat span { color: var(--ink-3); font-size: 0.72rem; }
+.ps-stat b { color: var(--ink); font-weight: 600; }
+.ps-stat span { color: var(--ink-3); font-size: 0.74rem; }
+
+/* ============================================================
+ * 5. KAFKA TOPIC — canvas-driven
+ * ============================================================ */
+.kt-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.kt-canvas-wrap { position: relative; min-height: 420px; padding: 14px 16px; }
+.kt-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.kt-overlay { position: relative; display: grid; grid-template-rows: auto auto auto; gap: 28px; }
+.kt-band { display: grid; grid-template-columns: 130px 1fr; align-items: center; gap: 14px; }
+.kt-lbl { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+.kt-prod-box { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--cyan-ink); border-radius: 999px; background: var(--cyan-wash); font-family: var(--mono); font-size: 0.82rem; color: var(--cyan-deep); width: max-content; }
+.kt-pgroup { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.kt-part { position: relative; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: 10px 12px; min-height: 64px; display: flex; flex-direction: column; gap: 2px; transition: border-color 0.25s, background 0.25s; overflow: hidden; }
+.kt-part.hit { border-color: var(--cyan-ink); background: var(--cyan-wash); animation: ktPartHit 0.6s ease-out; }
+@keyframes ktPartHit { 0% { transform: translateY(0); } 30% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
+.kt-pname { font-family: var(--mono); font-size: 0.78rem; font-weight: 700; color: var(--cyan-deep); }
+.kt-pnum { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); }
+.kt-cgroup { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.kt-cons-box { border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: 10px 12px; text-align: center; transition: background 0.25s, border-color 0.25s, opacity 0.3s; display: flex; flex-direction: column; gap: 4px; }
+.kt-cn { font-family: var(--mono); font-weight: 700; color: var(--ink); font-size: 0.94rem; }
+.kt-cassign { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3); }
+.kt-clag { font-family: var(--mono); font-size: 0.66rem; color: var(--ink-4); }
+.kt-clag span { color: var(--ink-2); font-weight: 600; }
+.kt-cons-box.flash { background: color-mix(in oklch, var(--ok) 16%, var(--paper)); border-color: var(--ok); animation: ktFlash 0.5s ease-out; }
+@keyframes ktFlash { 0% { transform: scale(1); } 30% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.kt-cons-box.dead { opacity: 0.4; background: color-mix(in oklch, var(--bad) 12%, var(--paper)); border-color: var(--bad); }
+.kt-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.kt-counter { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.kt-counter b { color: var(--ink); font-weight: 600; }
+
+/* ============================================================
+ * 6. WATERMARK — canvas-driven
+ * ============================================================ */
+.wm-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.wm-canvas-wrap { position: relative; min-height: 380px; }
+.wm-canvas { display: block; width: 100%; height: 100%; min-height: 380px; }
+.wm-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.wm-toggle { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
+.wm-counter { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.wm-counter b { color: var(--ink); font-weight: 600; }
+.wm-legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 14px; border-top: 1px dashed var(--rule); font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); }
+
+/* ============================================================
+ * 7. SNAPSHOT TIMELINE
+ * ============================================================ */
+.st-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.st-canvas-wrap { position: relative; height: 280px; }
+.st-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.st-state-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; border-top: 1px solid var(--rule); }
+@media (max-width: 720px) { .st-state-grid { grid-template-columns: 1fr; } }
+.st-cur p { font-size: 0.86rem; color: var(--ink-2); margin-top: 4px; line-height: 1.5; }
+.st-h { display: flex; align-items: center; gap: 10px; }
+.st-h .op { display: inline-block; padding: 1px 6px; border-radius: 4px; font-family: var(--mono); font-size: 0.66rem; font-weight: 700; }
+.op-create { background: var(--cyan-wash); color: var(--cyan-deep); }
+.op-insert { background: color-mix(in oklch, var(--ok) 16%, var(--paper)); color: var(--ok); }
+.op-update { background: color-mix(in oklch, var(--warn) 18%, var(--paper)); color: oklch(0.45 0.13 75); }
+.op-compact { background: color-mix(in oklch, var(--cyan) 14%, var(--paper)); color: var(--cyan-deep); }
+.op-badwrite { background: color-mix(in oklch, var(--bad) 16%, var(--paper)); color: var(--bad); }
+.op-rollback { background: var(--ink); color: var(--paper); }
+.st-meta { font-family: var(--mono); font-size: 0.76rem; padding: 10px 12px; background: oklch(0.17 0.015 250); color: oklch(0.88 0.012 240); border-radius: 6px; line-height: 1.6; white-space: pre; overflow-x: auto; margin: 0; }
+.st-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.st-help { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-3); margin-left: auto; }
+
+/* ============================================================
+ * 8. BLOOM FILTER
+ * ============================================================ */
+.bfx-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.bfx-canvas-wrap { position: relative; height: 380px; }
+.bfx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bfx-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.bfx-in { padding: 6px 10px; font-family: var(--mono); font-size: 0.82rem; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--paper); width: 140px; }
+.bfx-stat { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.bfx-stat b { color: var(--ink); font-weight: 600; }
+.bfx-out { padding: 10px 14px; font-size: 0.86rem; color: var(--ink-2); background: var(--paper-2); border-top: 1px solid var(--rule); }
+/* legacy classes retained for back-compat */
+.bf-bits { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; padding: 8px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper-2); }
+.bf-bit { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; background: var(--paper); border: 1px solid var(--rule-2); border-radius: 3px; color: var(--ink-4); }
+.bf-bit.on { background: var(--cyan-ink); color: white; border-color: var(--cyan-deep); }
+.bf-bit.flash { animation: bfflash 0.4s; }
+.bf-bit.check { animation: bfcheck 0.6s; }
+@keyframes bfflash { 0% { transform: scale(1.3); background: var(--ok); color: white; } 100% { } }
+@keyframes bfcheck { 0%, 100% { } 50% { transform: scale(1.2); box-shadow: 0 0 0 3px var(--cyan-wash); } }
+.bf-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bf-in { padding: 6px 10px; font-family: var(--mono); font-size: 0.82rem; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--paper); width: 140px; }
+.bf-out { padding: 8px 10px; background: var(--paper-2); border-radius: 6px; font-size: 0.86rem; }
+
+/* ============================================================
+ * 9. CDC FLOW — canvas-driven
+ * ============================================================ */
+.cdc-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--paper); }
+.cdc-tabs { display: flex; gap: 0; padding: 10px 14px 0 14px; border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+.cdc-tab { font-family: var(--mono); font-size: 0.78rem; padding: 8px 14px 9px 14px; background: transparent; border: 1px solid var(--rule); border-bottom: none; color: var(--ink-3); cursor: pointer; border-radius: 4px 4px 0 0; margin-right: 4px; margin-bottom: -1px; }
+.cdc-tab.active { background: var(--paper); color: var(--ink); border-bottom: 1px solid var(--paper); font-weight: 600; }
+.cdc-svg-wrap { padding: 14px; background: var(--paper); }
+.cdc-svg { display: block; width: 100%; height: auto; }
+.cdc-svg-num { font-family: var(--mono); font-size: 9px; fill: var(--ink-3); font-weight: 600; }
+.cdc-svg-stage { font-family: var(--mono); font-size: 11px; fill: var(--ink); font-weight: 600; }
+.cdc-svg-stage-2 { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+.cdc-svg-h { font-family: var(--mono); font-size: 11px; fill: var(--cyan-deep); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.cdc-svg-key { font-family: var(--mono); font-size: 11px; fill: oklch(0.45 0.12 220); font-weight: 600; }
+.cdc-svg-val { font-family: var(--mono); font-size: 11px; fill: var(--ink); }
+.cdc-svg-note { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+.cdc-svg-prop { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
+.cdc-svg-flaw { font-family: var(--mono); font-size: 11px; fill: #b85a4a; font-weight: 500; }
+.cdc-legend { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--rule); background: var(--paper-2); font-size: 0.82rem; color: var(--ink-2); line-height: 1.5; }
+.cdc-legend-text { flex: 1; }
+
+/* ============================================================
+ * 10. BACKFILL DAG
+ * ============================================================ */
+.bf-d-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: var(--paper); }
+.bf-d-svg-wrap { padding: 18px 20px 8px 20px; background: var(--paper); }
+.bf-svg { display: block; width: 100%; height: auto; }
+.bf-svg-h { font-family: var(--mono); font-size: 14px; font-weight: 700; fill: var(--ink); }
+.bf-svg-bandtitle { font-family: var(--mono); font-size: 14px; font-weight: 700; fill: var(--ink); }
+.bf-svg-bandsub { font-family: var(--mono); font-size: 11px; fill: var(--ink-3); }
+.bf-svg-bandspeed { font-family: var(--mono); font-size: 11px; fill: oklch(0.45 0.13 155); font-weight: 600; }
+.bf-svg-wlabel { font-family: var(--mono); font-size: 9.5px; fill: var(--ink-3); }
+.bf-svg-tick { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+.bf-svg-axislbl { font-family: var(--mono); font-size: 10.5px; fill: var(--ink-2); font-style: italic; }
+.bf-svg-day { font-family: var(--mono); font-size: 10px; fill: oklch(0.32 0.13 155); font-weight: 600; }
+.bf-svg-retrymark { font-family: var(--mono); font-size: 10px; fill: #b85a4a; font-weight: 700; }
+.bf-d-legend { display: flex; align-items: flex-start; gap: 16px; padding: 14px 18px; border-top: 1px solid var(--rule); background: var(--paper-2); }
+.bf-d-legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; flex: 1; font-size: 0.84rem; color: var(--ink-2); line-height: 1.5; }
+.bf-d-legend-grid code { font-family: var(--mono); background: var(--paper); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--rule-2); font-size: 0.8rem; }
+.bf-sw { display: inline-block; width: 14px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.bf-sw-ok { background: oklch(0.91 0.05 155); border: 0.7px solid #3f8264; }
+.bf-sw-fail { background: oklch(0.86 0.10 25); border: 0.7px solid #b85a4a; }
+@media (max-width: 700px) { .bf-d-legend { flex-direction: column; } .bf-d-legend-grid { grid-template-columns: 1fr; } }
+
+/* ============================================================
+ * 11. SLA DASHBOARD
+ * ============================================================ */
+.slax-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.slax-canvas-wrap { position: relative; height: 480px; }
+.slax-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.slax-feed { display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; max-height: 120px; overflow-y: auto; border-top: 1px solid var(--rule); background: var(--paper-2); font-family: var(--mono); font-size: 0.78rem; }
+.slax-feed:empty { display: none; }
+.slax-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.slax-clock { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.slax-clock b { color: var(--ink); font-weight: 600; }
+.sla-wrap { display: grid; gap: 10px; }
+.sla-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 720px) { .sla-grid { grid-template-columns: 1fr 1fr; } }
+.sla-card { padding: 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-2); }
+.sla-h { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.sla-svg { width: 100%; height: 64px; }
+.sla-val { font-family: var(--mono); font-size: 0.92rem; font-weight: 600; color: var(--ink); }
+.sla-val.bad { color: var(--bad); }
+.sla-feed { padding: 8px 10px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 6px; font-family: var(--mono); font-size: 0.78rem; max-height: 110px; overflow-y: auto; }
+.sla-alert { padding: 4px 0; }
+.sla-alert.bad { color: var(--bad); }
+.sla-alert.ok { color: var(--ok); }
+.sla-controls { display: flex; gap: 8px; }
+
+/* ============================================================
+ * 12. INTERVIEW MOVE
+ * ============================================================ */
+.ivx-frame { border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; background: linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%); }
+.ivx-canvas-wrap { position: relative; height: 160px; border-bottom: 1px solid var(--rule); }
+.ivx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ivx-stage { padding: 18px 22px; min-height: 220px; transition: opacity 0.3s ease, transform 0.3s ease; }
+.ivx-tag { display: inline-block; padding: 3px 9px; color: white; font-family: var(--mono); font-size: 0.68rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
+.ivx-title { font-family: var(--mono); font-size: 1.18rem; margin: 10px 0 14px; color: var(--ink); font-weight: 600; }
+.ivx-body { font-size: 0.94rem; color: var(--ink-2); line-height: 1.65; }
+.ivx-body p { margin: 0.6em 0; }
+.ivx-body ul { padding-left: 1.2rem; margin: 0.4em 0; }
+.ivx-body code { background: var(--paper-3); padding: 1px 5px; border-radius: 3px; font-size: 0.86em; font-family: var(--mono); }
+.ivx-note { margin-top: 16px; padding: 10px 14px; background: var(--cyan-wash); border-left: 3px solid var(--cyan-ink); border-radius: 0 6px 6px 0; font-size: 0.84rem; color: var(--ink-2); font-style: italic; }
+.ivx-note b { color: var(--ink); font-style: normal; }
+.ivx-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.ivx-progress { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3); margin: 0 auto; }
+.ivx-progress b { color: var(--ink); font-weight: 600; }
+.iv-wrap { display: grid; gap: 14px; }
+.iv-rail { display: flex; gap: 4px; overflow-x: auto; padding: 4px 2px 8px; border-bottom: 1px solid var(--rule); }
+.iv-dot { flex-shrink: 0; padding: 8px 10px; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--paper-2); cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-width: 80px; transition: border-color 0.15s, background 0.15s; }
+.iv-dot:hover { border-color: var(--cyan-ink); }
+.iv-dot.on { border-color: var(--cyan-ink); background: var(--cyan-wash); }
+.iv-dot.past { opacity: 0.6; }
+.iv-dot .t { font-family: var(--mono); font-size: 0.7rem; color: var(--cyan-ink); font-weight: 700; }
+.iv-dot .l { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-2); }
+.iv-stage { padding: 16px 18px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-2); min-height: 200px; }
+.iv-tag { display: inline-block; padding: 3px 8px; background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 0.7rem; font-weight: 600; border-radius: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+.iv-stage h3 { font-family: var(--mono); font-size: 1.15rem; margin: 8px 0 12px; }
+.iv-body { font-size: 0.92rem; color: var(--ink-2); line-height: 1.6; }
+.iv-body p { margin: 0.6em 0; }
+.iv-body ul { padding-left: 1.2rem; margin: 0.4em 0; }
+.iv-body code { background: var(--paper-3); padding: 1px 5px; border-radius: 3px; font-size: 0.86em; }
+.iv-note { margin-top: 14px; padding: 10px 12px; background: var(--cyan-wash); border-left: 3px solid var(--cyan-ink); border-radius: 0 6px 6px 0; font-size: 0.84rem; color: var(--ink-2); font-style: italic; }
+.iv-note b { color: var(--ink); font-style: normal; }
+.iv-controls { display: flex; align-items: center; gap: 10px; }
+.iv-controls [data-status] { flex: 1; text-align: center; }
+
+/* ============================================================
+ * IDEMPOTENCY PATTERNS (lesson 10)
+ * ============================================================ */
+.idem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 6px; }
+@media (max-width: 900px) { .idem-grid { grid-template-columns: 1fr; } }
+.idem-card { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.idem-num { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3); letter-spacing: 0.08em; }
+.idem-title { font-family: var(--mono); font-size: 0.98rem; font-weight: 700; color: var(--ink); }
+.idem-when { font-size: 0.78rem; color: var(--ink-3); font-style: italic; margin-top: -6px; }
+.idem-vis { background: var(--paper-2); border: 1px solid var(--rule-2); border-radius: 6px; padding: 8px; }
+.idem-svg { display: block; width: 100%; height: auto; }
+.idem-svg-h { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-3); }
+.idem-svg-row { font-family: var(--mono); font-size: 9px; fill: var(--ink-2); }
+.idem-sql { font-family: var(--mono); font-size: 0.74rem; line-height: 1.55; padding: 10px 12px; background: oklch(0.18 0.015 250); color: oklch(0.9 0.01 240); border-radius: 4px; margin: 0; white-space: pre; overflow-x: auto; }
+.idem-prop { font-family: var(--mono); font-size: 0.72rem; color: #3f8264; padding-top: 4px; border-top: 1px dashed var(--rule-2); }

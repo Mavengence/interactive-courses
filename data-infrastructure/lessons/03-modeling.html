@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>03 · Modeling: OLTP vs OLAP vs Stream — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+<style>
+  /* ============================================================
+     Lesson 03 · Star schema, dissected
+     ============================================================ */
+  :root {
+    --m3-graph:      oklch(0.32 0.02 250);
+    --m3-graph-2:    oklch(0.5 0.02 250);
+    --m3-paper:      oklch(0.985 0.005 80);
+    --m3-paper-2:    oklch(0.97 0.006 80);
+    --m3-rule:       oklch(0.86 0.01 80);
+    --m3-rule-2:     oklch(0.78 0.012 80);
+    --m3-fact:       oklch(0.55 0.18 25);
+    --m3-fact-w:     oklch(0.96 0.04 25);
+    --m3-dim:        oklch(0.45 0.13 215);
+    --m3-dim-w:      oklch(0.94 0.03 215);
+    --m3-link:       oklch(0.7 0.02 250);
+    --m3-link-hot:   oklch(0.55 0.18 25);
+    --m3-pk:         oklch(0.5 0.16 280);
+    --m3-fk:         oklch(0.55 0.18 25);
+    --m3-nk:         oklch(0.5 0.13 215);
+    --m3-m:          oklch(0.5 0.14 145);
+  }
+  .m3-fig {
+    margin: 28px 0 14px;
+    border: 1px solid var(--m3-rule);
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--m3-paper), var(--m3-paper-2));
+    overflow: hidden; position: relative;
+  }
+  .m3-fig-head {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    padding: 14px 22px 12px;
+    border-bottom: 1px solid var(--m3-rule);
+    background: oklch(0.98 0.005 80);
+  }
+  .m3-fig-num {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--m3-fact); padding: 3px 8px; border-radius: 4px;
+    background: var(--m3-fact-w);
+  }
+  .m3-fig-title {
+    font-family: var(--mono); font-weight: 600;
+    font-size: 1rem; color: var(--m3-graph);
+    letter-spacing: -0.01em;
+  }
+  .m3-fig-sub {
+    font-family: var(--sans); font-size: 0.86rem;
+    color: var(--m3-graph-2); margin-left: auto;
+  }
+  .m3-fig-stage { padding: 18px 22px 22px; }
+  .m3-fig-cap {
+    padding: 10px 22px 16px;
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--m3-graph-2);
+    border-top: 1px dashed var(--m3-rule);
+    background: oklch(0.985 0.005 80);
+    line-height: 1.55;
+  }
+  .m3-fig-cap b { color: var(--m3-graph); font-weight: 600; }
+
+  .m3-ss-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 320px);
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 820px) { .m3-ss-stage { grid-template-columns: 1fr; } }
+
+  .m3-ss-svg-wrap {
+    border: 1px solid var(--m3-rule);
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 50%, var(--m3-paper), oklch(0.95 0.008 80));
+    aspect-ratio: 760 / 540;
+    overflow: hidden;
+  }
+  .m3-ss-svg { width: 100%; height: 100%; display: block; }
+
+  /* table cards */
+  .ss-card { fill: var(--m3-paper); stroke: var(--m3-rule-2); stroke-width: 1.2; }
+  .ss-card-head { fill: var(--m3-paper-2); stroke: none; }
+  .ss-table-fact .ss-card-head { fill: var(--m3-fact-w); }
+  .ss-table-fact .ss-card { stroke: var(--m3-fact); stroke-width: 1.6; }
+  .ss-table-dim  .ss-card-head { fill: var(--m3-dim-w); }
+  .ss-table-dim  .ss-card       { stroke: oklch(0.7 0.06 215); }
+  .ss-card-rule { stroke: var(--m3-rule-2); stroke-width: 1; }
+  .ss-table .ss-title {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 13px; fill: var(--m3-graph); letter-spacing: -0.005em;
+  }
+  .ss-table-fact .ss-title { fill: var(--m3-fact); }
+  .ss-table-dim  .ss-title { fill: var(--m3-dim); }
+  .ss-table .ss-sub {
+    font-family: var(--mono); font-size: 9.5px; fill: var(--m3-graph-2);
+    letter-spacing: 0.04em;
+  }
+  .ss-row-bg { fill: transparent; transition: fill .2s; }
+  .ss-row-bg.hot { fill: var(--m3-fact-w); }
+  .ss-row-rule { stroke: var(--m3-rule); stroke-width: 0.5; }
+
+  .ss-tag { stroke: none; }
+  .ss-tag-PK { fill: var(--m3-pk); }
+  .ss-tag-FK { fill: var(--m3-fk); }
+  .ss-tag-NK { fill: var(--m3-nk); }
+  .ss-tag-M  { fill: var(--m3-m); }
+  .ss-tag-text {
+    font-family: var(--mono); font-weight: 700; font-size: 9px;
+    fill: white; letter-spacing: 0.04em;
+  }
+  .ss-col {
+    font-family: var(--mono); font-size: 11px; fill: var(--m3-graph);
+  }
+  .ss-col-PK { font-weight: 700; }
+  .ss-col-FK { font-weight: 600; }
+  .ss-type {
+    font-family: var(--mono); font-size: 10px; fill: var(--m3-graph-2);
+    font-style: italic;
+  }
+
+  /* link lines */
+  .ss-link {
+    stroke: var(--m3-link); stroke-width: 1.4;
+    transition: stroke .25s, stroke-width .25s, opacity .25s;
+  }
+  .ss-link.hot { stroke: var(--m3-link-hot); stroke-width: 2.2; }
+  .ss-link.dim { opacity: 0.18; }
+
+  /* hover dimming */
+  .ss-table { cursor: pointer; transition: opacity .25s; }
+  .ss-table.dim { opacity: 0.32; }
+  .ss-table.hot { filter: drop-shadow(0 4px 12px oklch(0.55 0.18 25 / 0.18)); }
+
+  /* side: SQL + note */
+  .m3-ss-side { display: flex; flex-direction: column; gap: 14px; }
+  .m3-ss-sql {
+    font-family: var(--mono); font-size: 0.8rem;
+    background: oklch(0.18 0.02 250); color: oklch(0.92 0.01 250);
+    padding: 14px 16px; border-radius: 10px;
+    line-height: 1.55; overflow-x: auto;
+    white-space: pre;
+    border: 1px solid oklch(0.25 0.02 250);
+  }
+  .m3-ss-sql .kw  { color: oklch(0.78 0.14 60); font-weight: 600; }
+  .m3-ss-sql .agg { color: oklch(0.75 0.16 145); font-weight: 600; }
+  .m3-ss-sql .lit { color: oklch(0.76 0.14 25); }
+  .m3-ss-sql .dim {
+    cursor: pointer; padding: 0 2px; border-radius: 3px;
+    transition: background .2s, color .2s;
+    color: oklch(0.78 0.10 215); font-weight: 600;
+  }
+  .m3-ss-sql .dim:hover, .m3-ss-sql .dim.hot {
+    background: oklch(0.55 0.18 25); color: white;
+  }
+
+  .m3-ss-note {
+    border: 1px solid var(--m3-rule);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: var(--m3-paper);
+  }
+  .m3-ss-note .ss-note-head {
+    font-family: var(--mono); font-size: 0.78rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--m3-graph-2); font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .m3-ss-note .ss-note-body {
+    font-family: var(--sans); font-size: 0.92rem;
+    color: var(--m3-graph); line-height: 1.55;
+  }
+  .m3-ss-note .ss-note-body code {
+    font-family: var(--mono); font-size: 0.85em;
+    background: var(--m3-paper-2); padding: 1px 5px; border-radius: 3px;
+    border: 1px solid var(--m3-rule);
+  }
+  .m3-ss-note .ss-note-body b { font-weight: 600; }
+
+  .m3-ss-legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    font-family: var(--mono); font-size: 0.74rem;
+    color: var(--m3-graph-2);
+  }
+  .m3-ss-legend .lg {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .m3-ss-legend .lg .sw {
+    display: inline-block; width: 18px; height: 11px;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 03 · track 01 — foundations</div>
+    <h1>Modeling: OLTP,<br/>OLAP, and stream.</h1>
+    <p class="subtitle">Five modeling philosophies. When each is right. When each ruins your life. The IC5 move is matching the model to the read pattern, not picking the one your last team used.</p>
+    <div style="margin-top:18px; padding:14px 18px; background:color-mix(in oklch, oklch(0.96 0.04 25) 40%, oklch(0.985 0.005 80)); border-radius:10px; border:1px solid color-mix(in oklch, oklch(0.55 0.18 25) 25%, oklch(0.86 0.01 80));">
+      <div style="font-family:var(--mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.55 0.18 25); font-weight:600; margin-bottom:8px;">Learning objectives</div>
+      <ul style="font-family:var(--sans); font-size:0.9rem; line-height:1.65; margin:0; padding-left:1.2em; color:oklch(0.32 0.02 250);">
+        <li>Match each of the five modeling patterns to the right read/write workload</li>
+        <li>Draw a Kimball star schema from memory: fact tables, dimension tables, surrogate keys, SCD2</li>
+        <li>Explain Data Vault structure (hubs, links, satellites) and when audit-grade history requires it</li>
+        <li>Articulate the stream–table duality and how CDC pipelines exploit it</li>
+      </ul>
+    </div>
+    <div class="meta">
+      <span>⏱ <b>13 min</b></span>
+      <span>◆ <b>3 simulations</b></span>
+      <span>✦ <b>+80 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>"How should I model this data?" is a question that sounds technical and is actually political. The right answer depends on who reads the data, how often, and how surprised they are willing to be when the schema changes. Here's the working taxonomy:</p>
+        <ol>
+          <li><strong>3NF / normalized</strong> — the OLTP gold standard. Every fact in exactly one place. Updates are cheap, joins are many. <em>Right for: source-of-truth product DBs.</em></li>
+          <li><strong>Star schema (Kimball)</strong> — denormalized into <em>fact</em> tables (events, measurements) and <em>dimension</em> tables (the things being measured). Few wide joins. <em>Right for: BI on a warehouse.</em></li>
+          <li><strong>Snowflake schema</strong> — same as star, but dimensions are themselves normalized. Save space, more joins. <em>Right for: when dimensions are huge or shared.</em></li>
+          <li><strong>One Big Table (OBT) / wide tables</strong> — denormalize <em>everything</em> into one mega-table. Joins disappear. Storage explodes. <em>Right for: ML feature tables, columnar warehouses where storage is free.</em></li>
+          <li><strong>Data Vault</strong> — hubs, links, satellites. Audit-grade history. <em>Right for: enterprises that get sued.</em></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Star schema, dissected</h2>
+      <div class="prose">
+        <p>The Kimball star schema is the single most-used analytical model. You should be able to draw it from memory. The center is one or more <strong>fact tables</strong> — one row per business event. The points of the star are <strong>dimension tables</strong> — descriptive context.</p>
+      </div>
+      <figure class="m3-fig" id="fig-star">
+        <div class="m3-fig-head">
+          <span class="m3-fig-num">Fig. 01 · the kimball star</span>
+          <span class="m3-fig-title">One fact at the center, four dimensions at the points</span>
+          <span class="m3-fig-sub">Hover a table or a SQL alias.</span>
+        </div>
+        <div class="m3-fig-stage">
+          <div class="m3-ss-stage">
+            <div class="m3-ss-svg-wrap">
+              <svg class="m3-ss-svg" id="ss-svg" viewBox="0 0 760 540" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+            <div class="m3-ss-side">
+              <div class="m3-ss-legend">
+                <span class="lg"><span class="sw" style="background: var(--m3-pk)"></span>PK</span>
+                <span class="lg"><span class="sw" style="background: var(--m3-fk)"></span>FK</span>
+                <span class="lg"><span class="sw" style="background: var(--m3-nk)"></span>NK · natural</span>
+                <span class="lg"><span class="sw" style="background: var(--m3-m)"></span>M · measure</span>
+              </div>
+              <pre class="m3-ss-sql" id="ss-sql"></pre>
+              <div class="m3-ss-note" id="ss-note">
+                <div class="ss-note-head"></div>
+                <div class="ss-note-body"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="m3-fig-cap">
+          <b>The shape.</b> Center holds <em>only</em> FKs and numeric measures; the dimensions hold the descriptive context. Every BI query becomes one big aggregation across <code>fact_orders</code> with a few star joins. Hover any table — or any aliased dim in the SQL — to see the join lit up.
+        </figcaption>
+      </figure>
+      <div class="prose">
+        <p>The fact table holds <em>foreign keys</em> and <em>numeric measures</em>. Nothing else. <code>user_id</code>, <code>product_id</code>, <code>date_key</code>, <code>amount</code>, <code>quantity</code>. Dimensions hold the descriptive stuff: country, category, price band, day-of-week. A typical analytical query says <em>"sum revenue grouped by category, filtered by country and date range"</em> — and the schema is shaped exactly to make that query a single big aggregation with a few joins.</p>
+        <p>Two patterns pay rent for the rest of your career:</p>
+        <ul>
+          <li><strong>SCD Type 2 (Slowly Changing Dimensions).</strong> When a user moves from US to UK, you don\'t overwrite their row — you insert a new row with <code>valid_from</code>/<code>valid_to</code> dates. Old facts still join to the old row. History is preserved.</li>
+          <li><strong>Surrogate keys.</strong> Never use the source system\'s natural key (like an email) as your dim PK. Use a synthetic <code>user_sk</code> integer. When the source system changes its mind, you don\'t cascade.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>OLTP vs OLAP: the table itself</h2>
+      <div id="w-rc"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>Same data, two layouts.</b> Postgres stores rows contiguously; Parquet stores columns contiguously. The same byte answers a "give me everything about user 42" query in microseconds on Postgres and an "average over a billion rows" query in seconds on Parquet. Different shape for different reads.</div></div>
+    </section>
+
+    <section id="s4">
+      <h2>Stream-table duality</h2>
+      <div class="prose">
+        <p>The deepest idea in data modeling is this: <strong>a stream and a table are the same thing, viewed from different angles.</strong></p>
+        <ul>
+          <li>A <strong>stream</strong> is the log of every change. <code>user 42 set country=US</code>, then <code>user 42 set country=UK</code>, then <code>user 42 set country=CA</code>.</li>
+          <li>A <strong>table</strong> is the materialized result of folding that stream forward. <code>user 42 → CA</code>.</li>
+        </ul>
+        <p>Every database has both internally — the WAL is the stream, the table pages are the materialized view. CDC pipelines (lesson 9) make this duality the entire architecture. Kafka calls a stream that materializes to a table a "<strong>compacted topic</strong>": old keys get garbage-collected, only the latest value survives. That\'s a stream pretending to be a table.</p>
+        <p>When you internalize this, modeling decisions become easier. <em>"Should this be a table or a Kafka topic?"</em> stops being binary; it becomes a question of whether you want the history or just the current state, and how you want to materialize between them.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Data Vault, when audit wins</h2>
+      <div class="prose">
+        <p>When the requirement is <em>"we need a complete, auditable record of every change to every business entity, ever, regardless of source system"</em> — 3NF and star schema both lose. 3NF overwrites or loses history on updates. Star schema hides integration logic inside transformations. Data Vault bakes auditability into the structure itself.</p>
+        <p>Data Vault 2.0 has exactly <strong>three object types</strong>:</p>
+        <ol>
+          <li><strong>Hub.</strong> One row per unique business key. No descriptive attributes, no history. Just the key and its source. Example: <code>hub_customer</code> with columns <code>customer_hk</code> (hash PK), <code>customer_id</code> (business key), <code>load_dts</code>, <code>rec_src</code>.</li>
+          <li><strong>Link.</strong> Models a relationship between two or more hubs — captures many-to-many associations. Example: <code>link_order_product</code> with <code>order_product_hk</code>, <code>order_hk</code>, <code>product_hk</code>, <code>load_dts</code>, <code>rec_src</code>. Links never change; only new associations are appended.</li>
+          <li><strong>Satellite.</strong> Holds all descriptive context and history for a hub or link. One insert per change, never update. Example: <code>sat_customer_details</code> with <code>customer_hk</code>, <code>load_dts</code> (PK together), <code>load_end_dts</code>, <code>email</code>, <code>country</code>, <code>rec_src</code>. Query with <code>WHERE load_end_dts IS NULL</code> for current state.</li>
+        </ol>
+        <div class="callout"><span class="icon">▸</span><div><b>The key insight.</b> Hubs and links are append-only and never change. Satellites are append-only too — no UPDATEs, ever. This makes Data Vault naturally idempotent and parallelisable: multiple source systems can load into the same vault concurrently without locking or overwriting each other's data.</div></div>
+        <p>The real-world example: a bank's core banking system, CRM, and fraud platform all have different notions of "customer." Data Vault loads each into the same <code>hub_customer</code> keyed by a canonical business key. Each source's attributes land in its own satellite. The customer's full history across all three systems is always queryable, auditable, and lineage-tracked — exactly what regulators and auditors need.</p>
+        <p><strong>When Data Vault is the wrong choice:</strong> it's verbose (3–5× more tables than star schema), query patterns are complex (you always join hub → satellite → link → satellite), and it requires a mature data engineering team to operate. For a startup with 3 source systems and no regulatory requirement, use Kimball.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="lesson-03.js?v=1"></script>
+<script>
+const LID = 'modeling';
+initLesson(LID, [
+  { id: 's1', label: 'Five philosophies' },
+  { id: 's2', label: 'Star schema' },
+  { id: 's3', label: 'Row vs column' },
+  { id: 's4', label: 'Stream-table duality' },
+  { id: 's5', label: 'Data Vault' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Vocab' },
+]);
+
+D.RowColumn(document.getElementById('w-rc'), { lessonId: LID, cpId: 'rc' });
+
+W.Quiz(document.getElementById('q1'), { // q1 is now in s6
+  lessonId: LID, cpId: 'q1', title: 'When does OBT win?',
+  question: 'Your ML team wants a "feature table" — every row is one user, with 800 columns of pre-computed signals. They ask: "Should we model this with star schema or one big table?" What\'s the right answer?',
+  options: [
+    'Star schema. Always normalize.',
+    'OBT. ML feature tables are read with <em>"select all 800 columns for this user_id"</em> — joins would be wasteful, and columnar storage means unused columns cost nothing.',
+    'Snowflake schema, to save storage.',
+    'Data Vault, for auditability.',
+  ],
+  correct: 1,
+  explanation: 'OBT is right for read patterns where you take many columns at once on a single key. Storage in a columnar format (Parquet) is cheap-per-column and effectively free for unread columns. Joining 800 features at query time would dominate cost. Feature stores like Tecton and Feast all materialize to wide tables for this reason.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'SCD2 in practice',
+  question: 'A user signs up in the US (Jan 1). Moves to the UK (June 1). Buys something on March 1 and again on Sept 1. Using SCD Type 2 dimensions, the March order joins to country=___ and the Sept order joins to country=___:',
+  options: [
+    'US, US — country is fixed at signup.',
+    'UK, UK — we always show current country.',
+    'US, UK — that\'s the point of SCD2: the order joins to the dim row that was valid <em>at the time of the order</em>.',
+    'NULL, UK — we lose history.',
+  ],
+  correct: 2,
+  explanation: 'SCD Type 2 keeps a row per version of a dimension, with <code>valid_from</code>/<code>valid_to</code> dates. The fact table joins on <code>user_id AND order_date BETWEEN valid_from AND valid_to</code>. This way historical reports stay correct: "revenue from US users in March" still includes the user who later moved to the UK. This is the killer feature vs Type 1 (overwrite) or Type 3 (limited history).'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Conformed dim', q: 'What is a conformed dimension?', a: 'A dimension shared across multiple fact tables, with the same keys and definitions everywhere. <code>dim_date</code> is the canonical example. Lets you do drill-across reports.' },
+    { term: 'Grain', q: 'What is "grain" of a fact table?', a: 'The atomic event the row represents. "One row per order line item" is finer grain than "one row per order." Pick the lowest grain you can afford — you can always aggregate up.' },
+    { term: 'Surrogate key', q: 'Why not use natural keys?', a: 'Natural keys (email, account number) change. Surrogate keys (auto-incrementing integers, hashes) are stable and let SCD2 work. Always use surrogate PKs in dimensions.' },
+    { term: 'Bridge table', q: 'When do you need one?', a: 'For many-to-many between fact and dim. e.g. an order has multiple promo codes. <code>fact_orders ↔ bridge_order_promo ↔ dim_promo</code>. Same idea as a join table in 3NF.' },
+    { term: 'Materialized view', q: 'How is it different from a normal view?', a: 'A normal view is a saved query, executed each time. A materialized view stores the result and refreshes it. Foundation of pre-aggregated marts and stream-table joins.' },
+    { term: 'Data Vault hub', q: 'What does a hub contain?', a: 'A hub holds one row per unique business key — nothing else. No descriptive attributes, no history. <code>customer_hk</code> (hash key), <code>customer_id</code> (business key), <code>load_dts</code>, <code>rec_src</code>. Multiple source systems can insert into the same hub without conflict.' },
+    { term: 'Data Vault satellite', q: 'How is history preserved?', a: 'Satellites are append-only. Every change to a descriptive attribute inserts a new row with a new <code>load_dts</code>. Never UPDATE. Current state = <code>WHERE load_end_dts IS NULL</code>. This is the auditability guarantee regulators care about.' },
+  ]
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>02 · CAP, PACELC & The Latency Tax — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<style>
+  /* ============================================================
+     LESSON 02 — module palette
+     cobalt (CP) · crimson (AP) · amber (latency) · graphite (ink)
+     ============================================================ */
+  :root {
+    --m2-cobalt:   oklch(0.52 0.18 260);
+    --m2-cobalt-2: oklch(0.62 0.16 258);
+    --m2-cobalt-w: oklch(0.94 0.04 260);
+    --m2-crimson:  oklch(0.55 0.20 22);
+    --m2-crimson-2:oklch(0.65 0.18 22);
+    --m2-crimson-w:oklch(0.95 0.04 22);
+    --m2-amber:    oklch(0.75 0.15 70);
+    --m2-amber-2:  oklch(0.65 0.16 60);
+    --m2-amber-w:  oklch(0.96 0.05 75);
+    --m2-graph:    oklch(0.32 0.02 250);
+    --m2-graph-2:  oklch(0.5 0.02 250);
+    --m2-paper:    oklch(0.985 0.005 80);
+    --m2-rule:     oklch(0.86 0.01 80);
+    --m2-rule-2:   oklch(0.78 0.012 80);
+  }
+
+  /* ----- diagram shell — generous, framed, distinct from prose ----- */
+  .m2-fig {
+    margin: 28px 0 14px;
+    border: 1px solid var(--m2-rule);
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, var(--m2-paper), oklch(0.97 0.006 80));
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 1px 0 oklch(1 0 0 / .6) inset, 0 2px 8px oklch(0 0 0 / .04);
+  }
+  .m2-fig-head {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    padding: 14px 22px 12px;
+    border-bottom: 1px solid var(--m2-rule);
+    background: oklch(0.98 0.005 80);
+  }
+  .m2-fig-num {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--m2-cobalt-2);
+    padding: 3px 8px; border-radius: 4px;
+    background: var(--m2-cobalt-w);
+  }
+  .m2-fig-title {
+    font-family: var(--mono); font-weight: 600;
+    font-size: 1rem; color: var(--m2-graph);
+    letter-spacing: -0.01em;
+  }
+  .m2-fig-sub {
+    font-family: var(--sans); font-size: 0.86rem;
+    color: var(--m2-graph-2); margin-left: auto;
+  }
+  .m2-fig-stage {
+    position: relative;
+    padding: 18px 22px 22px;
+  }
+  .m2-fig-cap {
+    padding: 10px 22px 16px;
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--m2-graph-2);
+    border-top: 1px dashed var(--m2-rule);
+    background: oklch(0.985 0.005 80);
+    line-height: 1.55;
+  }
+  .m2-fig-cap b { color: var(--m2-graph); font-weight: 600; }
+
+  /* ============================================================
+     FIG 1 — The Partition Theatre (CAP, three nodes, click to choose)
+     ============================================================ */
+  .m2-th-stage {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 28px;
+    align-items: stretch;
+  }
+  @media (max-width: 880px) { .m2-th-stage { grid-template-columns: 1fr; } }
+
+  .m2-th-svg-wrap {
+    position: relative;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 50%, oklch(0.97 0.006 80), oklch(0.95 0.008 80));
+    border: 1px solid var(--m2-rule);
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 1.05 / 1;
+    min-height: 380px;
+  }
+  .m2-th-svg { width: 100%; height: 100%; display: block; }
+
+  .m2-th-side { display: flex; flex-direction: column; gap: 12px; }
+  .m2-th-prompt {
+    font-family: var(--mono); font-size: 0.72rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--m2-graph-2); font-weight: 600;
+  }
+  .m2-th-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .m2-th-choice {
+    border: 1.5px solid var(--m2-rule-2);
+    background: var(--m2-paper);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: transform .15s, border-color .15s, background .15s, box-shadow .15s;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .m2-th-choice:hover { transform: translateY(-1px); border-color: var(--m2-graph-2); box-shadow: 0 4px 12px oklch(0 0 0 / .06); }
+  .m2-th-choice .lbl {
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    font-weight: 700;
+  }
+  .m2-th-choice .ttl {
+    font-size: 0.95rem; font-weight: 600; color: var(--m2-graph);
+    letter-spacing: -0.005em;
+  }
+  .m2-th-choice .sub {
+    font-family: var(--sans); font-size: 0.78rem;
+    color: var(--m2-graph-2); line-height: 1.45;
+  }
+  .m2-th-choice[data-c="cp"] .lbl { color: var(--m2-cobalt-2); }
+  .m2-th-choice[data-c="ap"] .lbl { color: var(--m2-crimson-2); }
+  .m2-th-choice.active[data-c="cp"] {
+    border-color: var(--m2-cobalt);
+    background: var(--m2-cobalt-w);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--m2-cobalt) 18%, transparent);
+  }
+  .m2-th-choice.active[data-c="ap"] {
+    border-color: var(--m2-crimson);
+    background: var(--m2-crimson-w);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--m2-crimson) 18%, transparent);
+  }
+  .m2-th-readout {
+    margin-top: 4px;
+    border: 1px solid var(--m2-rule);
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: oklch(0.985 0.005 80);
+    min-height: 168px;
+    transition: background .25s, border-color .25s;
+  }
+  .m2-th-readout.cp {
+    border-color: color-mix(in oklch, var(--m2-cobalt) 35%, var(--m2-rule));
+    background: color-mix(in oklch, var(--m2-cobalt-w) 60%, var(--m2-paper));
+  }
+  .m2-th-readout.ap {
+    border-color: color-mix(in oklch, var(--m2-crimson) 35%, var(--m2-rule));
+    background: color-mix(in oklch, var(--m2-crimson-w) 60%, var(--m2-paper));
+  }
+  .m2-th-readout .h {
+    font-family: var(--mono); font-size: 0.72rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--m2-graph-2); font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .m2-th-readout .body {
+    font-family: var(--sans); font-size: 0.92rem;
+    color: var(--m2-graph); line-height: 1.55;
+  }
+  .m2-th-readout .body b { color: var(--m2-graph); font-weight: 600; }
+  .m2-th-readout .systems {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+  }
+  .m2-th-readout .sys {
+    font-family: var(--mono); font-size: 0.74rem;
+    padding: 3px 9px;
+    border: 1px solid var(--m2-rule-2);
+    border-radius: 999px;
+    background: var(--m2-paper);
+    color: var(--m2-graph);
+  }
+  .m2-th-readout.cp .sys { border-color: color-mix(in oklch, var(--m2-cobalt) 40%, var(--m2-rule-2)); color: var(--m2-cobalt-2); }
+  .m2-th-readout.ap .sys { border-color: color-mix(in oklch, var(--m2-crimson) 40%, var(--m2-rule-2)); color: var(--m2-crimson-2); }
+
+  .m2-th-toolbar {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: auto; padding-top: 10px;
+    border-top: 1px dashed var(--m2-rule);
+  }
+  .m2-th-toolbar .lbl {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--m2-graph-2);
+    letter-spacing: 0.06em;
+  }
+  .m2-th-toolbar button {
+    font-family: var(--mono); font-size: 0.78rem;
+    padding: 6px 12px; border-radius: 6px;
+    border: 1px solid var(--m2-rule-2);
+    background: var(--m2-paper); color: var(--m2-graph);
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .m2-th-toolbar button:hover { background: oklch(0.97 0.006 80); border-color: var(--m2-graph-2); }
+  .m2-th-toolbar button.danger {
+    color: var(--m2-crimson-2);
+    border-color: color-mix(in oklch, var(--m2-crimson) 40%, var(--m2-rule-2));
+  }
+  .m2-th-toolbar button.danger:hover { background: var(--m2-crimson-w); }
+
+  /* SVG node styles */
+  .m2-th-svg .node-bg { fill: var(--m2-paper); stroke: var(--m2-graph); stroke-width: 1.6; }
+  .m2-th-svg .node-label {
+    font-family: var(--mono); font-size: 12px; font-weight: 700;
+    fill: var(--m2-graph); text-anchor: middle;
+  }
+  .m2-th-svg .node-ver {
+    font-family: var(--mono); font-size: 10px; fill: var(--m2-graph-2);
+    text-anchor: middle;
+  }
+  .m2-th-svg .link {
+    stroke: var(--m2-graph-2); stroke-width: 2; fill: none;
+    stroke-linecap: round;
+    transition: stroke .35s, stroke-dasharray .35s, opacity .35s;
+  }
+  .m2-th-svg .link.broken {
+    stroke: var(--m2-crimson);
+    stroke-dasharray: 4 6;
+    opacity: 0.55;
+    animation: m2-zap 1.6s linear infinite;
+  }
+  @keyframes m2-zap {
+    0%, 100% { stroke-dashoffset: 0; }
+    50%      { stroke-dashoffset: -20; }
+  }
+  .m2-th-svg .client-pulse {
+    fill: var(--m2-amber);
+    transform-origin: center;
+  }
+  .m2-th-svg .ack-good { fill: oklch(0.62 0.14 155); }
+  .m2-th-svg .ack-bad { fill: var(--m2-crimson); }
+  .m2-th-svg .partition-line {
+    stroke: var(--m2-crimson);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 5;
+    opacity: 0.55;
+  }
+  .m2-th-svg .ring {
+    stroke-width: 2;
+    fill: none;
+  }
+  .m2-th-svg .ring.cp { stroke: var(--m2-cobalt); }
+  .m2-th-svg .ring.ap { stroke: var(--m2-crimson); }
+  .m2-th-svg .ring.partitioned-out {
+    stroke: var(--m2-graph-2);
+    stroke-dasharray: 2 4;
+    opacity: 0.4;
+  }
+  .m2-th-svg .badge-text {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    text-anchor: middle;
+  }
+
+  /* ============================================================
+     FIG 2 — PACELC compass (2D plane, four quadrants)
+     ============================================================ */
+  .m2-pc-stage {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 28px;
+    align-items: stretch;
+  }
+  @media (max-width: 880px) { .m2-pc-stage { grid-template-columns: 1fr; } }
+
+  .m2-pc-svg-wrap {
+    position: relative;
+    border: 1px solid var(--m2-rule);
+    border-radius: 12px;
+    background: var(--m2-paper);
+    aspect-ratio: 1 / 1;
+    min-height: 420px;
+    overflow: hidden;
+  }
+  .m2-pc-svg { width: 100%; height: 100%; display: block; }
+  .m2-pc-svg .axis-line { stroke: var(--m2-rule-2); stroke-width: 1; }
+  .m2-pc-svg .axis-tick { stroke: var(--m2-graph-2); stroke-width: 1; }
+  .m2-pc-svg .axis-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    fill: var(--m2-graph);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .m2-pc-svg .axis-pole {
+    font-family: var(--mono); font-size: 10px;
+    fill: var(--m2-graph-2);
+    letter-spacing: 0.04em;
+  }
+  .m2-pc-svg .quad-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    fill: var(--m2-graph);
+    letter-spacing: 0.06em;
+  }
+  .m2-pc-svg .system-dot {
+    cursor: pointer;
+    transition: transform .2s;
+  }
+  .m2-pc-svg .system-dot:hover { transform: scale(1.15); }
+  .m2-pc-svg .system-dot circle { stroke: white; stroke-width: 1.5; }
+  .m2-pc-svg .system-dot text {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    fill: var(--m2-graph);
+    pointer-events: none;
+  }
+  .m2-pc-svg .quad-rect { fill-opacity: 0; transition: fill-opacity .2s; cursor: pointer; }
+  .m2-pc-svg .quad-rect.hot { fill-opacity: 0.06; }
+
+  .m2-pc-card {
+    border: 1.5px solid var(--m2-rule-2);
+    background: var(--m2-paper);
+    border-radius: 12px;
+    padding: 16px 18px;
+    transition: border-color .2s, background .2s;
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 100%;
+  }
+  .m2-pc-card .quad-name {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 1.4rem; letter-spacing: -0.01em;
+    color: var(--m2-graph);
+  }
+  .m2-pc-card .quad-name .slash { color: var(--m2-graph-2); margin: 0 4px; }
+  .m2-pc-card .quad-eyebrow {
+    font-family: var(--mono); font-size: 0.72rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--m2-graph-2); font-weight: 600;
+  }
+  .m2-pc-card .quad-desc {
+    font-family: var(--sans); font-size: 0.92rem;
+    line-height: 1.55; color: var(--m2-graph);
+  }
+  .m2-pc-card .quad-desc b { font-weight: 600; }
+  .m2-pc-card .quad-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .m2-pc-card .quad-tags .t {
+    font-family: var(--mono); font-size: 0.74rem;
+    padding: 3px 9px;
+    border: 1px solid var(--m2-rule-2);
+    border-radius: 999px;
+    background: var(--m2-paper);
+  }
+  .m2-pc-card .pillars {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin-top: auto;
+  }
+  .m2-pc-card .pillar {
+    background: oklch(0.97 0.005 80);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .m2-pc-card .pillar .lbl {
+    font-family: var(--mono); font-size: 0.66rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--m2-graph-2); font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .m2-pc-card .pillar .val {
+    font-family: var(--mono); font-size: 0.82rem;
+    color: var(--m2-graph); font-weight: 600;
+  }
+  /* Card accent colours match the quadrant fill colours in the plot */
+  .m2-pc-card[data-q="pael"] { border-color: var(--m2-crimson); }
+  .m2-pc-card[data-q="pael"] .quad-name { color: var(--m2-crimson-2); }
+  .m2-pc-card[data-q="paec"] { border-color: var(--m2-cobalt); }
+  .m2-pc-card[data-q="paec"] .quad-name { color: var(--m2-cobalt-2); }
+  .m2-pc-card[data-q="pcel"] { border-color: var(--m2-amber-2); }
+  .m2-pc-card[data-q="pcel"] .quad-name { color: var(--m2-amber-2); }
+  .m2-pc-card[data-q="pcec"] { border-color: var(--m2-cobalt-2); }
+  .m2-pc-card[data-q="pcec"] .quad-name { color: var(--m2-cobalt); }
+
+  /* ============================================================
+     FIG 3 — Latency-Tax Frontier (Pareto curve, draggable)
+     ============================================================ */
+  .m2-lt-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(220px, 280px);
+    align-items: start;
+    gap: 24px;
+  }
+  @media (max-width: 880px) { .m2-lt-stage { grid-template-columns: 1fr; } }
+
+  .m2-lt-svg-wrap {
+    border: 1px solid var(--m2-rule);
+    border-radius: 12px;
+    background:
+      linear-gradient(180deg, var(--m2-paper), oklch(0.96 0.008 80));
+    aspect-ratio: 1.5 / 1;
+    min-height: 320px;
+    position: relative;
+    overflow: hidden;
+  }
+  .m2-lt-svg { width: 100%; height: 100%; display: block; cursor: ew-resize; }
+  .m2-lt-svg .axis { stroke: var(--m2-graph); stroke-width: 1.2; }
+  .m2-lt-svg .grid { stroke: var(--m2-rule); stroke-width: 1; stroke-dasharray: 2 4; }
+  .m2-lt-svg .axis-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    fill: var(--m2-graph);
+    letter-spacing: 0.04em;
+  }
+  .m2-lt-svg .axis-tick {
+    font-family: var(--mono); font-size: 10px;
+    fill: var(--m2-graph-2);
+  }
+  .m2-lt-svg .frontier {
+    fill: none; stroke: var(--m2-graph);
+    stroke-width: 2; stroke-linecap: round;
+  }
+  .m2-lt-svg .frontier-fill {
+    fill: url(#m2-lt-grad); opacity: 0.18;
+  }
+  .m2-lt-svg .marker {
+    fill: var(--m2-amber);
+    stroke: var(--m2-graph); stroke-width: 1.5;
+    cursor: ew-resize;
+  }
+  .m2-lt-svg .marker-ring {
+    fill: none; stroke: var(--m2-amber);
+    stroke-width: 2; opacity: 0.35;
+  }
+  .m2-lt-svg .stamp {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    fill: var(--m2-graph);
+  }
+  .m2-lt-svg .stamp-dot {
+    fill: var(--m2-graph); stroke: var(--m2-paper); stroke-width: 1.5;
+  }
+  .m2-lt-svg .vline { stroke: var(--m2-amber-2); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.7; }
+
+  .m2-lt-side { display: flex; flex-direction: column; gap: 14px; }
+  .m2-lt-readout {
+    border: 1px solid var(--m2-rule);
+    border-radius: 12px;
+    padding: 16px 18px;
+    background: oklch(0.985 0.005 80);
+  }
+  .m2-lt-readout .lbl {
+    font-family: var(--mono); font-size: 0.66rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--m2-graph-2); font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .m2-lt-readout .val {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 1.35rem; color: var(--m2-graph);
+    letter-spacing: -0.01em;
+  }
+  .m2-lt-readout .val .unit {
+    font-size: 0.85rem; color: var(--m2-graph-2);
+    font-weight: 500; margin-left: 2px;
+  }
+  .m2-lt-readout .desc {
+    font-family: var(--sans); font-size: 0.82rem;
+    color: var(--m2-graph-2); margin-top: 6px; line-height: 1.5;
+  }
+  .m2-lt-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+  .m2-lt-presets button {
+    font-family: var(--mono); font-size: 0.74rem;
+    padding: 6px 10px; border-radius: 6px;
+    border: 1px solid var(--m2-rule-2);
+    background: var(--m2-paper); color: var(--m2-graph);
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .m2-lt-presets button:hover { background: var(--m2-amber-w); border-color: var(--m2-amber-2); }
+  .m2-lt-presets button.active {
+    background: var(--m2-amber-w); border-color: var(--m2-amber-2);
+    color: var(--m2-amber-2); font-weight: 600;
+  }
+
+  /* ============================================================
+     FIG 4 — Five Consistencies staircase
+     ============================================================ */
+  .m2-cs-stage { display: flex; flex-direction: column; gap: 0; }
+  .m2-cs-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    gap: 0;
+    border-top: 1px solid var(--m2-rule);
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .m2-cs-row:first-child { border-top: 0; }
+  .m2-cs-row:hover { background: oklch(0.985 0.005 80); }
+  .m2-cs-row.open { background: oklch(0.98 0.006 80); }
+
+  .m2-cs-rank {
+    padding: 18px 22px;
+    display: flex; flex-direction: column; gap: 4px;
+    border-right: 1px solid var(--m2-rule);
+  }
+  .m2-cs-rank .num {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 2rem; line-height: 1;
+    color: var(--m2-graph);
+    letter-spacing: -0.04em;
+  }
+  .m2-cs-rank .name {
+    font-family: var(--mono); font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--m2-graph);
+    letter-spacing: -0.01em;
+  }
+  .m2-cs-rank .strength {
+    font-family: var(--mono); font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--m2-graph-2); margin-top: 2px;
+  }
+
+  .m2-cs-anim {
+    padding: 18px 14px;
+    position: relative;
+    overflow: hidden;
+    min-height: 110px;
+    background: oklch(0.97 0.005 80);
+    border-right: 1px solid var(--m2-rule);
+  }
+  .m2-cs-anim svg { width: 100%; height: 100%; display: block; }
+  .m2-cs-anim svg .lane {
+    stroke: var(--m2-rule-2); stroke-width: 1; stroke-dasharray: 2 4;
+  }
+  .m2-cs-anim svg .lane-label {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    fill: var(--m2-graph-2);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .m2-cs-anim svg .write { fill: var(--m2-cobalt); }
+  .m2-cs-anim svg .read-ok { fill: oklch(0.62 0.14 155); }
+  .m2-cs-anim svg .read-stale { fill: var(--m2-crimson); }
+  .m2-cs-anim svg .event-text {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    fill: var(--m2-paper); text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .m2-cs-anim svg .event-stale-text {
+    font-family: var(--mono); font-size: 9px;
+    fill: var(--m2-crimson); text-anchor: middle;
+  }
+  .m2-cs-anim svg .arrow {
+    stroke: var(--m2-graph-2); stroke-width: 1.2;
+    fill: none; opacity: 0.5;
+    marker-end: url(#m2-cs-arrow);
+  }
+
+  .m2-cs-cost {
+    padding: 18px 22px;
+    display: flex; flex-direction: column; gap: 6px;
+    align-items: flex-start;
+  }
+  .m2-cs-cost .pill {
+    font-family: var(--mono); font-size: 0.74rem;
+    padding: 4px 10px; border-radius: 999px;
+    font-weight: 600;
+  }
+  .m2-cs-cost .pill.hi { background: var(--m2-crimson-w); color: var(--m2-crimson-2); border: 1px solid color-mix(in oklch, var(--m2-crimson) 40%, var(--m2-rule-2)); }
+  .m2-cs-cost .pill.mid { background: var(--m2-amber-w); color: var(--m2-amber-2); border: 1px solid color-mix(in oklch, var(--m2-amber) 50%, var(--m2-rule-2)); }
+  .m2-cs-cost .pill.lo { background: oklch(0.94 0.05 155); color: oklch(0.4 0.12 155); border: 1px solid oklch(0.7 0.13 155); }
+  .m2-cs-cost .cost-line {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--m2-graph); font-weight: 600;
+  }
+  .m2-cs-cost .cost-sub {
+    font-family: var(--sans); font-size: 0.78rem;
+    color: var(--m2-graph-2); line-height: 1.45;
+  }
+
+  .m2-cs-detail {
+    padding: 0 24px 22px 222px;
+    background: oklch(0.985 0.006 80);
+    border-top: 1px dashed var(--m2-rule);
+    display: none;
+  }
+  .m2-cs-row.open + .m2-cs-detail { display: block; }
+  .m2-cs-detail .body {
+    padding: 16px 0 4px;
+    font-family: var(--sans); font-size: 0.92rem;
+    color: var(--m2-graph); line-height: 1.6;
+    max-width: 720px;
+  }
+  .m2-cs-detail .body code {
+    background: var(--m2-paper); padding: 1px 6px;
+    border-radius: 4px; border: 1px solid var(--m2-rule);
+    font-size: 0.86em; color: var(--m2-cobalt-2);
+  }
+  .m2-cs-detail .body b { color: var(--m2-graph); font-weight: 600; }
+
+  @media (max-width: 760px) {
+    .m2-cs-row { grid-template-columns: 1fr; }
+    .m2-cs-rank, .m2-cs-anim, .m2-cs-cost { border-right: 0; border-bottom: 1px solid var(--m2-rule); }
+    .m2-cs-detail { padding: 0 22px 22px; }
+  }
+
+  /* prose section spacing tweaks for this lesson */
+  .lesson-content .m2-lead {
+    font-family: var(--mono);
+    font-size: clamp(1.05rem, 1.6vw, 1.18rem);
+    line-height: 1.5;
+    color: var(--m2-graph);
+    letter-spacing: -0.01em;
+    margin: 8px 0 18px;
+    padding: 0;
+    max-width: 740px;
+  }
+  .m2-lead em { color: var(--m2-cobalt-2); font-style: normal; font-weight: 600; }
+
+  /* hero accent flourishes (override base hero) */
+  .lesson-hero {
+    background:
+      linear-gradient(180deg, transparent, var(--m2-paper)),
+      radial-gradient(ellipse 50% 60% at 85% 0%, color-mix(in oklch, var(--m2-cobalt-w) 80%, transparent), transparent 70%),
+      radial-gradient(ellipse 30% 50% at 20% 30%, color-mix(in oklch, var(--m2-crimson-w) 50%, transparent), transparent 70%);
+  }
+
+</style>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 02 · track 01 — foundations</div>
+    <h1>CAP, PACELC<br/>& the latency tax.</h1>
+    <p class="subtitle">Two impossibility theorems that constrain every distributed data system. CAP is the famous one. PACELC is the more useful one. Both will show up in your interview, and you should know exactly when each lies to you.</p>
+    <div style="margin-top:18px; padding:14px 18px; background:color-mix(in oklch, oklch(0.94 0.04 260) 40%, oklch(0.985 0.005 80)); border-radius:10px; border:1px solid color-mix(in oklch, oklch(0.52 0.18 260) 25%, oklch(0.86 0.01 80));">
+      <div style="font-family:var(--mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.52 0.18 260); font-weight:600; margin-bottom:8px;">Learning objectives</div>
+      <ul style="font-family:var(--sans); font-size:0.9rem; line-height:1.65; margin:0; padding-left:1.2em; color:oklch(0.32 0.02 250);">
+        <li>State what CAP says and why "CA" is not a real choice in distributed systems</li>
+        <li>Explain how PACELC extends CAP by describing the everyday (non-partition) latency trade-off</li>
+        <li>Place real systems (Spanner, Cassandra, DynamoDB, MongoDB) in the correct PACELC quadrant</li>
+        <li>Distinguish the five consistency levels and know the latency cost of each</li>
+      </ul>
+    </div>
+    <div class="meta">
+      <span>⏱ <b>14 min</b></span>
+      <span>◆ <b>4 simulations</b></span>
+      <span>✦ <b>+95 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <h2>The theorem, restated honestly</h2>
+      <p class="m2-lead">Three nodes. A network split. You must choose: <em>do reads stay correct, or do reads stay possible?</em> CAP says you can't have both. Real designs make this choice <b>per-table, per-API, per-millisecond.</b></p>
+      <div class="prose">
+        <p>The CAP theorem was published by Eric Brewer in 2000 and proved by Gilbert and Lynch in 2002. In a distributed system, when a network <strong>partition</strong> happens — two nodes can't talk to each other — you must choose between <strong>consistency</strong> (every read sees the latest write) and <strong>availability</strong> (every request gets a non-error response). You cannot have both, simultaneously, during a partition. There is no design that beats this.</p>
+        <p>The version interviewers actually want is sharper: <em>"CA" is not a real choice.</em> Real networks partition. Cables fail, switches reboot, regions get hurricane'd. P is not a knob; it's a fact. So the real question CAP asks is: <strong>when (not if) we partition, which do you give up — C or A?</strong></p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Pick a partition trade</h2>
+      <div class="prose"><p>Three replicas, sharing writes. Cut the network between them and watch what each design does. Click the trade you'd accept.</p></div>
+
+      <figure class="m2-fig" id="fig-theatre">
+        <div class="m2-fig-head">
+          <span class="m2-fig-num">Fig. 01 · the partition theatre</span>
+          <span class="m2-fig-title">Three nodes · one client · one cable</span>
+          <span class="m2-fig-sub">Click <b>Cut cable</b> · then choose CP or AP.</span>
+        </div>
+        <div class="m2-fig-stage">
+          <div class="m2-th-stage">
+            <div class="m2-th-svg-wrap">
+              <svg class="m2-th-svg" id="th-svg" viewBox="0 0 460 440" preserveAspectRatio="xMidYMid meet" aria-label="Three replica nodes connected by a triangular ring">
+                <defs>
+                  <filter id="th-soft" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="6"/>
+                  </filter>
+                </defs>
+
+                <!-- subtle background grid -->
+                <g opacity="0.5">
+                  <line x1="0" y1="110" x2="460" y2="110" stroke="oklch(0.92 0.01 80)" stroke-width="1"/>
+                  <line x1="0" y1="220" x2="460" y2="220" stroke="oklch(0.92 0.01 80)" stroke-width="1"/>
+                  <line x1="0" y1="330" x2="460" y2="330" stroke="oklch(0.92 0.01 80)" stroke-width="1"/>
+                </g>
+
+                <!-- partition divider line (visible only when broken) -->
+                <line id="th-pdiv" class="partition-line" x1="280" y1="0" x2="280" y2="440"
+                      style="display:none"/>
+                <text id="th-pdiv-lbl" x="290" y="20"
+                      font-family="var(--mono)" font-size="10" fill="var(--m2-crimson)" style="display:none">
+                  partition
+                </text>
+
+                <!-- three connections -->
+                <g id="th-links">
+                  <path id="th-l-ab" class="link" d="M 130 110 L 330 110"/>
+                  <path id="th-l-bc" class="link" d="M 330 110 L 230 320"/>
+                  <path id="th-l-ac" class="link" d="M 130 110 L 230 320"/>
+                </g>
+
+                <!-- packet animation paths (for client write) -->
+                <g id="th-packets"></g>
+
+                <!-- ring overlay -->
+                <g id="th-rings"></g>
+
+                <!-- nodes -->
+                <g id="th-nodes">
+                  <g transform="translate(130 110)" id="th-n-a">
+                    <circle class="node-bg" r="34"/>
+                    <text class="node-label" y="-2">A</text>
+                    <text class="node-ver" y="14" id="th-ver-a">v1</text>
+                  </g>
+                  <g transform="translate(330 110)" id="th-n-b">
+                    <circle class="node-bg" r="34"/>
+                    <text class="node-label" y="-2">B</text>
+                    <text class="node-ver" y="14" id="th-ver-b">v1</text>
+                  </g>
+                  <g transform="translate(230 320)" id="th-n-c">
+                    <circle class="node-bg" r="34"/>
+                    <text class="node-label" y="-2">C</text>
+                    <text class="node-ver" y="14" id="th-ver-c">v1</text>
+                  </g>
+                </g>
+
+                <!-- client -->
+                <g transform="translate(60 380)" id="th-client">
+                  <rect x="-32" y="-14" width="64" height="28" rx="6"
+                        fill="var(--m2-paper)" stroke="var(--m2-graph)" stroke-width="1.5"/>
+                  <text font-family="var(--mono)" font-size="11" font-weight="700"
+                        fill="var(--m2-graph)" text-anchor="middle" y="4">client</text>
+                </g>
+                <!-- write target node label -->
+                <g transform="translate(390 380)" id="th-target">
+                  <text font-family="var(--mono)" font-size="10"
+                        fill="var(--m2-graph-2)" text-anchor="end">writes go to A</text>
+                </g>
+
+                <!-- ack badge -->
+                <g id="th-ack" style="display:none">
+                  <rect x="0" y="0" width="120" height="22" rx="11"
+                        fill="var(--m2-paper)" stroke="var(--m2-graph)" stroke-width="1"/>
+                  <text class="badge-text" x="60" y="14" id="th-ack-text">ack</text>
+                </g>
+              </svg>
+            </div>
+
+            <div class="m2-th-side">
+              <div class="m2-th-prompt">when the cable cuts, you keep…</div>
+              <div class="m2-th-choices">
+                <button class="m2-th-choice" data-c="cp" type="button">
+                  <span class="lbl">CP</span>
+                  <span class="ttl">Consistency</span>
+                  <span class="sub">Refuse writes that can't be replicated. Reads stay truthful.</span>
+                </button>
+                <button class="m2-th-choice" data-c="ap" type="button">
+                  <span class="lbl">AP</span>
+                  <span class="ttl">Availability</span>
+                  <span class="sub">Accept writes anywhere. Replicas diverge; reconcile later.</span>
+                </button>
+              </div>
+
+              <div class="m2-th-readout" id="th-readout">
+                <div class="h">what happens</div>
+                <div class="body" id="th-body">
+                  Click <b>Cut cable</b> to introduce a partition between
+                  <b>{A}</b> and <b>{B, C}</b>. Then pick the trade-off you'd live with.
+                </div>
+                <div class="systems" id="th-systems"></div>
+              </div>
+
+              <div class="m2-th-toolbar">
+                <span class="lbl">controls</span>
+                <button id="th-btn-cut" class="danger" type="button">Cut cable</button>
+                <button id="th-btn-write" type="button">Send write</button>
+                <button id="th-btn-reset" type="button">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="m2-fig-cap">
+          <b>Read it like this.</b> A solid edge means a healthy connection. A dashed crimson edge is a dead network link. The ring around the nodes shows the <em>quorum</em> the system can still talk to. CP shrinks the ring (smaller, but still correct); AP keeps everyone live (bigger, but lying).
+        </figcaption>
+      </figure>
+
+      <div class="callout"><span class="icon">▸</span><div><b>"CA" is not a real choice.</b> Single-node Postgres is "CA" because there's no network between replicas to partition. Add a replica and you're back to choosing CP or AP.</div></div>
+    </section>
+
+    <section id="s3">
+      <h2>PACELC: the useful upgrade</h2>
+      <p class="m2-lead">CAP only describes the bad day. PACELC describes <em>both</em>: <b>if</b> partition, choose A or C; <b>else</b>, choose Latency or Consistency. The "else" is where your bill lives.</p>
+      <div class="prose">
+        <p>To give a read strong consistency on a multi-region cluster, you have to coordinate across regions — a network round-trip, often 50-150ms. Or you can answer from the local replica in 1ms and risk staleness. Every distributed DB sits somewhere on this 2D plane, and the choice is usually <em>configurable per-query</em>.</p>
+      </div>
+
+      <figure class="m2-fig" id="fig-compass">
+        <div class="m2-fig-head">
+          <span class="m2-fig-num">Fig. 02 · the PACELC compass</span>
+          <span class="m2-fig-title">Two trades, four corners, real systems plotted</span>
+          <span class="m2-fig-sub">Hover dots · click a quadrant.</span>
+        </div>
+        <div class="m2-fig-stage">
+          <div class="m2-pc-stage">
+            <div class="m2-pc-svg-wrap">
+              <svg class="m2-pc-svg" id="pc-svg" viewBox="0 0 460 460" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <pattern id="pc-grid" width="46" height="46" patternUnits="userSpaceOnUse">
+                    <path d="M 46 0 L 0 0 0 46" fill="none" stroke="var(--m2-rule)" stroke-width="0.5"/>
+                  </pattern>
+                  <linearGradient id="pc-fade-cobalt" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0" stop-color="oklch(0.52 0.18 260 / .12)"/>
+                    <stop offset="1" stop-color="oklch(0.52 0.18 260 / .02)"/>
+                  </linearGradient>
+                  <linearGradient id="pc-fade-crimson" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="oklch(0.55 0.20 22 / .12)"/>
+                    <stop offset="1" stop-color="oklch(0.55 0.20 22 / .02)"/>
+                  </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="460" height="460" fill="url(#pc-grid)"/>
+
+                <!-- quadrant background tints -->
+                <!-- x<230 = low latency (EL), x>230 = strong consistency (EC)      -->
+                <!-- y<230 = availability (PA), y>230 = consistency (PC) in SVG coords -->
+                <rect class="quad-rect" data-q="pael" x="40" y="40" width="190" height="190"  fill="var(--m2-crimson)"/>
+                <rect class="quad-rect" data-q="paec" x="230" y="40" width="190" height="190" fill="var(--m2-cobalt)"/>
+                <rect class="quad-rect" data-q="pcel" x="40" y="230" width="190" height="190" fill="var(--m2-amber-2)"/>
+                <rect class="quad-rect" data-q="pcec" x="230" y="230" width="190" height="190" fill="var(--m2-cobalt-2)"/>
+
+                <!-- frame -->
+                <rect x="40" y="40" width="380" height="380" fill="none" stroke="var(--m2-graph)" stroke-width="1.5"/>
+
+                <!-- axes (centerlines) -->
+                <line class="axis-line" x1="230" y1="40" x2="230" y2="420"/>
+                <line class="axis-line" x1="40" y1="230" x2="420" y2="230"/>
+
+                <!-- axis labels -->
+                <text class="axis-label" x="230" y="26" text-anchor="middle">Else (no partition)</text>
+                <text class="axis-pole" x="50" y="26">low latency</text>
+                <text class="axis-pole" x="410" y="26" text-anchor="end">strong consistency</text>
+
+                <text class="axis-label" x="20" y="230" text-anchor="middle" transform="rotate(-90 20 230)">Partition</text>
+                <text class="axis-pole" x="38" y="50" text-anchor="end" transform="rotate(-90 38 50)">availability</text>
+                <text class="axis-pole" x="38" y="420" text-anchor="end" transform="rotate(-90 38 420)">consistency</text>
+
+                <!-- quadrant labels -->
+                <text class="quad-label" x="55"  y="58">PA / EL</text>
+                <text class="quad-label" x="245" y="58">PA / EC</text>
+                <text class="quad-label" x="55"  y="248">PC / EL</text>
+                <text class="quad-label" x="245" y="248">PC / EC</text>
+
+                <!-- system dots — plotted in PACELC space -->
+                <!-- coords: x along latency↔consistency, y along avail↔consistency -->
+                <g id="pc-dots">
+                  <!-- PA/EL bottom-left in classic but here mapped: low-lat/avail-during-P -->
+                </g>
+              </svg>
+            </div>
+
+            <div class="m2-pc-card" id="pc-card" data-q="paec">
+              <div class="quad-eyebrow">quadrant</div>
+              <div class="quad-name" id="pc-name">PA<span class="slash">/</span>EC</div>
+              <div class="quad-desc" id="pc-desc">
+                <b>Consistent in normal life, available under partition.</b> The popular default for user-state stores: writes are linearizable when the network is healthy, but if a region splits off, the system keeps accepting writes there and merges later. You trade some staleness for resilience.
+              </div>
+              <div class="quad-tags" id="pc-tags"></div>
+              <div class="pillars">
+                <div class="pillar">
+                  <div class="lbl">partition</div>
+                  <div class="val" id="pc-p">availability</div>
+                </div>
+                <div class="pillar">
+                  <div class="lbl">else</div>
+                  <div class="val" id="pc-e">consistency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="m2-fig-cap">
+          <b>The plot.</b> Vertical = the partition trade (top: stay available; bottom: stay consistent). Horizontal = the everyday trade (left: low latency; right: strong consistency). The dot is where each system sits <em>by default</em> — most are tunable per-query.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="s4">
+      <h2>The latency tax</h2>
+      <p class="m2-lead">Every step toward stronger consistency has a price tag in milliseconds. Drag the marker. Watch the bill rise.</p>
+
+      <figure class="m2-fig" id="fig-frontier">
+        <div class="m2-fig-head">
+          <span class="m2-fig-num">Fig. 03 · the latency-tax frontier</span>
+          <span class="m2-fig-title">p99 read latency vs. freshness guarantee</span>
+          <span class="m2-fig-sub">Drag along the curve.</span>
+        </div>
+        <div class="m2-fig-stage">
+          <div class="m2-lt-stage">
+            <div class="m2-lt-svg-wrap">
+              <svg class="m2-lt-svg" id="lt-svg" viewBox="0 0 540 360" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="m2-lt-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="var(--m2-amber)"/>
+                    <stop offset="1" stop-color="var(--m2-paper)"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- gridlines -->
+                <g>
+                  <line class="grid" x1="60" y1="60"  x2="500" y2="60"/>
+                  <line class="grid" x1="60" y1="120" x2="500" y2="120"/>
+                  <line class="grid" x1="60" y1="180" x2="500" y2="180"/>
+                  <line class="grid" x1="60" y1="240" x2="500" y2="240"/>
+                </g>
+
+                <!-- frontier (filled area) -->
+                <path id="lt-fill" class="frontier-fill"
+                      d=""/>
+                <path id="lt-curve" class="frontier" d=""/>
+
+                <!-- labelled stamps along the curve -->
+                <g id="lt-stamps"></g>
+
+                <!-- vertical line + marker -->
+                <line id="lt-vline" class="vline" x1="0" y1="60" x2="0" y2="300"/>
+                <g id="lt-marker">
+                  <circle class="marker-ring" r="14" cx="0" cy="0"/>
+                  <circle class="marker" r="7" cx="0" cy="0"/>
+                </g>
+
+                <!-- axes -->
+                <line class="axis" x1="60" y1="300" x2="500" y2="300"/>
+                <line class="axis" x1="60" y1="60"  x2="60"  y2="300"/>
+
+                <!-- y axis ticks -->
+                <text class="axis-tick" x="54" y="304" text-anchor="end">0</text>
+                <text class="axis-tick" x="54" y="244" text-anchor="end">25</text>
+                <text class="axis-tick" x="54" y="184" text-anchor="end">75</text>
+                <text class="axis-tick" x="54" y="124" text-anchor="end">150</text>
+                <text class="axis-tick" x="54" y="64"  text-anchor="end">300</text>
+
+                <!-- x axis ticks -->
+                <text class="axis-tick" x="60"  y="318" text-anchor="middle">none</text>
+                <text class="axis-tick" x="170" y="318" text-anchor="middle">eventual</text>
+                <text class="axis-tick" x="280" y="318" text-anchor="middle">read-your-writes</text>
+                <text class="axis-tick" x="390" y="318" text-anchor="middle">causal</text>
+                <text class="axis-tick" x="500" y="318" text-anchor="middle">linearizable</text>
+
+                <!-- axis titles -->
+                <text class="axis-label" x="280" y="345" text-anchor="middle">FRESHNESS GUARANTEE →</text>
+                <text class="axis-label" x="20" y="180" text-anchor="middle" transform="rotate(-90 20 180)">↑ p99 READ LATENCY (ms)</text>
+              </svg>
+            </div>
+
+            <div class="m2-lt-side">
+              <div class="m2-lt-readout">
+                <div class="lbl">freshness guarantee</div>
+                <div class="val" id="lt-name">read-your-writes</div>
+                <div class="desc" id="lt-desc">A client always sees its own most recent write. Other clients may see staler data. Implemented with sticky sessions or version pinning.</div>
+              </div>
+              <div class="m2-lt-readout">
+                <div class="lbl">p99 read latency</div>
+                <div class="val"><span id="lt-ms">8</span><span class="unit"> ms</span></div>
+                <div class="desc"><span id="lt-cost">Cheap. Local-replica read with a session token check.</span></div>
+              </div>
+              <div class="m2-lt-readout">
+                <div class="lbl">cluster scope</div>
+                <div class="val" id="lt-scope">single region</div>
+                <div class="desc" id="lt-scope-desc">Stays inside one region's failure domain. No WAN coordination on the read path.</div>
+              </div>
+              <div class="m2-lt-presets" id="lt-presets">
+                <button data-x="60">none</button>
+                <button data-x="170">eventual</button>
+                <button data-x="280" class="active">read-your-writes</button>
+                <button data-x="390">causal</button>
+                <button data-x="500">linearizable</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption class="m2-fig-cap">
+          <b>The bill.</b> Latency numbers are typical p99s for a 3-region active-active cluster. Eventual is "best-effort, free." Linearizable means a wide-area quorum on every read — that's the round-trip. The flat plateau in the middle is where most production systems live.
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="s5">
+      <h2>The five flavours of consistency</h2>
+      <p class="m2-lead">"Consistency" is one word for at least five guarantees. Click a row to expand. The animation shows how each handles the same write/read sequence.</p>
+
+      <figure class="m2-fig" id="fig-stair">
+        <div class="m2-fig-head">
+          <span class="m2-fig-num">Fig. 04 · the consistency staircase</span>
+          <span class="m2-fig-title">Same race, five rules — what does each reader see?</span>
+          <span class="m2-fig-sub">A writes <code>x=1</code> then <code>x=2</code>; B reads x.</span>
+        </div>
+        <div class="m2-cs-stage" id="cs-stage">
+          <!-- rows injected by JS -->
+        </div>
+        <figcaption class="m2-fig-cap">
+          <b>The animation.</b> Top lane is writer A's timeline; bottom lane is reader B's timeline. Blue dots are writes; green = read returned a value at-least-as-fresh as expected; crimson = read returned a stale value (allowed by that level's contract).
+        </figcaption>
+      </figure>
+
+      <div class="callout"><span class="icon">▸</span><div><b>The interview move.</b> When a question requires "consistency," ask <em>which kind</em>. <em>"Read-your-writes for the user's own session, eventual for everyone else's view"</em> is a perfectly normal design — and a much cheaper one than going linearizable everywhere.</div></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+      <div id="q3"></div>
+    </section>
+
+    <section id="s7">
+      <h2>The vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="lesson-02.js?v=1"></script>
+<script>
+const LID = 'cap-pacelc';
+initLesson(LID, [
+  { id: 's1', label: 'CAP, restated' },
+  { id: 's2', label: 'Pick a trade' },
+  { id: 's3', label: 'PACELC' },
+  { id: 's4', label: 'Latency tax' },
+  { id: 's5', label: 'Consistency staircase' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Vocab' },
+]);
+
+// initialize the four diagrams (defined in lesson-02.js)
+M2.PartitionTheatre(document.getElementById('fig-theatre'), { lessonId: LID });
+M2.PacelcCompass(document.getElementById('fig-compass'),   { lessonId: LID });
+M2.LatencyTax(document.getElementById('fig-frontier'),     { lessonId: LID });
+M2.ConsistencyStair(document.getElementById('fig-stair'),  { lessonId: LID });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'A real interview question',
+  question: 'You\'re designing a global checkout cart. The team wants "low latency in every region" and "the cart shows the same items if the user opens it on a different device 30 seconds later." Which PACELC quadrant fits?',
+  options: [
+    'PA/EL — fast and loose, always.',
+    'PC/EC — strong consistency always; users will tolerate the latency.',
+    'PA/EC — strong consistency in the normal case, but stay available during partitions.',
+    'PC/EL — strong consistency under partition, low latency otherwise.',
+  ],
+  correct: 2,
+  explanation: '<b>PA/EC</b> is the sweet spot for this kind of user-state workload. You want consistency in the 99.9% case (so the cart matches across devices) — but if a region temporarily splits from the rest, you\'d rather let the user keep shopping (and reconcile later) than throw an error. PC/EC would force the user to wait for cross-region coordination on every cart edit. PA/EL would let stale carts stick around forever. MongoDB and Couchbase are tuned roughly here.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: '"Eventual" is a trap',
+  question: 'A junior engineer says: "We picked Cassandra because we need eventual consistency." What\'s the actual question you should ask back?',
+  options: [
+    '"How long is eventual?" — eventual is a guarantee about the limit, not the timeline.',
+    '"What\'s your replication factor?"',
+    '"Are you sure you don\'t mean strong consistency?"',
+    '"Why not Postgres?"',
+  ],
+  correct: 0,
+  explanation: 'Eventual consistency means "<em>if writes stop, replicas converge eventually</em>." It says nothing about <em>when</em>. In practice, eventual is usually milliseconds. But under load, partitions, or hot keys, it can stretch to seconds or even minutes — long enough to ruin a UX. The right question is always: <em>what\'s the tail latency of convergence, and what does the UI do during that window?</em> "Read-your-writes" via sticky sessions is the usual fix.'
+});
+
+W.Quiz(document.getElementById('q3'), {
+  lessonId: LID, cpId: 'q3', title: 'The trick question',
+  question: 'Why is "CA" — consistency + availability without partition tolerance — usually called a non-choice for distributed systems?',
+  options: [
+    'Because consistency and availability conflict by definition.',
+    'Because partitions are inevitable in real networks; assuming them away means you don\'t have a distributed system, you have a single point of failure.',
+    'Because the CAP theorem doesn\'t apply to modern systems.',
+    'Because CA systems are always slow.',
+  ],
+  correct: 1,
+  explanation: 'P is not a design choice — it\'s a property of the physical world. Switches reboot, links flap, regions go offline. A "CA" system is one that fails entirely when those things happen, because it can\'t make progress without all nodes reachable. That\'s a fragility property, not a strength. The interview move is to refuse the C-vs-A framing as binary: <em>"During a partition I\'d pick X. In normal operation, the trade is L vs C, and I\'d pick Y."</em>'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Quorum', q: 'What is N/R/W?', a: 'Replication factor (N), read quorum (R), write quorum (W). To guarantee a read sees the latest write you need <code>R + W > N</code>. e.g. N=3, R=2, W=2.' },
+    { term: 'Sloppy quorum', q: 'What does "sloppy" mean?', a: 'Under a partition, accept writes on <em>any</em> N nodes — not just the canonical replicas — to keep availability. Reconcile later via hinted handoff. Cassandra/Dynamo do this.' },
+    { term: 'Read repair', q: 'How does eventual consistency converge?', a: 'When a read hits multiple replicas with different versions, the coordinator returns the latest <em>and</em> writes the newer value to the stale replicas. Background "anti-entropy" repair handles the rest.' },
+    { term: 'Linearizable', q: 'Why is it expensive?', a: 'It requires that every read returns a value at-least-as-fresh as any acknowledged write, globally. Implementing it across regions means coordinating with a quorum every time. That\'s a wide-area RTT per read.' },
+    { term: 'Bounded staleness', q: 'A useful middle ground', a: '"You can be at most 5 seconds behind, or at most 10 versions behind." Cosmos DB exposes this as a first-class consistency level. Cheaper than strong, more useful than eventual.' },
+  ]
+});
+</script>
+
+</body>
+</html>

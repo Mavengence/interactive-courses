@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>05 · Scoping: Small Tasks Win — Codex Course</title>
+  <meta name="description" content="Codex is great at a morning's work, not a quarter's. Learn the shape of a task it can land cleanly."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="05 · Scoping: Small Tasks Win — Codex Course"/>
+  <meta property="og:description" content="Codex is great at a morning's work, not a quarter's. Learn the shape of a task it can land cleanly."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/05-scope.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="05 · Scoping: Small Tasks Win — Codex Course"/>
+  <meta name="twitter:description" content="Codex is great at a morning's work, not a quarter's. Learn the shape of a task it can land cleanly."/>
+  <link rel="canonical" href="../lessons/05-scope.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Scoping: Small Tasks Win",
+    "description":"Codex is great at a morning's work, not a quarter's. Learn the shape of a task it can land cleanly.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":5
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-05">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 05 · track 02 — task craft</div>
+    <h1>Scoping.<br/>Small Tasks Win.</h1>
+    <p class="subtitle">Codex is great at a morning's work, not a quarter's. Learn the shape of a task it can land cleanly.</p>
+    <div class="meta">
+      <span>⏱ <b>12 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+50 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>There is a size of task that Codex lands cleanly. There is a size of task where it thrashes, produces a sprawling PR, and requires you to untangle three entwined changes on review. The boundary is sharper than you'd think, and once you can see it, you'll start reflexively decomposing work before you hand it over.</p>
+        <p>The rule of thumb: <strong>a task Codex can land in one run is the size of a morning for a mid-level engineer</strong>. Roughly:</p>
+        <ul>
+          <li>Touches 1–5 files.</li>
+          <li>Involves one concept — not three parallel threads.</li>
+          <li>Has a testable outcome that can be checked in under a minute.</li>
+          <li>Lives entirely inside your existing architecture — no "and also introduce a new service layer."</li>
+        </ul>
+        <p>Bigger than that, quality drops off a cliff. Not linearly — exponentially. A task twice the size is four times as flaky. And because Codex runs are asynchronous, a flaky run costs you the whole round-trip time.</p>
+      </div>
+
+      <div class="pull-quote">Size the task for the agent, not for the ticket.</div>
+    </section>
+
+    <section id="s2">
+      <h2>Three slicing moves</h2>
+      <div class="prose"><p>When a task feels too big, there are three reliable ways to split it. In rough order of ease:</p></div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">move 01 · horizontal</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Split by layer</h3>
+          <p class="small muted" style="margin-top:8px;">Big task = schema change + API change + UI change. Three Codex tasks. The schema PR lands, you merge, the API PR builds on it, and so on. Each one reviewable in isolation.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">move 02 · vertical</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Split by entity</h3>
+          <p class="small muted" style="margin-top:8px;">"Add soft-delete" to three entities → three tasks, one per entity. Identical shape, smaller blast radius each. Also: if one of them is tricky, it doesn't block the other two.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">move 03 · prep/do</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Do the plumbing first</h3>
+          <p class="small muted" style="margin-top:8px;">Task 1: refactor the messy part so the next change is obvious. Task 2: make the change. Cleaner than one PR doing both at once — and the prep PR often catches bugs you didn't know about.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>The surgical changes principle</h2>
+      <div class="prose">
+        <p>There's a discipline that separates effective AI-assisted development from sloppy AI-assisted development: <strong>only change what the current task requires.</strong> Not what looks messy. Not what you notice along the way. Not the thing three files over that's probably wrong. The task.</p>
+        <p>This matters more with an AI agent than with a human engineer because the agent has no natural reluctance to touch things. A human gets tired and stops. The agent will cheerfully refactor your entire error-handling layer if the task spec gives it any opening to do so. It means well. But you now have a 600-line PR where 200 lines are the feature and 400 lines are "improvements" you never asked for, never reviewed, and can't easily separate.</p>
+        <p>The technical term for this is <em>scope creep</em> and it's worse in AI sessions than in human ones because it happens in a single run, invisibly, before you see the output.</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">cost 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Review burden multiplies</h3>
+          <p class="small muted" style="margin-top:8px;">A 200-line PR takes 20 minutes to review. A 600-line PR — where 400 lines are untasked refactoring — takes 90 minutes. The ratio isn't linear; interleaved changes are harder to reason about than isolated ones.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">cost 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Rollback becomes entangled</h3>
+          <p class="small muted" style="margin-top:8px;">If something breaks in production, "revert the PR" reverts everything — the feature, the refactoring, the cleaned-up tests. You can't cleanly separate. A narrowly scoped task is always safe to revert.</p>
+        </div>
+      </div>
+
+      <div class="prose" style="margin-top:16px;">
+        <p>The antidote is a single sentence you can add to any task spec: <em>"Only change files directly required for this task. If you notice other issues, note them in the PR description but do not fix them."</em> That one instruction cuts the "bonus work" problem by roughly half.</p>
+        <p>The other half is fixed by scoping the spec to be so specific that there's no room for interpretation. Compare:</p>
+      </div>
+
+<pre class="code"><span class="tok-c"># Too open — invites bonus work</span>
+<span class="tok-k">## Goal</span>
+Add pagination to the users list endpoint. The current implementation
+returns all users; we need page-based results.
+
+<span class="tok-c"># Surgical — leaves no room for wandering</span>
+<span class="tok-k">## Goal</span>
+Add <span class="tok-s">page</span> and <span class="tok-s">page_size</span> query params to <span class="tok-s">GET /users</span> in <span class="tok-s">api/users.py</span>.
+Default: <span class="tok-s">page=1</span>, <span class="tok-s">page_size=20</span>. Max <span class="tok-s">page_size=100</span> (raise 400 if exceeded).
+Return <span class="tok-s">{"items": [...], "total": N, "page": N, "pages": N}</span>.
+
+<span class="tok-k">## Scope</span>
+Touch only <span class="tok-s">api/users.py</span> and <span class="tok-s">tests/api/test_users.py</span>. Nothing else.</pre>
+    </section>
+
+    <section id="s4">
+      <h2>Recognise the smells</h2>
+      <div class="prose"><p>When you catch yourself writing a spec with any of these phrases, stop. Split first.</p></div>
+      <div id="w-compare"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Live replay: the exponential blow-up</h2>
+      <div class="prose"><p>A too-big task. Watch Codex make it work, kind of, while quietly accumulating regret.</p></div>
+      <div id="w-term"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L05"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('scope', [
+    {id:'s1', label:'The size of a morning'},
+    {id:'s2', label:'Three slicing moves'},
+    {id:'s3', label:'Surgical changes'},
+    {id:'s4', label:'Smells to recognise'},
+    {id:'s5', label:'Live replay: too big'},
+    {id:'s6', label:'Quick check'},
+  ]);
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Same goal — before and after slicing',
+    badLabel: 'Too big — one task',
+    goodLabel: 'Sliced — three tasks',
+    bad: '<b>Goal</b>\nAdd soft-delete to Users, Projects, and Teams.\nInclude a "restore" endpoint for each.\nAlso add an audit log of who deleted what.\nMigrate existing hard-deletes we\'ve been stashing in cold storage.',
+    good: '<b>Task A: schema</b>\nAdd deleted_at and deleted_by to users, projects, teams.\nAdd migration. Don\'t touch queries yet.\n\n<b>Task B: API</b>\nUpdate list/get endpoints to filter deleted_at IS NULL.\nAdd DELETE → sets deleted_at. Add POST /restore.\n\n<b>Task C: audit</b>\nLog soft-deletes to the audit_events table.\nMigrate cold-storage rows in a separate PR.',
+    note: 'The "too big" version isn\'t wrong — it\'s just one run doing four people\'s jobs. Sliced, each task is a morning\'s work, reviewable, and the failure of one doesn\'t block the others.'
+  });
+
+  W.Terminal(document.getElementById('w-term'), {
+    lessonId: 'scope', cpId: 'term-1',
+    heading: 'Session replay: when a task is too big',
+    title: 'codex@sandbox · task-too-big',
+    frames: [
+      { line: '<span class="p">codex&gt;</span> planning the four-part task…', delay: 500 },
+      { line: '  <span class="c">plan: schema → queries → endpoints → audit log → migration</span>', delay: 700 },
+      { line: '<span class="p">codex&gt;</span> editing 3 models + 6 tests (schema)', delay: 600 },
+      { line: '<span class="p">codex&gt;</span> editing 12 query functions (queries)', delay: 700 },
+      { line: '<span class="p">$</span> pytest', delay: 400 },
+      { line: '<span class="e">→ 14 failures · some unrelated to this change?</span>', delay: 800 },
+      { line: '<span class="p">codex&gt;</span> investigating unrelated failures…', delay: 700 },
+      { line: '  <span class="c">found: two existing tests depend on hard-delete behavior</span>', delay: 800 },
+      { line: '<span class="p">codex&gt;</span> revising test expectations (risky)', cls: 'dim', delay: 700 },
+      { line: '<span class="p">$</span> pytest', delay: 400 },
+      { line: '<span class="e">→ 3 failures · audit log ordering nondeterministic</span>', delay: 700 },
+      { line: '<span class="p">codex&gt;</span> 47 minutes elapsed · 600 lines changed · 6 concepts tangled', cls: 'dim', delay: 700 },
+      { line: '<span class="p">codex&gt;</span> producing patch…', delay: 500 },
+      { line: '<span class="c">→ PR #512 opened · +612 / −89 · 18 files · "needs review"</span>', delay: 500 },
+      { line: '<span class="c">→ reviewer (you): "can we split this"</span>', delay: 500 },
+    ]
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'scope', cpId: 'q1',
+    question: 'You catch yourself writing: "Add feature X, and while we\'re in there, fix the existing pagination bug, and refactor the error handler." What should you do?',
+    options: [
+      'Ship it as one task — Codex can handle it.',
+      'Split into three tasks. Sequence them so each builds on the last, and each can be reviewed in isolation.',
+      'Add "please be careful" to the spec.',
+      'Take the weekend off.',
+    ],
+    correct: 1,
+    explanation: '"While we\'re in there" is the single most reliable scope-creep signal. Three concepts = three tasks. The pagination fix might even benefit from landing first, so the feature is built on clean foundations.'
+  });
+</script>
+
+<script src="../js/lessons/L05.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

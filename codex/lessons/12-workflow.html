@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>12 · Your AI Dev Workflow — Codex Course</title>
+  <meta name="description" content="End-to-end workflow: planning, implementation, review, and ship. The daily loop that turns AI assistance into consistent output."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="12 · Your AI Dev Workflow — Codex Course"/>
+  <meta property="og:description" content="End-to-end workflow: planning, implementation, review, and ship. The daily loop that turns AI assistance into consistent output."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/12-workflow.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="12 · Your AI Dev Workflow — Codex Course"/>
+  <meta name="twitter:description" content="End-to-end workflow: planning, implementation, review, and ship. The daily loop that turns AI assistance into consistent output."/>
+  <link rel="canonical" href="../lessons/12-workflow.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Your AI Dev Workflow",
+    "description":"End-to-end workflow: planning, implementation, review, and ship. The daily loop that turns AI assistance into consistent output.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":12
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-12">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 12 · track 04 — capstone</div>
+    <h1>Putting It<br/>Together.</h1>
+    <p class="subtitle">One realistic task, end to end. From a request to a merged PR — and the daily workflow loop that makes this repeatable.</p>
+    <div class="meta">
+      <span><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <b>15 min read</b></span>
+      <span>&#9670; <b>final capstone</b></span>
+      <span>&#10022; <b>+80 XP</b> &middot; course complete</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Everything in this course comes together here. Before the capstone walkthrough, we lay out the full workflow chain — the sequence of phases that takes a raw idea from "someone asked for this" to "shipped and monitored." Then you walk through one realistic task, choosing the right move at each decision point.</p>
+        <p>The wrong answers in the capstone are not absurd — they are the things you would genuinely reach for if you had not been through the previous eleven lessons. Notice <em>why</em> the correct path is correct, not just what it is.</p>
+      </div>
+
+      <div class="pull-quote">The goal is not to memorize the right moves. It is to feel the shape of the problem space so the right move feels obvious.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The workflow chain</h2>
+      <div class="prose">
+        <p>Consistent output from AI-assisted development comes from a consistent workflow. Ad hoc "just ask the agent" approaches produce inconsistent results — sometimes great, sometimes a mess. The teams that scale reliably follow a repeatable chain:</p>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">phase 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Discuss</h3>
+          <p class="small muted" style="margin-top:8px;">Before any code, capture intent. What is the actual problem? What does done look like? What are the constraints? Keep it conversational. A good discussion surfaces assumptions and ambiguities before they become expensive bugs.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">phase 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Plan</h3>
+          <p class="small muted" style="margin-top:8px;">Turn the discussion into a concrete implementation plan. Break work into discrete, independently-reviewable tasks. Identify dependencies. Assign acceptance criteria to each task. The plan is a checklist — each item will become a PR.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">phase 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Implement</h3>
+          <p class="small muted" style="margin-top:8px;">Run the agent on each task in the plan. One task at a time for dependent work; in parallel for independent tasks (lesson 10). Each task produces one PR. Keep scope tight — if the diff touches things outside the task's scope, something went wrong in planning.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">phase 04</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Review</h3>
+          <p class="small muted" style="margin-top:8px;">Review each PR as you would any human-authored one. Check the diff, look for the failure modes from lesson 07 (circular tests, missing error handling, wrong scope). Two revision rounds max — then re-spec if still stuck (lesson 11).</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">phase 05</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Ship</h3>
+          <p class="small muted" style="margin-top:8px;">Merge, deploy, and verify. AI-written code ships through the same pipeline as human-written code — CI, deployment gates, monitoring. No special treatment needed. If something breaks post-deploy, treat it like any regression: reproduce, spec the fix, run the agent.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">phase 06</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Learn</h3>
+          <p class="small muted" style="margin-top:8px;">After each task: did the agent make a mistake that a better spec would have prevented? Update your agent instructions file with the lesson. 60 seconds of reflection per task compounds into a dramatically better agent over months.</p>
+        </div>
+      </div>
+
+      <div class="prose" style="margin-top:20px;">
+        <p>The chain does not have to be heavyweight. For a small task, "discuss" might be two sentences in a comment. "Plan" might be three bullet points. "Implement" is one agent run. The phases exist as thinking checkpoints, not bureaucratic steps. The habit is the thing.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Scene 01 &middot; The request</h2>
+      <div class="prose">
+        <p>09:14 Monday. Slack:</p>
+      </div>
+      <div class="card" style="margin-top:10px; padding:18px;">
+        <div class="tiny" style="color:var(--cyan-ink);">#payments-team &middot; priya</div>
+        <p class="small" style="margin-top:8px;">"hey, finance is asking for a CSV export of all active subscriptions, updated nightly. need it live by friday. can you handle this? what's the first thing you'd do?"</p>
+      </div>
+      <div id="q1"></div>
+    </section>
+
+    <section id="s4">
+      <h2>Scene 02 &middot; Writing the spec</h2>
+      <div class="prose">
+        <p>You have decomposed it. The first task is: <em>add a <code>/admin/exports/subscriptions.csv</code> endpoint that streams active subscriptions as CSV</em>. Nightly scheduling and delivery are separate follow-on tasks.</p>
+        <p>You are about to write the spec. Which of these is the strongest opener?</p>
+      </div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Scene 03 &middot; The PR comes back</h2>
+      <div class="prose">
+        <p>41 minutes later. PR opened. You look at the diff:</p>
+      </div>
+      <div id="w-diff"></div>
+      <div id="q3"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Scene 04 &middot; The nudge</h2>
+      <div class="prose">
+        <p>You have noticed: the test mocks <code>active_subscriptions()</code> and asserts the response contains what the mock returned. It is testing the mock, not the endpoint (lesson 11 — the circular test pattern). Time to nudge. Which comment will land the fix on the first try?</p>
+      </div>
+      <div id="q4"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Scene 05 &middot; After merge</h2>
+      <div class="prose">
+        <p>The PR is solid. Tests verify real behavior. Review is clean. You are about to merge and move to task 02 (the nightly scheduler). One last habit pays off over time. What is it?</p>
+      </div>
+      <div id="q5"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Course complete</h2>
+      <div class="prose">
+        <p>You have got it. The mental model, the craft, the loop, the safety net. The thing left is practice — and that is the easy part, because the tools are cheap to run and fast to learn from.</p>
+        <p>Three parting habits that pay off forever:</p>
+        <ol>
+          <li><strong>Every failed run is signal.</strong> Read the transcript. Ask: "what part of my spec was ambiguous?" Update your agent instructions file. One line learned per run compounds fast.</li>
+          <li><strong>Two revisions, then rewrite.</strong> If a PR is stuck after two rounds of comments, re-spec from scratch. Faster every time.</li>
+          <li><strong>Keep the review queue short.</strong> Your bottleneck shifts from "who has time to build this" to "who has time to review." Four or five parallel PRs in review at once is a sweet spot — more than that and review quality drops.</li>
+        </ol>
+        <p>That is the whole thing. Go build.</p>
+      </div>
+      <div style="margin-top:30px; text-align:center;">
+        <a href="../index.html" class="btn btn-primary">&larr; Back to the course map</a>
+      </div>
+    </section>
+
+    <div id="lesson-footer"></div>
+
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L12"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('capstone', [
+    {id:'s1', label:'The capstone'},
+    {id:'s2', label:'The workflow chain'},
+    {id:'s3', label:'Scene 1 · the request'},
+    {id:'s4', label:'Scene 2 · the spec'},
+    {id:'s5', label:'Scene 3 · the PR'},
+    {id:'s6', label:'Scene 4 · the nudge'},
+    {id:'s7', label:'Scene 5 · after merge'},
+    {id:'s8', label:'Course complete'},
+  ]);
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId:'capstone', cpId:'q1',
+    question:'The ask is "CSV export, nightly, live by Friday." What do you do first?',
+    options:[
+      'Open the agent, paste Priya\'s message verbatim, hit run.',
+      'Decompose: (a) write the export endpoint, (b) add the nightly schedule, (c) wire up the delivery destination. Three smaller tasks — the first one is a morning\'s work.',
+      'Ask Priya for the exact CSV columns and ship it as one big task.',
+      'Tell Priya it is not feasible this week.',
+    ],
+    correct: 1,
+    explanation: '"CSV export + schedule + delivery" is three separate concerns. Ship it as one task and you get a tangled PR that is hard to review and hard to revise. Decompose and each piece lands clean. Ask Priya for columns <i>while</i> decomposing — you need that information for task (a).'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId:'capstone', cpId:'q2',
+    question:'Best opening for the spec of task (a) — the export endpoint?',
+    options:[
+      '"Add a CSV export of subscriptions."',
+      '"Goal: GET /admin/exports/subscriptions.csv returns all active subscriptions as CSV, streamed (not loaded into memory). Columns: id, customer_email, plan, status, current_period_end."',
+      '"Do the finance CSV thing."',
+      '"Build a reporting system."',
+    ],
+    correct: 1,
+    explanation: 'One sentence of goal. Explicit route. Explicit columns (removes guessing). "Streamed" is a non-obvious constraint — many subscription tables are large, and a naive implementation loads them all into memory and fails in production. Closing that ambiguity upfront saves a revision.'
+  });
+
+  W.Diff(document.getElementById('w-diff'), {
+    title:'PR · api/admin/exports.py',
+    file:'api/admin/exports.py · +38 / −0',
+    lines:[
+      { t:'+', s:'from flask import Blueprint, Response, stream_with_context' },
+      { t:'+', s:'from auth import admin_required' },
+      { t:'+', s:'from repositories.subscriptions import active_subscriptions' },
+      { t:'+', s:'import csv, io' },
+      { t:'+', s:'' },
+      { t:'+', s:'exports_bp = Blueprint("exports", __name__)' },
+      { t:'+', s:'' },
+      { t:'+', s:'@exports_bp.route("/admin/exports/subscriptions.csv")' },
+      { t:'+', s:'@admin_required' },
+      { t:'+', s:'def export_subscriptions():' },
+      { t:'+', s:'    def generate():' },
+      { t:'+', s:'        buf = io.StringIO()' },
+      { t:'+', s:'        w = csv.writer(buf)' },
+      { t:'+', s:'        w.writerow(["id","email","plan","status","current_period_end"])' },
+      { t:'+', s:'        yield buf.getvalue()' },
+      { t:'+', s:'        buf.seek(0); buf.truncate(0)' },
+      { t:'+', s:'        for sub in active_subscriptions(stream=True):' },
+      { t:'+', s:'            w.writerow([sub.id, sub.customer_email, sub.plan,' },
+      { t:'+', s:'                        sub.status, sub.current_period_end.isoformat()])' },
+      { t:'+', s:'            yield buf.getvalue()' },
+      { t:'+', s:'            buf.seek(0); buf.truncate(0)' },
+      { t:'+', s:'    return Response(stream_with_context(generate()),' },
+      { t:'+', s:'                    mimetype="text/csv")' },
+      { t:' ', s:'' },
+      { t:' ', s:'# --- tests/api/admin/test_exports.py ---' },
+      { t:'+', s:'def test_export_subscriptions(client, mocker):' },
+      { t:'+', s:'    mocker.patch("api.admin.exports.active_subscriptions",' },
+      { t:'+', s:'        return_value=[FakeSub(1, "a@b.com", "pro", "active", ...)])' },
+      { t:'+', s:'    r = client.get("/admin/exports/subscriptions.csv")' },
+      { t:'+', s:'    assert r.status_code == 200' },
+      { t:'+', s:'    assert b"a@b.com" in r.data' },
+    ]
+  });
+
+  W.Quiz(document.getElementById('q3'), {
+    lessonId:'capstone', cpId:'q3',
+    question:'First scan of the PR. What is the biggest concern?',
+    options:[
+      'The endpoint does not use streaming.',
+      'The test mocks active_subscriptions() and then asserts the response contains what the mock returned — it is testing the mock, not the behavior.',
+      'The imports are in the wrong order.',
+      'Nothing — tests pass.',
+    ],
+    correct: 1,
+    explanation: 'The endpoint implementation is fine — it does stream. The test is the classic circular pattern from lesson 11: it replaces the thing it claims to verify. Green suite, zero behavior proof. The endpoint could return anything and the test would still pass.'
+  });
+
+  W.Quiz(document.getElementById('q4'), {
+    lessonId:'capstone', cpId:'q4',
+    question:'The comment that lands the fix first try:',
+    options:[
+      '"test is weak, please improve"',
+      '"make it test the real thing"',
+      '"tests/api/admin/test_exports.py::test_export_subscriptions mocks active_subscriptions and then asserts the response contains the mock data — which proves nothing. Rewrite to: seed 3 real subscription rows in the test db (2 active, 1 canceled), hit the endpoint, assert the CSV has 2 data rows with the right emails, and the canceled one is absent."',
+      '"add more tests"',
+    ],
+    correct: 2,
+    explanation: 'Good nudges have three parts: what is wrong, where it is, and what right looks like. The winning comment has all three and a concrete fixture plan. The agent can implement it in one pass. Vague feedback ("weak", "improve", "more") forces the agent to guess what you mean — which is how you end up at revision three.'
+  });
+
+  W.Quiz(document.getElementById('q5'), {
+    lessonId:'capstone', cpId:'q5',
+    question:'Before you move to task 02, what is the highest-leverage habit?',
+    options:[
+      'Close the PR tab and move on.',
+      'Note the lesson learned — "tests that mock their own subject are a failure mode here" — and add a line to your agent instructions file so the next run does not repeat it.',
+      'Rewrite the PR description yourself.',
+      'Archive the PR in a private document.',
+    ],
+    correct: 1,
+    explanation: 'Your agent instructions file gets smarter from rejections. The 30 seconds you spend adding one line ("tests must exercise real behavior, not mocked subjects") pays back on every future run in this repo. This is the habit separating teams that level up with AI assistance from teams that coexist with it.'
+  });
+</script>
+
+<script src="../js/lessons/L12.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

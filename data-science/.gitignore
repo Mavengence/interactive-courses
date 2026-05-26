@@ -1,0 +1,17 @@
+# Dev server artifacts (local only — not part of the public course bundle)
+node_modules/
+package.json
+package-lock.json
+vite.config.js
+.DS_Store
+
+# Internal planning artifacts — never publish
+CLAUDE.md
+INTEGRATION.md
+.claude/
+plans/
+discuss-*.md
+NOTES.md
+TODO.md
+*.local.md
+SANITIZATION_README.txt

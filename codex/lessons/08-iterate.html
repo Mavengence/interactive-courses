@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>08 · Iteration Loops — Codex Course</title>
+  <meta name="description" content="When to nudge, when to re-spec, when to throw it away and restart. A decision tree for every stuck run."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="08 · Iteration Loops — Codex Course"/>
+  <meta property="og:description" content="When to nudge, when to re-spec, when to throw it away and restart. A decision tree for every stuck run."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/08-iterate.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="08 · Iteration Loops — Codex Course"/>
+  <meta name="twitter:description" content="When to nudge, when to re-spec, when to throw it away and restart. A decision tree for every stuck run."/>
+  <link rel="canonical" href="../lessons/08-iterate.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Iteration Loops",
+    "description":"When to nudge, when to re-spec, when to throw it away and restart. A decision tree for every stuck run.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":8
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-08">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 08 · track 03 — in the loop</div>
+    <h1>Iteration<br/>Loops.</h1>
+    <p class="subtitle">When to nudge, when to re-spec, when to throw it away and start fresh. A decision tree for every stuck run.</p>
+    <div class="meta">
+      <span>⏱ <b>13 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+45 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>The PR isn't right. Maybe the tests fail. Maybe they pass but the code is strange. Maybe it solved the wrong problem. What now? Most people instinctively do what they'd do with a human — leave review comments, expect them addressed. That works, sometimes. But the agent isn't a human, and the optimal move depends on what kind of wrong the PR is.</p>
+        <p>Here's the decision tree we've seen work, distilled from a lot of watching people iterate with Codex:</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">the PR is <b>90% right</b></div>
+          <h3 style="margin-top:6px;font-size:1rem;">Nudge</h3>
+          <p class="small muted" style="margin-top:8px;">One or two specific changes: a misnamed function, a missing edge case, a test you want strengthened. Leave targeted review comments. Ask Codex to address them. Expect a clean follow-up commit.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">the PR is <b>~70% right</b></div>
+          <h3 style="margin-top:6px;font-size:1rem;">Re-spec</h3>
+          <p class="small muted" style="margin-top:8px;">The agent understood the shape but missed the point. Comments won't fix a framing problem. Close the PR, rewrite the task with what you learned, run again. Takes 10 minutes; saves you 3 rounds of comment ping-pong.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">the PR is <b>&lt;50% right</b></div>
+          <h3 style="margin-top:6px;font-size:1rem;">Throw it out</h3>
+          <p class="small muted" style="margin-top:8px;">The agent is solving a different problem. Don't salvage. Close it, go read your own spec — something\'s ambiguous. Often the fix is to break it into two tasks, or to write the tests first.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">the PR is <b>broken AND tangled</b></div>
+          <h3 style="margin-top:6px;font-size:1rem;">Split & redo</h3>
+          <p class="small muted" style="margin-top:8px;">The task was too big (lesson 05). Close the PR. Split into 2–3 smaller tasks. Sequence them. You'll land all three before you would\'ve gotten one clean review on the monster.</p>
+        </div>
+      </div>
+
+      <div class="pull-quote">Two revisions, then rewrite. That\'s the rule that saves the most time.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The nudge, done right</h2>
+      <div class="prose"><p>Nudges work — when they're specific. Here are two comments on the same issue. Guess which one Codex lands the fix for on the first try.</p></div>
+      <div id="w-compare"></div>
+
+      <div class="prose" style="margin-top:16px;">
+        <p>A good nudge has three things: <strong>what's wrong</strong>, <strong>where it is</strong>, and <strong>what right looks like</strong>. Missing any of the three, and Codex has to guess — which is exactly the thing we're trying to avoid by having a clear spec in the first place.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+    </section>
+
+    <section id="s4">
+      <h2>The rewrite gambit</h2>
+      <div class="prose">
+        <p>The move that most teams don't use enough: closing a PR and starting over. It feels wasteful. It isn't.</p>
+        <p>A re-specced task takes 10 minutes to write, 5 minutes to run, and arrives as a clean PR that matches what you wanted. A comment-driven iteration on a ~70% PR takes 3 rounds of comments, 45 minutes of agent thrash, and arrives as a <em>patchwork</em> PR that works but whose history is a review nightmare.</p>
+        <p>If you're on round two of comments and the PR still feels off, close it. Take what you learned from seeing the agent's attempt — which requirement it missed, which assumption it had wrong — and fold it into a new task. That's not failure. That's signal.</p>
+      </div>
+      <div class="callout">
+        <span class="icon">▸</span>
+        <div><b>The meta-lesson:</b> a failed Codex run is cheap information. It tells you where your spec was ambiguous. That's worth more than the PR itself. Good teams treat the first run as a probe as much as a production attempt.</div>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Context rot — when to start fresh</h2>
+      <div class="prose">
+        <p>When you work interactively with an AI assistant across a long session — multiple revisions, exploratory tangents, several back-and-forth corrections — the session context fills up. As it does, something subtle and destructive happens: the model's effective attention on your early instructions degrades. It still has them; it's just not weighting them as heavily against all the conversational noise that's accumulated on top.</p>
+        <p>The symptom is a session that used to produce clean patches and now produces strange ones. The agent reverts fixes you made three exchanges ago. It suggests approaches you already rejected. It seems to have forgotten a convention you spelled out clearly in message two. This is context rot: not a model failure, but a context management failure.</p>
+        <p><strong>The fix is not to repeat yourself more emphatically.</strong> The fix is to rotate context — start a new session with a crisp, distilled spec that encodes what you've learned so far.</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">signal 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Reverts fixed behavior</h3>
+          <p class="small muted" style="margin-top:8px;">You corrected something in exchange 3. In exchange 9 it comes back. The early correction is getting drowned out. Rotate.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">signal 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Re-proposes rejected approaches</h3>
+          <p class="small muted" style="margin-top:8px;">"Let's use <code>lru_cache</code> for this." You said no in exchange 4. Now it's back. The rejection is buried. Rotate and encode "do not use lru_cache" in the new spec.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">signal 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Generic outputs from specific inputs</h3>
+          <p class="small muted" style="margin-top:8px;">Your task was specific but the output looks generic — like it was written for a different repo. The session context has diluted the specific instructions you gave early on.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">signal 04</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Increasing correction rounds</h3>
+          <p class="small muted" style="margin-top:8px;">First task took one round of review. Current task is on round four for similar complexity. The session is degrading, not the task. Rotate.</p>
+        </div>
+      </div>
+
+      <div class="pull-quote">Two failed correction rounds in the same session = rotate context, not revise more.</div>
+    </section>
+
+    <section id="s6">
+      <h2>Compaction: what to carry forward</h2>
+      <div class="prose">
+        <p>When you rotate context — whether you're re-speccing a task or starting a fresh session — you're not starting from zero. You carry information from the previous session forward. The question is: <em>what</em>?</p>
+        <p>There's a compression move that experienced practitioners make instinctively: before closing a long session, they write down the discoveries that wouldn't be obvious from reading the codebase or the original spec. These are the things that would send a new session down the same dead ends.</p>
+      </div>
+
+      <div id="w-compare2"></div>
+
+      <div class="prose" style="margin-top:16px;">
+        <p>The right items to carry forward are always in the same category: <strong>things that aren't obvious from the code.</strong> The code shows what's there. It doesn't show what you tried and rejected, what turned out to be a hidden constraint, or why a specific approach didn't work even though it looked right.</p>
+        <p>A concrete discipline: before closing a long session that didn't fully land, write three bullet points — one for each "thing I now know that I didn't know when I started this task." Those three bullets become the first paragraph of the new task spec.</p>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L08"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('iterate', [
+    {id:'s1', label:'Decision tree'},
+    {id:'s2', label:'The nudge, done right'},
+    {id:'s3', label:'Quick check'},
+    {id:'s4', label:'The rewrite gambit'},
+    {id:'s5', label:'Context rot'},
+    {id:'s6', label:'Compaction: carry forward'},
+    {id:'s7', label:'Quick check'},
+  ]);
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Two review comments, same problem',
+    badLabel: 'Vague nudge',
+    goodLabel: 'Specific nudge',
+    bad: '"the test isn\'t very good, can you make it better?"',
+    good: '"tests/api/test_login.py::test_rate_limit_blocks_at_6 currently mocks is_allowed() — which means it\'s testing the mock, not the limiter.\n\nRewrite it to call /login six times against the real limiter and assert the 6th returns 429.\n\nKeep the existing assertion style (pytest, no unittest.mock wrappers)."',
+    note: '<b>Three parts:</b> what\'s wrong (mocks the thing it\'s testing), where (<code>test_rate_limit_blocks_at_6</code>), what right looks like (call it six times, assert 429). Specific enough that the agent can\'t pick the wrong interpretation.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'iterate', cpId: 'q1',
+    question: 'You\'ve left two rounds of review comments on a Codex PR. The third review still has issues. What\'s the right move?',
+    options: [
+      'Leave a third round of comments. Eventually it\'ll converge.',
+      'Close the PR. Re-spec the task with what you\'ve learned from the failed attempts. Rerun.',
+      'Give up on Codex.',
+      'Merge it and file follow-up tickets.',
+    ],
+    correct: 1,
+    explanation: 'Two rounds is the empirical limit where comment-driven iteration is still faster than a rewrite. If the PR still isn\'t right after two, something about the spec is off — not the agent\'s effort. Close, re-spec, rerun. Faster and produces a cleaner artifact.'
+  });
+
+  W.Compare(document.getElementById('w-compare2'), {
+    title: 'Compaction: what to carry vs. what to drop',
+    badLabel: 'Carrying noise',
+    goodLabel: 'Carrying signal',
+    bad: 'CONTEXT FROM LAST SESSION:\n- We were working on the rate limiter\n- There was a conversation about caching\n- I asked about Redis vs. in-memory\n- You said something about TTLs\n- We discussed the test structure for a while\n- The second approach seemed better\n- Something about the limiter key format',
+    good: 'CONTEXT FROM LAST SESSION (3 bullets):\n1. Constraint discovered: the limiter key must be (ip, user_id) not just ip — shared IPs (offices, proxies) would block unrelated users otherwise.\n2. Rejected approach: lru_cache is process-local; on multi-worker deployments counts don\'t accumulate. Use Redis.\n3. Hidden coupling: rate_limit_middleware runs before auth, so user_id is unavailable there — limiter logic must live in the view layer.',
+    note: '<b>The test:</b> would a fresh session be able to avoid the wrong turns without your bullets? If yes, drop it. If no, keep it. The caching discussion and TTL chatter are in the docs; the three discoveries above aren\'t.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'iterate', cpId: 'q2',
+    question: 'You notice the AI assistant is suggesting an approach you explicitly rejected two exchanges ago. What does this signal, and what should you do?',
+    options: [
+      'The model disagrees with you. Argue your position more forcefully.',
+      'This is a context rot signal. Close the session. Start a new one with a spec that includes "do not use [rejected approach] because [reason]."',
+      'Repeat the rejection in the same session — it\'ll eventually stick.',
+      'Accept the suggestion. The model may have found a better reason for it.',
+    ],
+    correct: 1,
+    explanation: 'Re-proposing rejected approaches is the clearest signal that early context is being drowned out. The fix is rotation, not repetition. Carry the rejection forward explicitly in the new spec with the reason — that encodes the constraint so it holds regardless of where it appears in the context window.'
+  });
+</script>
+
+<script src="../js/lessons/L08.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

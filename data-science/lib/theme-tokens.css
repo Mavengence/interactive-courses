@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Theme Design System — Tokens
+   Generic design-token library
+   --------------------------------------------------------------------------
+   Single source of truth for all visual decisions. Reference these tokens —
+   never hard-code colors, font sizes, spacing, radius, or shadows.
+   ========================================================================== */
+
+:root {
+  /* ----- Color: brand & semantic ------------------------------------------ */
+  --theme-blue:           #0866FF;  /* primary actions, active, links */
+  --theme-blue-hover:     #0055DB;
+  --theme-blue-active:    #004ABF;
+  --theme-blue-50:        #E7F3FF;  /* selected row bg, light highlights */
+
+  --theme-green:          #31A24C;  /* success, positive deltas */
+  --theme-red:            #E41E3F;  /* error, negative deltas, critical */
+  --theme-yellow:         #F7B928;  /* warning */
+  --theme-cyan:           #00C2CB;  /* secondary chart */
+  --theme-purple:         #A033FF;  /* tertiary chart */
+  --theme-orange:         #FF6900;  /* quaternary chart */
+
+  /* ----- Color: gray scale (the backbone) -------------------------------- */
+  --theme-white:          #FFFFFF;
+  --theme-gray-50:        #FAFBFC;
+  --theme-gray-100:       #F0F2F5;
+  --theme-gray-200:       #E4E6EB;
+  --theme-gray-300:       #CED0D4;
+  --theme-gray-400:       #8A8D91;
+  --theme-gray-500:       #65676B;
+  --theme-gray-600:       #444950;
+  --theme-gray-700:       #303338;
+  --theme-gray-800:       #242526;
+  --theme-gray-900:       #1C1E21;
+  --theme-black:          #050505;  /* never #000 */
+
+  /* ----- Semantic surface aliases ---------------------------------------- */
+  --bg-page:             var(--theme-gray-100);
+  --bg-card:             var(--theme-white);
+  --bg-card-hover:       #F5F6F8;
+  --bg-input:            var(--theme-gray-100);
+  --bg-input-focus:      var(--theme-white);
+  --bg-selected:         var(--theme-blue-50);
+  --bg-hover:            var(--theme-gray-100);
+
+  /* ----- Semantic text aliases ------------------------------------------- */
+  --fg-1:                var(--theme-black);      /* primary */
+  --fg-2:                var(--theme-gray-500);   /* secondary, labels */
+  --fg-3:                var(--theme-gray-400);   /* tertiary, placeholder */
+  --fg-strong:           var(--theme-gray-600);   /* heavy secondary */
+  --fg-on-blue:          var(--theme-white);
+  --fg-link:             var(--theme-blue);
+  --fg-success:          var(--theme-green);
+  --fg-danger:           var(--theme-red);
+  --fg-warning:          var(--theme-yellow);
+
+  /* ----- Borders --------------------------------------------------------- */
+  --border:              1px solid var(--theme-gray-200);
+  --border-strong:       1px solid var(--theme-gray-300);
+  --border-focus:        2px solid var(--theme-blue);
+
+  /* ----- Chart palette (use in this order) ------------------------------- */
+  --chart-1: #0866FF;
+  --chart-2: #00C2CB;
+  --chart-3: #F7B928;
+  --chart-4: #E41E3F;
+  --chart-5: #31A24C;
+  --chart-6: #A033FF;
+  --chart-7: #FF6900;
+  --chart-8: #E4E6EB;
+
+  /* ----- Typography: families ------------------------------------------- */
+  --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:    SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+  /* ----- Typography: scale ---------------------------------------------- */
+  --text-4xl:   32px;   --lh-4xl: 1.2;   --tracking-4xl: -0.02em;
+  --text-3xl:   28px;   --lh-3xl: 1.2;   --tracking-3xl: -0.02em;
+  --text-2xl:   24px;   --lh-2xl: 1.2;   --tracking-2xl: -0.02em;
+  --text-xl:    20px;   --lh-xl:  1.34;  --tracking-xl:  -0.01em;
+  --text-lg:    17px;   --lh-lg:  1.34;
+  --text-base:  15px;   --lh-base: 1.5;
+  --text-sm:    13px;   --lh-sm:  1.5;
+  --text-xs:    12px;   --lh-xs:  1.5;
+
+  /* ----- Typography: weights -------------------------------------------- */
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+
+  /* ----- Spacing (4px base unit) ---------------------------------------- */
+  --sp-1:   4px;
+  --sp-2:   8px;
+  --sp-3:   12px;
+  --sp-4:   16px;
+  --sp-5:   20px;
+  --sp-6:   24px;
+  --sp-8:   32px;
+  --sp-10:  40px;
+  --sp-12:  48px;
+  --sp-16:  64px;
+
+  /* ----- Radius --------------------------------------------------------- */
+  --r-sm:   6px;
+  --r-md:   8px;
+  --r-lg:   12px;
+  --r-xl:   16px;
+  --r-pill: 20px;
+  --r-full: 9999px;
+
+  /* ----- Shadows -------------------------------------------------------- */
+  --shadow-sm:       0 1px 2px rgba(0,0,0,0.1);
+  --shadow-md:       0 2px 8px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.1);
+  --shadow-lg:       0 12px 28px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-dropdown: 0 2px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  --shadow-tooltip:  0 2px 8px rgba(0,0,0,0.2);
+
+  /* ----- Motion --------------------------------------------------------- */
+  --ease:        all 0.2s ease;
+  --ease-fast:   all 0.1s ease;
+  --ease-spring: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ----- Layout --------------------------------------------------------- */
+  --sidebar-width:  240px;
+  --header-height:  56px;
+  --tabbar-height:  44px;
+  --filterbar-height: 52px;
+  --content-max-prose: 680px;
+}
+
+/* ==========================================================================
+   Element defaults — apply by adding `class="theme"` to a container, or
+   import this file and rely on the resets below at :root level.
+   ========================================================================== */
+
+html, body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  color: var(--fg-1);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .theme-h1 {
+  font-size: var(--text-4xl);
+  line-height: var(--lh-4xl);
+  letter-spacing: var(--tracking-4xl);
+  font-weight: var(--weight-bold);
+  margin: 0;
+}
+h2, .theme-h2 {
+  font-size: var(--text-3xl);
+  line-height: var(--lh-3xl);
+  letter-spacing: var(--tracking-3xl);
+  font-weight: var(--weight-bold);
+  margin: 0;
+}
+h3, .theme-h3 {
+  font-size: var(--text-2xl);
+  line-height: var(--lh-2xl);
+  letter-spacing: var(--tracking-2xl);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+}
+h4, .theme-h4 {
+  font-size: var(--text-xl);
+  line-height: var(--lh-xl);
+  letter-spacing: var(--tracking-xl);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+}
+
+p, .theme-p {
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  margin: 0;
+  max-width: var(--content-max-prose);
+}
+
+small, .theme-small {
+  font-size: var(--text-sm);
+  line-height: var(--lh-sm);
+  color: var(--fg-2);
+}
+
+code, kbd, pre, .theme-code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+a, .theme-link {
+  color: var(--fg-link);
+  text-decoration: none;
+  transition: var(--ease);
+}
+a:hover, .theme-link:hover { text-decoration: underline; }
+
+/* KPI numbers */
+.theme-kpi {
+  font-size: var(--text-3xl);
+  line-height: var(--lh-3xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-3xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}
+.theme-kpi-xl {
+  font-size: var(--text-4xl);
+  line-height: var(--lh-4xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-4xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}
+
+/* Card primitive */
+.theme-card {
+  background: var(--bg-card);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--sp-6);
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>11 · SLAs, Observability, Data Quality — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 11 · track 04 — at scale</div>
+    <h1>SLAs, observability,<br/>data quality.</h1>
+    <p class="subtitle">Freshness, completeness, accuracy — the three numbers that determine whether your pipeline is trusted. How to instrument them. How to alert on them. The difference between an outage and a data quality bug, and why your VP cares about both.</p>
+    <div class="meta">
+      <span>⏱ <b>16 min</b></span>
+      <span>◆ <b>3 simulations</b></span>
+      <span>✦ <b>+85 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <h2>The three numbers</h2>
+      <div class="prose">
+        <p>Software systems are observable through latency, errors, and saturation. Data systems need a different triple. The IC5 framing:</p>
+        <ul>
+          <li><strong>Freshness.</strong> How recent is the data? Specifically: what is <em>now()</em> minus the max event time of rows currently in the table? "Lag" or "staleness" are synonyms.</li>
+          <li><strong>Completeness.</strong> Are we missing rows we should have? Sometimes called "volume" — yesterday's row count is a robust proxy for "did we get all the events."</li>
+          <li><strong>Accuracy.</strong> Are the values right? Schema-conforming, in-range, internally consistent. The hardest of the three to instrument because "right" is domain-specific.</li>
+        </ul>
+        <p>An outage is when freshness goes to infinity (the pipeline is dead). A data quality bug is when freshness is fine but completeness or accuracy is silently wrong. Both wake people up; only one is detectable from a CPU graph.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Live SLA dashboard</h2>
+      <div class="prose"><p>Inject failures. Watch how each metric responds. Notice that "the dashboard is green" does not mean "the data is right" — it means "the metrics we instrumented look healthy."</p></div>
+      <div id="w-sla"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>The IC5 move.</b> When designing a pipeline, define the SLO before you write the first query. <em>"Freshness ≤ 15 min, completeness ≥ 99.9% of yesterday's count, schema-conforming row rate ≥ 99.99%."</em> Then build the alerts. Anything else is decoration.</div></div>
+    </section>
+
+    <section id="s3">
+      <h2>The four quality test families</h2>
+      <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.84rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
+            <th style="padding: 8px;">Family</th><th style="padding: 8px;">Detects</th><th style="padding: 8px;">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Schema</td><td style="padding:8px;">column added/removed/retyped, nullability change</td><td style="padding:8px; color:var(--ok);">Free — registry rejects</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Constraint</td><td style="padding:8px;"><code>not_null</code>, <code>unique</code>, foreign-key, range</td><td style="padding:8px; color:var(--ok);">Cheap — declarative SQL</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Anomaly / volume</td><td style="padding:8px;">row count drift, value-distribution drift</td><td style="padding:8px; color:var(--warn);">Medium — needs history baseline</td></tr>
+          <tr><td style="padding:8px; color:var(--cyan-deep);">Reconciliation</td><td style="padding:8px;">downstream sum ≠ upstream sum, FK joins lose rows</td><td style="padding:8px; color:var(--bad);">High — runs full joins</td></tr>
+        </tbody>
+      </table>
+      <div class="prose"><p>Run all four. Schema and constraint tests on every model, every run — they're cheap. Anomaly tests on the high-value tables — they catch the silent bugs. Reconciliation tests for the metrics your CFO looks at — expensive but the only thing that proves correctness end-to-end.</p></div>
+    </section>
+
+    <section id="s4">
+      <h2>The dbt test idiom</h2>
+      <pre style="font-family: var(--mono); font-size: 0.82rem; background: var(--paper-2); padding: 14px; border-radius: 8px; border: 1px solid var(--rule); overflow-x: auto; line-height: 1.5;">
+# models/marts/fact_orders.yml
+models:
+  - name: fact_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: amount_usd
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000000
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['pending','paid','shipped','refunded','cancelled']
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('stg_orders')      # reconciliation</pre>
+      <div class="prose"><p>Each test is just a SELECT that should return zero rows. dbt runs them all after every build, fails the run if any return rows, and posts the failures to your CI. This is the cheapest "data quality" you can buy and the highest-leverage. If you do nothing else from this lesson, do this.</p></div>
+    </section>
+
+    <section id="s5">
+      <h2>Data quality frameworks: Great Expectations and Monte Carlo</h2>
+      <div class="prose">
+        <p>dbt tests are powerful for model-level constraints but they run only when dbt runs. For continuous, production-grade quality monitoring across the whole data platform — including raw ingestion layers that dbt never touches — two frameworks dominate.</p>
+        <p><strong>Great Expectations (GX)</strong> is an open-source Python library and platform. You define <em>expectations</em> against a dataset — "column X is not null," "values are between 0 and 1,000,000," "row count is within 10% of last run" — and GX generates a data document (rendered HTML report) with pass/fail per expectation per run. Key concepts:</p>
+        <ul>
+          <li><em>Expectation Suite:</em> a named collection of expectations for a data asset.</li>
+          <li><em>Checkpoint:</em> a run configuration that pairs a suite with a validator (Pandas, Spark, SQL) and an action list (alert, save results, update data docs).</li>
+          <li><em>Data Docs:</em> auto-generated HTML showing expectation pass rates over time — the "quality dashboard" that stakeholders can bookmark.</li>
+        </ul>
+        <p>GX works well when your data engineering team owns the expectation authoring and you want code-as-config quality rules checked into git alongside your pipeline code.</p>
+        <p><strong>Monte Carlo</strong> is a commercial <em>data observability</em> platform. Instead of you writing explicit rules, Monte Carlo learns your tables' statistical baselines automatically — row count distribution, null rate distribution, schema history — and alerts on anomalies without manual threshold setting. The key distinction from GX:</p>
+        <ul>
+          <li>GX: <em>declared</em> rules, run on pipeline trigger, fails loudly when expectations break.</li>
+          <li>Monte Carlo: <em>learned</em> baselines, runs continuously, alerts on statistical drift you didn't anticipate.</li>
+        </ul>
+        <p>IC5 answer to "which should we use?" — both, at different layers. GX (or dbt tests) at the model/transform layer for business-logic correctness. Monte Carlo (or an equivalent like Bigeye, Datafold, Soda) at the platform layer for anomaly detection across raw sources and high-value tables. Neither replaces the other.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Lineage + alerting: closing the loop</h2>
+      <div class="prose">
+        <p>An anomaly in <code>fact_orders.amount_usd</code> is half a debugging job. The other half is: <em>which upstream change caused this?</em> Lineage answers that. dbt's auto-generated DAG, OpenLineage events, Datahub, Atlan — all provide the same picture: <em>given a problem in a downstream table, walk back to find which upstream model or source last changed.</em></p>
+        <p>The end-to-end loop:</p>
+        <ol>
+          <li>SLO defined per table: freshness, volume, schema, constraints.</li>
+          <li>Tests run on every build. Failures emit events.</li>
+          <li>Lineage tags every event with upstream context.</li>
+          <li>Alerts page the team that owns the <em>upstream</em> source, not the downstream consumer.</li>
+        </ol>
+        <p>That last step is the IC5 move. The default of "page whoever owns the broken table" is wrong — usually the broken table is correctly reflecting a broken upstream, and the on-call wastes 40 minutes finding that out manually.</p>
+        <p><strong>OpenLineage</strong> is the open standard (CNCF project) for lineage event emission. Airflow, dbt, Spark, and Flink all have OpenLineage integrations — every job emits <code>RunEvent</code> messages with input/output dataset names and facets. Marquez is the open-source backend; commercial platforms (Monte Carlo, Datahub, Atlan) also ingest OpenLineage. If you're building a new platform, default to OpenLineage for portability.</p>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'sla-quality';
+initLesson(LID, [
+  { id: 's1', label: 'The three numbers' },
+  { id: 's2', label: 'Live dashboard' },
+  { id: 's3', label: 'Test families' },
+  { id: 's4', label: 'dbt tests' },
+  { id: 's5', label: 'GX & Monte Carlo' },
+  { id: 's6', label: 'Lineage & alerts' },
+  { id: 's7', label: 'Quick check' },
+  { id: 's8', label: 'Vocab' },
+]);
+
+D.SLADash(document.getElementById('w-sla'), { lessonId: LID, cpId: 'sla' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'The silent bug',
+  question: 'A pipeline reports green: jobs succeeded, latency normal, no errors. Marketing escalates: "the conversion rate dashboard has been wrong for three days." Most likely cause?',
+  options: [
+    'A bug in the dashboard.',
+    'An accuracy or completeness regression — schema looks fine, jobs run fine, but a value was silently wrong (a join dropped rows, a unit changed, an enum had a new value treated as null). Standard health metrics don\'t catch this; reconciliation tests do.',
+    'CPU saturation.',
+    'A network partition.',
+  ],
+  correct: 1,
+  explanation: 'This is the classic "data quality bug" — the pipeline is technically healthy but the <em>output is wrong</em>. Causes: an upstream enum gained a value that didn\'t match a CASE statement (silently NULL); a join lost rows because of a key-format change; a unit conversion drifted. The fix is reconciliation: <code>SUM(fact) MUST EQUAL SUM(source)</code>, run as a test, every build. Without it, you\'ll find out from your VP.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Where to alert',
+  question: '<code>fact_orders</code> is missing 30% of expected rows today. Lineage shows <code>fact_orders ← stg_orders ← raw_orders ← Postgres CDC</code>. CDC has 0 events for the last 4 hours. Which team gets paged?',
+  options: [
+    'The dbt model owner — that\'s where the test failed.',
+    'The dashboard team — they\'re the ones complaining.',
+    'The CDC / source-system team. Lineage shows the gap is at the source; downstream is correctly reflecting nothing-arrived. Paging the dbt owner wastes everyone\'s time.',
+    'Everyone, simultaneously.',
+  ],
+  correct: 2,
+  explanation: 'The IC5 move: <em>walk lineage to the root before paging.</em> The dbt model accurately reflects its input, which is empty — there\'s no bug there. The bug is at the CDC connector or the source DB. Auto-routing alerts via lineage saves 30+ minutes of "is it me or is it upstream" debugging on every incident. This is the bar a real data platform sets.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'SLA / SLO / SLI', q: 'The hierarchy', a: '<b>SLI</b>: the metric (freshness in minutes). <b>SLO</b>: the target (≤15 min, 99% of the time). <b>SLA</b>: the contract with consequences ($X credit if missed). Borrow from SRE.' },
+    { term: 'Freshness', q: 'How is it computed?', a: '<code>now() - max(event_time)</code> in the target table. <em>Not</em> <code>now() - max(load_ts)</code> — that just measures pipeline scheduler health, not data lag.' },
+    { term: 'Volume / row count', q: 'A robust simple alert', a: 'Compare today\'s row count to a rolling-7-day baseline. Alert if it\'s outside [-20%, +50%]. Catches "the API stopped sending events" failures with one query.' },
+    { term: 'Anomaly detection', q: 'Why isn\'t it everywhere?', a: 'Because false positives are expensive. ML-based detectors look great in demos and page you constantly in production. Start with hard thresholds; add anomaly detection only on metrics where the team is willing to tune.' },
+    { term: 'Data contract', q: 'What is it?', a: 'An explicit, versioned schema + semantic contract between a source and a downstream consumer. Schema registry enforces the schema; the contract adds field semantics, freshness, and ownership. The 2024+ way to stop "schema drift broke prod" incidents.' },
+    { term: 'Great Expectations', q: 'Declared vs learned?', a: '<em>Declared</em> rules — you write expectations (not_null, in_range, row count ±10%) and GX checks them. Best for model-layer, code-as-config quality rules. Reports via Data Docs HTML. Integrates with dbt, Airflow, Spark.' },
+    { term: 'Monte Carlo', q: 'Declared vs learned?', a: '<em>Learned</em> baselines — MC infers distribution, null rate, volume baselines from historical data and alerts on drift without manual threshold setting. Best for platform-layer anomaly detection across raw sources.' },
+    { term: 'OpenLineage', q: 'What is it?', a: 'A CNCF open standard for lineage event emission. Jobs emit <code>RunEvent</code> messages with input/output datasets. Airflow, dbt, Spark, Flink all have integrations. Marquez is the open-source backend; commercial platforms also ingest it.' },
+  ]
+});
+</script>
+
+</body>
+</html>

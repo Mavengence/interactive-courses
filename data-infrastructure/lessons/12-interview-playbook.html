@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>12 · The Interview Playbook — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 12 · capstone</div>
+    <h1>The interview<br/>playbook.</h1>
+    <p class="subtitle">A real 45-minute design interview, dissected move by move. The structure to follow. The questions to ask back. The trade-offs to surface unprompted. The mistakes that read as junior — and the moves that read as IC5.</p>
+    <div class="meta">
+      <span>⏱ <b>20 min</b></span>
+      <span>◆ <b>1 walkthrough + 30 drills</b></span>
+      <span>✦ <b>+150 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <h2>The five-act structure</h2>
+      <div class="prose">
+        <p>Every data system design interview, regardless of company, is the same five acts. Use this as a template. If the interviewer doesn't lead you through them, lead yourself.</p>
+        <ol>
+          <li><strong>Clarify (5 min).</strong> Don't draw anything yet. Ask what the system is for, who reads the output, what scale, what freshness, what consistency. Write the answers on the board — they're the spec. The three numbers to always extract: <em>writes/sec, reads/sec, freshness target.</em></li>
+          <li><strong>Skeleton (5 min).</strong> Draw the six layers from lesson 1. Mark which layers the question touches. Identify the dominant constraint (usually one of: latency, scale, correctness, or cost).</li>
+          <li><strong>Deep dive (20 min).</strong> Pick the hardest 1-2 layers and design them in detail. Schema, partition key, processing topology, SLO targets. <em>This is where the interview is decided.</em> For storage: name the partition key and explain your choice. For streaming: name the watermark strategy. For serving: explain what's on the read path and what's pre-computed.</li>
+          <li><strong>Failure modes (10 min).</strong> What breaks? Late data, hot partitions, schema drift, backfills, region failover. Name the monitoring signal for each. The interviewer will probe; surface it yourself first.</li>
+          <li><strong>Trade-offs & next steps (5 min).</strong> Recap what you optimized for. Name what you traded away (consistency? cost? simplicity?). Mention what you'd do next quarter — multi-region, GDPR compliance, cost optimization — to show you see past the 45-minute window.</li>
+        </ol>
+        <p>The single most common mistake: <em>starting to design before clarifying.</em> You'll draw an expensive real-time system when a nightly batch would have been fine. Two minutes of clarifying questions can save twenty minutes of design rework in a 45-minute interview.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Walk through a real one</h2>
+      <div class="prose"><p>Click through this 45-minute interview. The prompt is the kind you'll actually get. Each step shows the move and the meta-commentary on <em>why</em>.</p></div>
+      <div id="w-iv"></div>
+    </section>
+
+    <section id="s3">
+      <h2>Phrases that read as senior</h2>
+      <div class="prose">
+        <p>These are not magic words. They're the verbal markers of someone who's actually built the systems before. Use them when they're true:</p>
+        <ul>
+          <li><em>"Before we design this, what does the consumer of the output actually need?"</em> — Frames the problem in terms of read patterns, not write patterns.</li>
+          <li><em>"What's the cost of this being one minute late versus one hour late?"</em> — Surfaces the freshness SLO instead of assuming it.</li>
+          <li><em>"Let me size this before I pick a tool."</em> — 1B events/day at 1KB each is 12KB/sec average, 120KB/sec peak. That's tiny. Many problems are smaller than they look once you do the math.</li>
+          <li><em>"I'd default to Iceberg + dbt + Airflow unless we have a specific reason not to."</em> — Names a sensible boring default. Boring defaults are senior.</li>
+          <li><em>"The risk here is X. The mitigation is Y. The accepted residual risk is Z."</em> — Trade-off literacy. Also, naming residual risk explicitly is a thing only senior engineers do.</li>
+          <li><em>"I'd want to see a prototype before committing to that."</em> — Refusing to over-design when uncertainty is high.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Phrases that read as junior</h2>
+      <div class="prose">
+        <ul>
+          <li><em>"We'd use Kafka."</em> (without saying why)</li>
+          <li><em>"I'd just use machine learning to handle that."</em></li>
+          <li><em>"It needs to be exactly-once."</em> (when the sink is an HTTP API)</li>
+          <li><em>"I'd put it all in Snowflake."</em> (when scale is unstated)</li>
+          <li><em>"Let me just draw it."</em> (without clarifying first)</li>
+          <li><em>"That edge case is unlikely."</em> (when asked about a failure mode)</li>
+        </ul>
+        <p>None of these are wrong, exactly. They're all <em>under-specified</em> — they skip the reasoning step that an IC5 is hired for. The fix is the same in all cases: name the assumption you're making out loud, and explain when you'd revisit it.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check: IC5-level scenarios</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s6">
+      <h2>The 30 things to have memorized</h2>
+      <div class="prose"><p>Quick recall. If any of these isn't immediate, go back to the lesson and re-read.</p></div>
+      <div id="flash"></div>
+    </section>
+
+    <section id="s7">
+      <h2>One last move</h2>
+      <div class="prose">
+        <p>At the end of the interview, when they ask <em>"any questions for us?"</em> — ask <em>"what's the data quality story like here?"</em> and <em>"how do you handle backfills today?"</em></p>
+        <p>You'll get a real answer that tells you whether you'd actually want the job. And the interviewer will note that you cared about the operational reality, not the architecture diagram.</p>
+        <p>That's the whole course. Now go interview.</p>
+      </div>
+      <div class="callout" style="margin-top: 24px;"><span class="icon">✓</span><div><b>You finished.</b> Twelve lessons, four tracks, the full picture. The XP is a number; the picture in your head is the actual product. Hold it. Trust it. Use it.</div></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'interview-playbook';
+initLesson(LID, [
+  { id: 's1', label: 'Five-act structure' },
+  { id: 's2', label: 'Real interview' },
+  { id: 's3', label: 'Senior phrases' },
+  { id: 's4', label: 'Junior phrases' },
+  { id: 's5', label: 'Quick check' },
+  { id: 's6', label: '30 things' },
+  { id: 's7', label: 'Last move' },
+]);
+
+D.InterviewMove(document.getElementById('w-iv'), { lessonId: LID, cpId: 'iv', moves: [
+  { tag:'clarify', title:'00:00 — Mirror the prompt back',
+    body:'<p>Prompt: <em>"Design real-time analytics for a marketplace — sellers see live order/revenue/inventory dashboards."</em></p><p>I say back: <b>"So we need second-fresh dashboards for each seller, scoped to their own data, over an event stream of orders. Tell me if I have the shape right."</b></p>',
+    note:'This is not throat-clearing. It anchors the contract and gives the interviewer a chance to correct you cheaply, before any architecture.' },
+  { tag:'scope', title:'02:00 — Pin scale and freshness',
+    body:'<p>Three numbers I always extract: <b>writes/sec, reads/sec, freshness target</b>.</p><p>"How many orders per second at peak?" → ~10k/s. "How many sellers loading dashboards?" → 50k DAU, ~500 concurrent. "How fresh?" → "feels live" → <b>under 5 seconds</b>.</p>',
+    note:'Without these, every later choice is a guess. With them, choices defend themselves.' },
+  { tag:'estimate', title:'05:00 — Back-of-envelope the data',
+    body:'<p>10k orders/s × 86,400 = ~860M/day. At 1KB each → <b>~860GB/day raw</b>. Compressed Parquet ~10× → ~86GB/day on the lakehouse. 7-day hot tier ≈ 600GB.</p><p>Cache fan-out: 50k sellers × 50KB pre-agg ≈ <b>2.5GB hot in Redis/Druid</b>. Fits in one node.</p>',
+    note:'Numbers shift the conversation from vibes to engineering. If you don\'t do this, the interviewer will ask you to.' },
+  { tag:'api', title:'08:00 — Sketch the consumer contract first',
+    body:'<p>Two endpoints — and I write them on the board:</p><pre>GET /seller/:id/dashboard   → { revenue_24h, orders_24h, top_skus[10] }\nWS  /seller/:id/stream      → { event: \'order\', ts, amount, sku }</pre><p>Dashboard load is one cache hit. Live updates push deltas. <b>No SQL on the read path.</b></p>',
+    note:'Designing the consumer\'s shape first prevents the classic mistake of building beautiful infra that nobody can use.' },
+  { tag:'data model', title:'12:00 — Pick the event shape',
+    body:'<p>One canonical event: <code>order_placed</code>. Fields: <code>order_id, seller_id, ts_event, amount_cents, sku, currency, schema_version</code>.</p><p>Partition key = <b>seller_id</b> — every downstream thing scales with sellers, so co-locate by seller from the source.</p>',
+    note:'The partition key is the most consequential decision. Get it wrong and you re-shuffle for the rest of the design.' },
+  { tag:'streaming', title:'17:00 — The pipeline · CDC → Kafka → Flink',
+    body:'<p>Postgres orders table is source of truth. <b>Debezium CDC</b> → Kafka topic <code>orders.cdc</code> (partitioned by seller_id, 64 partitions). <b>Flink</b> reads, applies upserts, computes 1-minute tumbling windows per seller.</p><p>Watermark = max(event_ts) − 30s. Late events past 30s go to a side output.</p>',
+    note:'Saying "Flink" without saying "watermark" is a tell. Watermarks are the one thing you must pronounce correctly.' },
+  { tag:'storage', title:'22:00 — Two sinks, one source',
+    body:'<p>Flink writes <b>two places</b>:<br>1. <b>Iceberg</b> <code>fact_orders</code> on S3 — partitioned by <code>day, seller_id_bucket</code>. This is the durable lakehouse layer for ad-hoc/BI.<br>2. <b>Druid</b> rollups — pre-aggregated <code>(seller_id, minute) → revenue, orders, top_skus</code>. This is the dashboard read path.</p>',
+    note:'One pipeline, two materializations. Don\'t make the analyst query Druid; don\'t make the dashboard query Iceberg.' },
+  { tag:'serving', title:'27:00 — The hot read path',
+    body:'<p>Dashboard endpoint hits <b>Druid</b> directly: <code>SELECT sum(revenue) WHERE seller_id=? AND minute &gt;= now()-1d</code>. Druid sub-second on rollups.</p><p>WebSocket stream subscribes to a <b>Kafka consumer group per seller-shard</b>, filters server-side, fans out via a thin gateway. <b>No DB on the websocket path.</b></p>',
+    note:'Live = stream from the bus. Aggregates = serve from the rollup store. Never confuse the two.' },
+  { tag:'tradeoff', title:'32:00 — Call the consistency model',
+    body:'<p>This is <b>PA/EL under PACELC</b>: during a partition we stay available and accept stale reads; in normal operation we optimize latency over linearizability.</p><p>The seller seeing "$1,247 revenue" might be 4 seconds behind truth. <b>That is acceptable</b> for this product. I\'d call this out to the interviewer explicitly.</p>',
+    note:'Naming the consistency model is a senior signal. Most candidates handwave it.' },
+  { tag:'scale', title:'37:00 — Hot sellers and skew',
+    body:'<p>One seller (Black Friday top brand) takes 30% of traffic → its Kafka partition melts.</p><p>Fix: <b>two-level keying</b>. Hash <code>(seller_id, order_id % 4)</code> for the bus to spread, then re-key to seller_id before the windowed aggregation. Pre-aggregate per sub-key, then merge.</p>',
+    note:'Skew handling is the #1 follow-up at IC5. Have an answer ready before they ask.' },
+  { tag:'tradeoff', title:'40:00 — What I\'m NOT building',
+    body:'<p>Out of scope, called out: multi-region failover, GDPR right-to-delete on the stream, fraud detection, A/B exposure of dashboard variants, mobile push.</p><p>"If we had another 30 minutes I\'d sketch the multi-region story — async replication of Iceberg + Kafka MirrorMaker, with <b>region-local serving</b>."</p>',
+    note:'Showing what you cut is as important as what you build. It proves you saw the whole space.' },
+  { tag:'follow-up', title:'43:00 — The closing move',
+    body:'<p>"The thing I\'d watch in production: the <b>watermark lag</b> on Flink. If event-time falls behind processing-time by more than 60s, dashboards silently go stale even though Druid is healthy. I\'d page on that, not on raw Kafka lag."</p><p>This is the move that wins the loop.</p>',
+    note:'End on the operational story. The interviewer is now picturing you on call. That\'s the hire signal.' },
+] });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'The clarification move',
+  question: 'The prompt is: "Design a data pipeline for fraud detection." Before drawing anything, which three numbers must you extract first?',
+  options: [
+    '"Which cloud provider?" "Do you use Kafka already?" "How big is the team?"',
+    'Writes/sec (transaction volume at peak), reads/sec or latency budget for the fraud decision, and freshness target (realtime inference vs. nightly batch scoring). These define the architecture.',
+    '"Do you want batch or streaming?" — let them decide the design for you.',
+    '"What\'s the budget?" and "How many engineers do we have?"',
+  ],
+  correct: 1,
+  explanation: 'Without the three numbers — writes/sec, reads/sec or decision latency, freshness — every architectural choice is a guess. 100 transactions/sec at "decisions must be synchronous and &lt;200ms" forces a very different design than 10,000/sec with "flag and review within 1 hour." The interview budget is 45 minutes; spending 5 extracting requirements saves 20 minutes of designing the wrong thing.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'The hot partition problem',
+  question: 'Your Kafka topic for orders is partitioned by <code>seller_id</code>. One seller drives 40% of all traffic on Black Friday. What exactly breaks, and what is the IC5 fix?',
+  options: [
+    'Nothing breaks — Kafka handles it automatically.',
+    'That partition\'s consumer thread becomes the bottleneck. Fix: repartition entirely by order_id for even spread. Downstream, re-key to seller_id before the windowed aggregation.',
+    'Kafka will rebalance partitions automatically to spread the load.',
+    'Add more brokers and the partition will split.',
+  ],
+  correct: 1,
+  explanation: 'Kafka partitions are the unit of parallelism — one consumer thread per partition. A hot partition makes that one thread the bottleneck for 40% of your throughput. Kafka does NOT rebalance contents; adding brokers moves the partition but not the skew. The fix is two-level keying: hash on <code>(seller_id, order_id % N)</code> to spread across N×more partitions for throughput, then re-key to seller_id before the aggregation stage. This is the canonical hot-partition pattern and shows up in nearly every IC5 streaming interview.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Six layers', q: 'In order', a: 'Source → Log → Processing → Storage → Serving → Consumption.' },
+    { term: 'CAP', q: 'During a partition…', a: 'You pick C or A. P is not optional. "CA" means you have a single point of failure.' },
+    { term: 'PACELC', q: 'In normal operation…', a: 'You pick L or C. Latency vs Consistency. Cassandra → PA/EL. Spanner → PC/EC.' },
+    { term: 'Star schema', q: 'What\'s in the middle?', a: 'A fact table — foreign keys + numeric measures. Surrounding dimension tables hold descriptive context.' },
+    { term: 'SCD Type 2', q: 'How preserve history?', a: 'Insert new dim row with valid_from/valid_to instead of overwriting. Surrogate key changes; natural key stays.' },
+    { term: 'Parquet anatomy', q: 'Top-down', a: 'File → row groups → column chunks → pages. Footer holds schema + per-column-chunk min/max stats.' },
+    { term: 'Predicate pushdown', q: 'How does it skip work?', a: 'Min/max stats per row group. Query <code>amount &gt; 1000</code>, row group max <code>amount</code> = 50 → entire group skipped.' },
+    { term: 'Dictionary encoding', q: 'What does it do?', a: 'Replace low-cardinality values with int indices into a dictionary. Massive compression on string columns like country, status.' },
+    { term: 'Iceberg metadata chain', q: '4 levels', a: 'catalog → metadata.json → manifest list → manifests → data files.' },
+    { term: 'CoW vs MoR', q: 'When each?', a: 'CoW: read-heavy, infrequent updates. MoR: write-heavy CDC streams. Hudi is MoR-default; Iceberg/Delta are CoW-default.' },
+    { term: 'Time travel', q: 'How is it free?', a: 'Old snapshots\' files survive until VACUUM. Reading "as of timestamp" just resolves the snapshot active then.' },
+    { term: 'Partition rule of thumb', q: 'Pick by what?', a: 'The dominant filter column. Aim for ≥128MB per partition file. Avoid high-cardinality keys.' },
+    { term: 'Z-order', q: 'When use it?', a: 'When 2-4 columns are filtered with similar frequency. Interleaves bits so min/max prunes well across all of them.' },
+    { term: 'Small file problem', q: 'Cure?', a: 'Compaction. Run periodically; aim for ~512MB target file size.' },
+    { term: 'ELT vs ETL', q: 'Why ELT won', a: 'Cheap warehouse compute + raw kept forever = bug-fix replay is free. Tooling democratized to anyone with SQL.' },
+    { term: 'Idempotent', q: 'Three ways to achieve', a: 'MERGE on key; windowed DELETE+INSERT in a tx; INSERT … ON CONFLICT DO NOTHING with stable event_id.' },
+    { term: 'Kafka partition', q: 'What does it cap?', a: 'Consumer-group parallelism. N partitions = max N working consumers. Plan high.' },
+    { term: 'Event time vs processing time', q: 'Which to use?', a: 'Almost always event time. Processing-time aggregations look right but produce wrong business answers when sources are delayed.' },
+    { term: 'Watermark', q: 'What does it promise?', a: '"I think I\'ve seen all events with event_time ≤ T." Crossing T closes the window for emission.' },
+    { term: 'Window types', q: 'Four kinds', a: 'Tumbling (fixed non-overlapping), hopping (fixed overlapping), session (gap-based), global (custom trigger).' },
+    { term: 'CDC', q: 'How does it tap source?', a: 'Reads the WAL/binlog/oplog the DB already writes. Captures inserts, updates, deletes — including deletes polling can\'t see.' },
+    { term: 'Lambda vs Kappa', q: 'Why Kappa won', a: 'One codebase. Streaming is robust enough to be source of truth; "batch" is just replay from offset zero.' },
+    { term: 'Outbox pattern', q: 'When?', a: 'When app needs to publish a business event atomically with a DB write. Write to outbox table inside the tx; CDC streams it.' },
+    { term: 'Exactly-once truth', q: 'What is it really?', a: 'At-least-once delivery + idempotent processing. The system can\'t prevent duplicate delivery, only duplicate <em>effect</em>.' },
+    { term: 'Backfill design', q: 'Two checks', a: '(1) Same window run twice = same output. (2) Adjacent windows in parallel = same as serial.' },
+    { term: 'Schema compatibility', q: 'Backward / forward / full', a: 'Backward: new schema reads old data. Forward: old reads new. Full: both. Default to FULL.' },
+    { term: 'Three SLO numbers', q: 'For data?', a: 'Freshness (how recent), completeness (any missing rows), accuracy (values right).' },
+    { term: 'Lineage', q: 'Why it\'s essential', a: 'Auto-routes alerts to the upstream owner of a problem, not the downstream consumer. Saves 30+ min per incident.' },
+    { term: 'dbt test families', q: 'Which two are free?', a: 'Schema tests (registry-enforced) + constraint tests (declarative SQL). Run on every build, no excuse not to.' },
+    { term: 'IC5 default stack', q: 'Boring is senior', a: 'Iceberg on S3 + Trino/Snowflake + dbt + Airflow + Kafka for streams + Debezium for CDC. Deviate only with reason.' },
+  ]
+});
+</script>
+
+</body>
+</html>

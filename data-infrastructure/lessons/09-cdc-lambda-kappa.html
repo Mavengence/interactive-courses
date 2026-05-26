@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>09 · CDC, Lambda, Kappa — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+<link rel="stylesheet" href="../styles/lesson-diagrams.css?v=1"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 09 · track 03 — movement</div>
+    <h1>CDC, Lambda,<br/>and Kappa.</h1>
+    <p class="subtitle">How to mirror a Postgres source to a warehouse without losing your mind. Why Lambda architecture was a phase. Why Kappa won. The exact pattern interviewers expect when you say "real-time analytics on top of operational data."</p>
+    <div class="meta">
+      <span>⏱ <b>14 min</b></span>
+      <span>◆ <b>3 simulations</b></span>
+      <span>✦ <b>+90 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <h2>Change Data Capture</h2>
+      <div class="prose">
+        <p>You have a Postgres database with 200 tables. Marketing wants those tables in the warehouse, fresh, with every insert/update/delete reflected within seconds. The naive answer is "select * every 5 minutes." That answer scales for about a week.</p>
+        <p><strong>Change Data Capture (CDC)</strong> is the right answer. Every database already maintains a write-ahead log — Postgres calls it WAL, MySQL calls it binlog, Oracle calls it redo. CDC tools tail that log, decode every committed transaction into a stream of <code>{op: insert|update|delete, table, before, after}</code> events, and ship them to a downstream consumer.</p>
+        <p>This is dramatically better than polling because (a) it's near-realtime — milliseconds of lag, (b) it captures deletes (which polling misses entirely), (c) it doesn't load the source DB, and (d) it produces a complete, ordered event stream that any downstream can consume.</p>
+        <p><strong>The bootstrap problem.</strong> You can't replay infinite WAL history — most Postgres clusters retain WAL for only hours or days. Debezium solves this with a two-phase bootstrap: (1) <em>initial snapshot</em> — a consistent read of every row, emitted as <code>op: "r"</code> events, using a transaction-level snapshot so no writes are locked; (2) <em>streaming</em> — once the snapshot completes, WAL tailing begins from the LSN of that snapshot. New consumers always go through both phases. This is the standard pattern and interviewers expect you to name it.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The CDC pipeline, end to end</h2>
+      <div id="w-cdc"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>Tools to know.</b> <strong>Debezium</strong> is the canonical open-source CDC connector — runs on Kafka Connect, supports Postgres/MySQL/SQL Server/MongoDB. In Postgres, it uses <em>logical replication slots</em>, which require <code>wal_level = logical</code> and will hold WAL on disk if the consumer falls behind — a common ops footgun. Managed alternatives: <strong>Fivetran</strong> (closed, premium), <strong>Airbyte</strong> (open), <strong>AWS DMS</strong> (AWS-native, handles cross-DB migrations too). Modern queryable-stream option: <strong>Materialize</strong>, which exposes the CDC stream as incrementally-maintained SQL views without a separate warehouse hop.</div></div>
+    </section>
+
+    <section id="s3">
+      <h2>The CDC payload, in detail</h2>
+      <pre style="font-family: var(--mono); font-size: 0.78rem; background: var(--paper-2); padding: 14px; border-radius: 8px; border: 1px solid var(--rule); overflow-x: auto;">{
+  "op": "u",                          // c = create, u = update, d = delete, r = read (snapshot)
+  "ts_ms": 1714233601000,
+  "source": {
+    "db": "shop",
+    "schema": "public",
+    "table": "orders",
+    "lsn": 287345128,                 // Postgres WAL position — monotonic, gap-detector
+    "txId": 442817
+  },
+  "before": { "id": 42, "status": "pending", "amount": 4890 },
+  "after":  { "id": 42, "status": "shipped", "amount": 4890 }
+}</pre>
+      <div class="prose">
+        <p>Three things this format gives you:</p>
+        <ol>
+          <li><strong>Both states.</strong> <code>before</code> + <code>after</code> means the consumer can compute <em>diffs</em> without joining back to source.</li>
+          <li><strong>Ordering tokens.</strong> <code>lsn</code> and <code>txId</code> let you detect gaps and replay from a precise position. If you see <code>lsn</code> jump by more than the expected increment, you missed events — alert on this.</li>
+          <li><strong>Deletes are first-class.</strong> <code>op: "d"</code> with <code>before</code> populated, <code>after: null</code>. Polling can't see deletes.</li>
+        </ol>
+        <p><strong>Schema evolution and the registry.</strong> In production, Debezium wraps each payload in an Avro (or Protobuf) envelope and registers the schema with <strong>Confluent Schema Registry</strong> or a compatible alternative. Every consumer deserializes using the schema ID embedded in the message, not a hard-coded struct — so adding a nullable column to the source table propagates automatically without breaking consumers. Set registry compatibility to <code>BACKWARD</code> at minimum so new schemas can still read old messages during replay.</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Lambda was a phase</h2>
+      <div class="prose">
+        <p>From around 2011 to 2017, a popular architecture was <strong>Lambda</strong>: run two parallel pipelines, a "speed layer" producing fast-but-approximate results from streams, and a "batch layer" producing slow-but-accurate results from a daily re-compute. A serving layer merged them at query time. Nathan Marz proposed it; entire books were written.</p>
+        <p>Lambda solved the problem of streaming engines being immature in 2011. By 2017, streaming engines (Flink, Kafka Streams, Spark Structured Streaming) were robust enough that the speed layer could be the only layer. Jay Kreps (Kafka co-creator) called this <strong>Kappa</strong>: <em>one pipeline, streaming end-to-end, and "batch" is just a stream replayed from offset zero.</em></p>
+      </div>
+      <figure class="ld-fig" id="fig-lambda-kappa">
+        <div class="ld-fig-head">
+          <span class="ld-fig-num">Fig. 03 · two pipelines vs one</span>
+          <span class="ld-fig-title">Lambda kept a batch and a streaming layer · Kappa keeps only the stream</span>
+          <span class="ld-fig-sub">2011 → 2017 → today</span>
+        </div>
+        <div class="ld-fig-stage">
+          <svg class="ld-svg" viewBox="0 0 880 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Lambda and Kappa architectures side by side">
+            <defs>
+              <marker id="ld-lk-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/>
+              </marker>
+            </defs>
+
+            <!-- divider -->
+            <line x1="440" y1="40" x2="440" y2="360" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+
+            <!-- ============== LAMBDA (left) ============== -->
+            <g transform="translate(20,20)">
+              <text class="ld-lk-track-label" x="0" y="22" fill="var(--ink)">LAMBDA</text>
+              <text class="ld-sub" x="100" y="22">two layers · merge at read time</text>
+
+              <!-- source -->
+              <g transform="translate(0,56)">
+                <rect class="ld-lk-node" x="0" y="0" width="86" height="56" rx="6" stroke="var(--ink)"/>
+                <text class="ld-label" x="43" y="24" text-anchor="middle" font-weight="700">source</text>
+                <text class="ld-mini" x="43" y="42" text-anchor="middle" fill="var(--ink-3)">events / db log</text>
+              </g>
+
+              <!-- fork lines from source -->
+              <path class="ld-lk-pipe batch" d="M 86 78 C 130 78, 150 60, 200 60"/>
+              <path class="ld-lk-pipe speed" d="M 86 100 C 130 100, 150 130, 200 130"/>
+
+              <!-- batch layer -->
+              <g transform="translate(200,32)">
+                <rect class="ld-lk-node batch" x="0" y="0" width="160" height="56" rx="6"/>
+                <text class="ld-label" x="80" y="22" text-anchor="middle" font-weight="700" fill="oklch(0.45 0.13 60)">batch layer</text>
+                <text class="ld-mini" x="80" y="40" text-anchor="middle" fill="oklch(0.45 0.13 60)">daily · slow · accurate</text>
+              </g>
+
+              <!-- speed layer -->
+              <g transform="translate(200,102)">
+                <rect class="ld-lk-node speed" x="0" y="0" width="160" height="56" rx="6"/>
+                <text class="ld-label" x="80" y="22" text-anchor="middle" font-weight="700" fill="oklch(0.5 0.15 25)">speed layer</text>
+                <text class="ld-mini" x="80" y="40" text-anchor="middle" fill="oklch(0.5 0.15 25)">realtime · approx</text>
+              </g>
+
+              <!-- merge into serving -->
+              <path class="ld-lk-pipe batch" d="M 360 60 C 380 60, 380 200, 200 200"/>
+              <path class="ld-lk-pipe speed" d="M 360 130 C 380 130, 380 200, 200 200"/>
+
+              <!-- serving -->
+              <g transform="translate(40,180)">
+                <rect class="ld-lk-node" x="0" y="0" width="160" height="60" rx="6" stroke="var(--ink)" stroke-width="1.8"/>
+                <text class="ld-label" x="80" y="22" text-anchor="middle" font-weight="700">serving</text>
+                <text class="ld-mini" x="80" y="40" text-anchor="middle" fill="var(--ink-3)">merge slow + fast</text>
+                <text class="ld-mini" x="80" y="54" text-anchor="middle" fill="var(--ink-3)">at query time</text>
+              </g>
+
+              <!-- pain callout -->
+              <g transform="translate(0,278)">
+                <rect x="0" y="0" width="400" height="58" rx="6" fill="oklch(0.96 0.04 25)" stroke="oklch(0.6 0.15 25)" stroke-width="1"/>
+                <text x="14" y="22" font-family="var(--mono)" font-size="12" font-weight="700" fill="oklch(0.45 0.16 25)">⚠ killer flaw</text>
+                <text x="14" y="40" font-family="var(--mono)" font-size="11" fill="oklch(0.4 0.13 25)">two codebases for the same logic ·</text>
+                <text x="14" y="54" font-family="var(--mono)" font-size="11" fill="oklch(0.4 0.13 25)">they never quite agree</text>
+              </g>
+            </g>
+
+            <!-- ============== KAPPA (right) ============== -->
+            <g transform="translate(460,20)">
+              <text class="ld-lk-track-label" x="0" y="22" fill="var(--cyan-deep)">KAPPA</text>
+              <text class="ld-sub" x="86" y="22">one pipeline · replay = recompute</text>
+
+              <!-- source -->
+              <g transform="translate(0,86)">
+                <rect class="ld-lk-node stream" x="0" y="0" width="86" height="56" rx="6"/>
+                <text class="ld-label" x="43" y="24" text-anchor="middle" font-weight="700">source</text>
+                <text class="ld-mini" x="43" y="42" text-anchor="middle" fill="var(--ink-3)">events / db log</text>
+              </g>
+
+              <path class="ld-lk-pipe stream" d="M 86 114 L 138 114"/>
+
+              <!-- stream -->
+              <g transform="translate(140,86)">
+                <rect class="ld-lk-node stream" x="0" y="0" width="160" height="56" rx="6"/>
+                <text class="ld-label" x="80" y="22" text-anchor="middle" font-weight="700" fill="var(--cyan-deep)">stream processor</text>
+                <text class="ld-mini" x="80" y="40" text-anchor="middle" fill="var(--cyan-deep)">Flink · Kafka Streams</text>
+              </g>
+
+              <path class="ld-lk-pipe stream" d="M 300 114 L 352 114"/>
+
+              <!-- output -->
+              <g transform="translate(354,86)">
+                <rect class="ld-lk-node" x="0" y="0" width="60" height="56" rx="6" stroke="var(--ink)"/>
+                <text class="ld-label" x="30" y="24" text-anchor="middle" font-weight="700">output</text>
+                <text class="ld-mini" x="30" y="42" text-anchor="middle" fill="var(--ink-3)">tables</text>
+              </g>
+
+              <!-- replay loop -->
+              <path d="M 220 142 C 220 200, 50 200, 50 142" fill="none" stroke="var(--cyan-ink)" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ld-lk-arrow)"/>
+              <text x="135" y="196" text-anchor="middle" font-family="var(--mono)" font-size="11" font-weight="600" fill="var(--cyan-deep)">replay from offset 0 = recompute</text>
+
+              <!-- win callout -->
+              <g transform="translate(0,278)">
+                <rect x="0" y="0" width="400" height="58" rx="6" fill="var(--cyan-wash)" stroke="var(--cyan-ink)" stroke-width="1"/>
+                <text x="14" y="22" font-family="var(--mono)" font-size="12" font-weight="700" fill="var(--cyan-deep)">✓ one codebase</text>
+                <text x="14" y="40" font-family="var(--mono)" font-size="11" fill="var(--cyan-deep)">batch is just a stream replayed from</text>
+                <text x="14" y="54" font-family="var(--mono)" font-size="11" fill="var(--cyan-deep)">offset zero of a long-retention topic</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <figcaption class="ld-fig-cap">
+          <b>Lambda</b> ran two parallel pipelines and merged them at the serving layer — every aggregation expressed twice, in two frameworks, in two languages, that mysteriously disagreed. <b>Kappa</b> collapses both into one stream processor; "backfill" is just a consumer that starts at offset zero of a long-retention topic. As of 2026, Flink and Spark Structured Streaming are robust enough to be the only layer.
+        </figcaption>
+      </figure>
+      <div class="prose">
+        <p>The killer flaw of Lambda: <strong>two codebases for the same logic.</strong> Every aggregation has to be expressed twice — once in the streaming framework, once in the batch framework — and they have to produce identical results. They never quite did. Engineers spent years debugging "why does the realtime number disagree with the daily number?"</p>
+        <p>Kappa wins by collapsing this: the same code runs over a stream, and "re-compute everything" is implemented as a stream consumer that starts from offset zero of a long-retention topic. This requires a streaming engine that's robust enough to be the source of truth — and as of 2026, Flink and Spark Structured Streaming are.</p>
+      </div>
+      <div class="callout"><span class="icon">▸</span><div><b>The interview move.</b> If asked "would you use Lambda or Kappa?" — pick Kappa unless you have a specific reason. The specific reasons for keeping Lambda: (1) your stream framework can't express a complex ML scoring transform that your batch framework (Spark MLlib) can; (2) you need to backfill from an external source that doesn't retain a replayable log and only offers bulk exports. Both are increasingly rare as Flink's expressiveness has grown. The more common modern variant is <em>Delta Architecture</em> (Databricks' name for Kappa + streaming Delta Lake writes), which is Lambda with the batch layer replaced by a Spark Structured Streaming job — one codebase, ACID writes, compaction built in.</div></div>
+    </section>
+
+    <section id="s5">
+      <h2>Real-time analytics, the standard pattern</h2>
+      <figure class="ld-fig" id="fig-rta">
+        <div class="ld-fig-head">
+          <span class="ld-fig-num">Fig. 04 · real-time analytics, end-to-end</span>
+          <span class="ld-fig-title">CDC → Kafka → Flink → Iceberg, with two serving fan-outs</span>
+          <span class="ld-fig-sub">interview-canonical · seconds of freshness</span>
+        </div>
+        <div class="ld-fig-stage">
+          <svg class="ld-svg" viewBox="0 0 880 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Real-time analytics CDC pipeline">
+            <defs>
+              <marker id="ld-rta-arrow-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-3)"/>
+              </marker>
+            </defs>
+
+            <!-- main horizontal spine: src → cdc → kafka → flink → iceberg -->
+
+            <!-- 1 Postgres source -->
+            <g transform="translate(20,140)">
+              <rect class="ld-rta-stage src" x="0" y="0" width="108" height="96" rx="6"/>
+              <text class="ld-rta-stage-head" x="12" y="20" fill="oklch(0.4 0.15 220)">SOURCE</text>
+              <line class="ld-rule" x1="0" y1="30" x2="108" y2="30"/>
+              <!-- DB cylinder glyph -->
+              <ellipse cx="54" cy="50" rx="22" ry="6" fill="oklch(0.92 0.04 220)" stroke="oklch(0.55 0.13 220)"/>
+              <path d="M 32 50 L 32 70 A 22 6 0 0 0 76 70 L 76 50" fill="oklch(0.95 0.025 220)" stroke="oklch(0.55 0.13 220)"/>
+              <ellipse cx="54" cy="50" rx="22" ry="6" fill="none" stroke="oklch(0.55 0.13 220)"/>
+              <text class="ld-mini" x="54" y="88" text-anchor="middle" font-weight="700" fill="var(--ink)">Postgres</text>
+            </g>
+
+            <!-- arrow + label CDC -->
+            <text class="ld-rta-arrow-label" x="160" y="180" text-anchor="middle">CDC</text>
+            <path class="ld-rta-arrow" d="M 130 188 L 192 188"/>
+
+            <!-- 2 Kafka topic -->
+            <g transform="translate(196,140)">
+              <rect class="ld-rta-stage bus" x="0" y="0" width="148" height="96" rx="6"/>
+              <text class="ld-rta-stage-head" x="12" y="20" fill="oklch(0.4 0.15 270)">EVENT BUS</text>
+              <line class="ld-rule" x1="0" y1="30" x2="148" y2="30"/>
+              <text class="ld-mini" x="12" y="46" font-weight="700" fill="var(--ink)">Kafka</text>
+              <text class="ld-mini" x="12" y="58" fill="var(--ink-3)">topic: orders.cdc</text>
+              <!-- partition tape -->
+              <g transform="translate(12,66)" font-family="var(--mono)" font-size="9" fill="var(--ink-3)">
+                <rect x="0" y="0" width="124" height="22" rx="3" fill="oklch(0.96 0.025 270)" stroke="oklch(0.55 0.15 270)" stroke-width="0.8"/>
+                <line x1="24" y1="0" x2="24" y2="22" stroke="oklch(0.55 0.15 270)" stroke-width="0.5"/>
+                <line x1="48" y1="0" x2="48" y2="22" stroke="oklch(0.55 0.15 270)" stroke-width="0.5"/>
+                <line x1="72" y1="0" x2="72" y2="22" stroke="oklch(0.55 0.15 270)" stroke-width="0.5"/>
+                <line x1="96" y1="0" x2="96" y2="22" stroke="oklch(0.55 0.15 270)" stroke-width="0.5"/>
+                <text x="62" y="15" text-anchor="middle" fill="oklch(0.4 0.15 270)" font-weight="600">ordered append-only log</text>
+              </g>
+            </g>
+
+            <!-- arrow + Flink label -->
+            <text class="ld-rta-arrow-label" x="376" y="180" text-anchor="middle">consume</text>
+            <path class="ld-rta-arrow" d="M 346 188 L 408 188"/>
+
+            <!-- 3 Flink processor -->
+            <g transform="translate(412,140)">
+              <rect class="ld-rta-stage proc" x="0" y="0" width="120" height="96" rx="6"/>
+              <text class="ld-rta-stage-head" x="12" y="20" fill="oklch(0.45 0.15 25)">PROCESS</text>
+              <line class="ld-rule" x1="0" y1="30" x2="120" y2="30"/>
+              <text class="ld-mini" x="60" y="50" text-anchor="middle" font-weight="700" fill="var(--ink)">Flink</text>
+              <text class="ld-mini" x="60" y="66" text-anchor="middle" fill="oklch(0.5 0.15 25)">apply upserts</text>
+              <text class="ld-mini" x="60" y="80" text-anchor="middle" fill="oklch(0.5 0.15 25)">windowed agg</text>
+            </g>
+
+            <text class="ld-rta-arrow-label" x="564" y="180" text-anchor="middle">write</text>
+            <path class="ld-rta-arrow" d="M 534 188 L 596 188"/>
+
+            <!-- 4 Iceberg -->
+            <g transform="translate(600,140)">
+              <rect class="ld-rta-stage lake" x="0" y="0" width="148" height="96" rx="6"/>
+              <text class="ld-rta-stage-head" x="12" y="20" fill="oklch(0.38 0.13 145)">LAKEHOUSE</text>
+              <line class="ld-rule" x1="0" y1="30" x2="148" y2="30"/>
+              <text class="ld-mini" x="12" y="48" font-weight="700" fill="var(--ink)">Iceberg</text>
+              <text class="ld-mini" x="60" y="48" fill="var(--ink-3)">fact_orders</text>
+              <!-- file glyphs -->
+              <g transform="translate(12,58)">
+                <rect width="24" height="22" rx="2" fill="oklch(0.94 0.05 145)" stroke="oklch(0.5 0.13 145)" stroke-width="0.7"/>
+                <rect x="30" width="24" height="22" rx="2" fill="oklch(0.94 0.05 145)" stroke="oklch(0.5 0.13 145)" stroke-width="0.7"/>
+                <rect x="60" width="24" height="22" rx="2" fill="oklch(0.94 0.05 145)" stroke="oklch(0.5 0.13 145)" stroke-width="0.7"/>
+                <rect x="90" width="24" height="22" rx="2" fill="oklch(0.94 0.05 145)" stroke="oklch(0.5 0.13 145)" stroke-width="0.7"/>
+              </g>
+            </g>
+
+            <!-- 5 fan-out: down from Kafka to OLAP cache -->
+            <path class="ld-rta-arrow" d="M 270 236 C 270 270, 270 280, 270 290"/>
+            <text class="ld-rta-arrow-label" x="284" y="262">tee</text>
+
+            <g transform="translate(196,290)">
+              <rect class="ld-rta-stage serve" x="0" y="0" width="190" height="68" rx="6"/>
+              <text class="ld-rta-stage-head" x="12" y="20" fill="oklch(0.4 0.13 215)">OLAP CACHE</text>
+              <line class="ld-rule" x1="0" y1="30" x2="190" y2="30"/>
+              <text class="ld-mini" x="12" y="46" font-weight="700" fill="var(--ink)">Druid · Pinot</text>
+              <text class="ld-mini" x="12" y="60" fill="var(--ink-3)">dashboards · sub-second</text>
+            </g>
+
+            <!-- 6 fan-out: down from Iceberg to Trino/Snowflake -->
+            <path class="ld-rta-arrow" d="M 674 236 C 674 270, 674 280, 674 290"/>
+            <text class="ld-rta-arrow-label" x="688" y="262">query</text>
+
+            <g transform="translate(580,290)">
+              <rect class="ld-rta-stage serve" x="0" y="0" width="190" height="68" rx="6"/>
+              <text class="ld-rta-stage-head" x="12" y="20" fill="oklch(0.4 0.13 215)">ANALYTICS SQL</text>
+              <line class="ld-rule" x1="0" y1="30" x2="190" y2="30"/>
+              <text class="ld-mini" x="12" y="46" font-weight="700" fill="var(--ink)">Trino · Snowflake</text>
+              <text class="ld-mini" x="12" y="60" fill="var(--ink-3)">ad-hoc · BI · ML features</text>
+            </g>
+
+            <!-- top legend bar -->
+            <g transform="translate(20,30)">
+              <text x="0" y="14" font-family="var(--mono)" font-size="11" font-weight="700" fill="var(--ink)">flow</text>
+              <line x1="42" y1="10" x2="82" y2="10" stroke="var(--ink-3)" stroke-width="1.8" marker-end="url(#ld-rta-arrow-h)"/>
+              <text x="96" y="14" font-family="var(--mono)" font-size="11" fill="var(--ink-3)">data hop</text>
+              <text x="190" y="14" font-family="var(--mono)" font-size="11" font-weight="600" fill="var(--cyan-deep)">freshness target:</text>
+              <text x="330" y="14" font-family="var(--mono)" font-size="11" fill="var(--ink-2)">seconds end-to-end · sub-second on the cache fan-out</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption class="ld-fig-cap">
+          <b>The pattern interviewers expect.</b> CDC reads Postgres' WAL, lands an ordered topic in Kafka, Flink applies upserts and writes to an Iceberg table — same SQL, same governance, queryable from Trino or Snowflake at seconds-of-freshness. For dashboards needing sub-second response, fan out the same Kafka topic into a serving cache like Druid or Pinot. Every layer is replayable from Kafka; nothing is the source of truth except the upstream log.
+        </figcaption>
+      </figure>
+      <div class="prose"><p>This is the lakehouse-CDC pattern interviewers expect. CDC produces an ordered Kafka topic. Flink (or Spark Streaming) consumes, applies upserts, writes to an Iceberg table. The Iceberg table is queryable from Trino/Snowflake — same SQL, same governance, end-to-end seconds-of-freshness. For sub-second BI, fan out to Druid or Pinot. Every layer is replayable from Kafka.</p></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'cdc-lambda-kappa';
+initLesson(LID, [
+  { id: 's1', label: 'CDC, why' },
+  { id: 's2', label: 'Pipeline visualization' },
+  { id: 's3', label: 'Payload anatomy' },
+  { id: 's4', label: 'Lambda vs Kappa' },
+  { id: 's5', label: 'Real-time pattern' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Vocab' },
+]);
+
+D.CDCFlow(document.getElementById('w-cdc'), { lessonId: LID, cpId: 'cdc' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'Why not just poll?',
+  question: 'A junior engineer wants to mirror Postgres → warehouse with <code>SELECT * WHERE updated_at > last_seen</code> every minute. Why is CDC strictly better?',
+  options: [
+    'CDC is faster.',
+    'Polling misses deletes (no row to select), causes load spikes on the source, and gets the wrong answer when <code>updated_at</code> is missing or unreliable. CDC reads the WAL — every commit is captured exactly once, including deletes, with no source load.',
+    'Polling is deprecated.',
+    'CDC uses less network bandwidth.',
+  ],
+  correct: 1,
+  explanation: 'Three killer flaws with polling: (1) <em>deletes</em> — there\'s no row to find, you\'d need a tombstone table the source doesn\'t have. (2) <em>Schema-dependence</em> — you\'re trusting an <code>updated_at</code> column that may not exist or may be set wrong by application code. (3) <em>Load</em> — every poll is a query against your transactional database, scanning a potentially massive index. CDC reads the WAL (a thing the DB writes anyway), captures every commit including deletes, and adds essentially zero source load.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Lambda vs Kappa',
+  question: 'A team\'s Lambda pipeline has two implementations of "weekly active users" — one in Spark, one in Flink. They disagree by 0.3% and nobody knows why. What\'s the IC5 fix?',
+  options: [
+    'Add a unit test.',
+    'Migrate to Kappa: make the streaming pipeline the source of truth, and "weekly recompute" is the same code reading from offset zero of a retained Kafka topic. One implementation, one truth.',
+    'Average the two numbers.',
+    'Use machine learning to reconcile.',
+  ],
+  correct: 1,
+  explanation: 'The 0.3% drift is the canonical Lambda failure mode — two codebases drift even when authors are careful. Tests don\'t fix it (the bug is in the dual-implementation premise). Kappa fixes it by deleting the batch path: there\'s only one code path. Re-running history is the same code reading older offsets. The drift literally cannot exist.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'WAL / binlog', q: 'Where does CDC tap?', a: 'The transaction log the DB already writes for crash recovery. Postgres: WAL via logical replication. MySQL: binlog. SQL Server: CDC tables. Mongo: oplog.' },
+    { term: 'Snapshot + stream', q: 'How does CDC bootstrap?', a: 'You can\'t replay infinite WAL history. CDC tools take a consistent snapshot of current rows (op: "r"), then start tailing WAL from the snapshot LSN. New consumers go through the same two phases.' },
+    { term: 'Tombstone', q: 'Kafka delete marker', a: 'A record with a key but null value. In compacted topics, tombstones tell the broker to delete the key. CDC delete events become tombstones in compacted "current state" topics.' },
+    { term: 'Schema registry', q: 'Why is it needed?', a: 'CDC payloads carry schemas. If a column is added at the source, the schema changes — consumers have to handle it. Confluent Schema Registry stores Avro/Protobuf schemas with compatibility checks (backward, forward, full).' },
+    { term: 'Outbox pattern', q: 'When CDC isn\'t enough', a: 'For app-emitted business events (not just row changes), the app writes to a regular DB table inside the transaction; CDC streams that table. Guarantees the event is captured iff the transaction commits. Solves the dual-write problem.' },
+  ]
+});
+</script>
+
+</body>
+</html>

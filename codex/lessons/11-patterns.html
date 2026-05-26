@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>11 · Patterns That Work — Codex Course</title>
+  <meta name="description" content="Recurring patterns in AI-assisted development: TDD with AI, brownfield onboarding, refactoring, and debugging. The task shapes that consistently succeed."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="11 · Patterns That Work — Codex Course"/>
+  <meta property="og:description" content="Recurring patterns in AI-assisted development: TDD with AI, brownfield onboarding, refactoring, and debugging. The task shapes that consistently succeed."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/11-patterns.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="11 · Patterns That Work — Codex Course"/>
+  <meta name="twitter:description" content="Recurring patterns in AI-assisted development: TDD with AI, brownfield onboarding, refactoring, and debugging. The task shapes that consistently succeed."/>
+  <link rel="canonical" href="../lessons/11-patterns.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Patterns That Work",
+    "description":"Recurring patterns in AI-assisted development: TDD with AI, brownfield onboarding, refactoring, and debugging. The task shapes that consistently succeed.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":11
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-11">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 11 · track 04 — advanced</div>
+    <h1>Patterns<br/>That Work.</h1>
+    <p class="subtitle">Across many AI-assisted dev sessions, a handful of task shapes consistently succeed and a handful consistently fail. This is the library of proven shapes.</p>
+    <div class="meta">
+      <span>&#9203; <b>13 min read</b></span>
+      <span>&#9670; <b>3 interactives</b></span>
+      <span>&#10022; <b>+50 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Some tasks run smoothly with an AI agent every time. Others fail reliably — not because of a bad prompt, but because the task shape is wrong for the tool. Over time, the patterns become clear.</p>
+        <p>This lesson is a catalog of the recurring patterns: what works, why it works, and what the failure mode looks like when you get it wrong. Use it as a reference when you are planning a new task and something feels off.</p>
+      </div>
+
+      <div class="pull-quote">The failure is almost never the AI. It is the task shape.</div>
+    </section>
+
+    <section id="s2">
+      <h2>Pattern 01: TDD with AI</h2>
+      <div class="prose">
+        <p><strong>The idea:</strong> write tests first (or have the agent write them first), then implement. The test suite becomes the acceptance criterion, and the agent can iterate autonomously until all tests pass.</p>
+        <p><strong>Why it works:</strong> the agent has a concrete, unambiguous signal for "done." Without tests, it is guessing. With tests, it can iterate — run, fail, patch, run again — without any human in the loop. The result is a PR with verified behavior, not just plausible code.</p>
+        <p><strong>The two-phase approach:</strong></p>
+        <ol>
+          <li><em>Phase 1 — tests only:</em> "Write the test suite for this feature. Do not implement the feature yet. Tests should fail." Review the tests; they are your acceptance criteria made concrete.</li>
+          <li><em>Phase 2 — implementation:</em> "Implement the feature until all tests from phase 1 pass." The agent now has an objective to optimize against.</li>
+        </ol>
+        <p><strong>The failure mode:</strong> asking for tests and implementation in a single task. The agent writes the implementation first and then writes tests that pass against what it just built — which proves nothing. The tests are circular. Always split the phases.</p>
+      </div>
+      <div class="callout">
+        <span class="icon">&#9658;</span>
+        <div><b>Watch for the circular test:</b> if a test mocks the very function it is testing and then asserts what the mock returned, it is not a test — it is theater. A good test exercises real behavior: seed data, call the real function, assert real output.</div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Pattern 02: Brownfield onboarding</h2>
+      <div class="prose">
+        <p><strong>The idea:</strong> before making any changes to an existing codebase, give the agent an exploration phase. Explicitly tell it: "do not write any code yet. Read the relevant files and tell me what you find."</p>
+        <p><strong>Why it works:</strong> AI agents are optimistic — given any task, they will make assumptions to fill gaps and start writing. On a greenfield project that is fine. On an existing codebase, those assumptions are often wrong: they will duplicate existing utilities, miss caching layers, violate naming conventions, and break callers. A mandatory exploration phase forces the agent to build a mental model before touching anything.</p>
+        <p><strong>The exploration checklist before any brownfield task:</strong></p>
+        <ul>
+          <li>What existing code does this feature touch or depend on?</li>
+          <li>Are there existing utilities, helpers, or abstractions that already solve part of the problem?</li>
+          <li>What conventions does the existing code follow (naming, error handling, test patterns)?</li>
+          <li>What tests currently cover the area being changed?</li>
+        </ul>
+        <p>Only after the agent can answer these questions should it start writing code.</p>
+        <p><strong>The failure mode:</strong> skipping exploration and treating a large existing codebase like a greenfield. The agent rewrites existing functionality, ignores established patterns, and produces a PR that looks right in isolation but breaks things a human reviewer has to catch.</p>
+      </div>
+
+      <div id="w-compare"></div>
+    </section>
+
+    <section id="s4">
+      <h2>Pattern 03: Refactoring with AI</h2>
+      <div class="prose">
+        <p><strong>The idea:</strong> use the agent to apply a refactoring pattern consistently across a codebase — extracting a utility, renaming, converting to a new pattern, updating all call sites.</p>
+        <p><strong>Why it works:</strong> agents excel at mechanical consistency. Applying the same transformation to 40 files is tedious and error-prone for a human; it is straightforward for an agent. The spec is precise ("convert all X to Y"), the change is verifiable (tests still pass), and there is no ambiguity about what "done" looks like.</p>
+        <p><strong>How to spec a refactoring task:</strong></p>
+        <ul>
+          <li>Name the old pattern and the new pattern explicitly, with a code example of each.</li>
+          <li>Reference an existing example of the new pattern: "see <code>src/models/project.py</code> for the pattern to follow."</li>
+          <li>Specify scope: "apply to all files in <code>src/repositories/</code>." Do not say "refactor the codebase" — that is a wish, not a task.</li>
+          <li>Specify what not to change: "do not touch <code>legacy/</code> or any file that has a TODO: migrate comment."</li>
+        </ul>
+        <p><strong>The failure mode:</strong> open-ended refactoring ("clean up the code"). The agent will make judgment calls about what "clean" means — often adding abstractions, renaming things by preference, or restructuring in ways you did not want. Narrow refactoring tasks with explicit patterns win every time.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Pattern 04: Debugging with AI</h2>
+      <div class="prose">
+        <p><strong>The idea:</strong> give the agent the symptom, the reproduction case, and permission to read and run — then let it hypothesize and verify in the feedback loop.</p>
+        <p><strong>Why it works:</strong> agents are effective at the mechanical part of debugging: reading stack traces, searching for the relevant code path, writing a minimal reproduction, and testing a hypothesis. The bottleneck in human debugging is context-switching and search; agents do not get tired of reading files.</p>
+        <p><strong>What to give the agent:</strong></p>
+        <ul>
+          <li>The error message and full stack trace, verbatim.</li>
+          <li>The steps to reproduce (or a failing test if you have one).</li>
+          <li>What you have already ruled out (prevents the agent from retreading ground you have covered).</li>
+          <li>Permission to write a test that reproduces the bug before fixing it. This prevents regressions.</li>
+        </ul>
+        <p><strong>The failure mode:</strong> asking the agent to "fix the bug" without a reproduction case. The agent will guess — often plausibly — and you will get a diff that looks like it might help. Sometimes it does. Often it fixes the symptom while leaving the root cause. Always reproduce first, fix second.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Pattern 05: The two-revision rule</h2>
+      <div class="prose">
+        <p><strong>The idea:</strong> if a PR is stuck — if you have sent two rounds of comments and the agent still has not landed the fix cleanly — stop commenting and re-spec from scratch.</p>
+        <p><strong>Why it works:</strong> when a PR needs more than two revision rounds, the problem is almost never the agent's execution. It is the spec. Something in the original task description was ambiguous, missing, or wrong, and the agent has been compensating by guessing. No amount of comment nudging will fix a fundamentally underspecified task.</p>
+        <p>Re-speccing from scratch takes ten minutes and typically produces a clean PR on the first pass. Two more rounds of comments will take longer and may not get there at all.</p>
+        <p><strong>Signals that it is time to restart:</strong></p>
+        <ul>
+          <li>The agent keeps making the same mistake in different forms.</li>
+          <li>Your comments are getting longer and more detailed — you are essentially writing the implementation in the comments.</li>
+          <li>The PR diff is growing with each revision instead of converging.</li>
+        </ul>
+        <p>When you see these signals: close the PR, read the original spec, find what was underspecified, rewrite. The discipline to restart is what separates teams that scale with AI assistance from teams that fight it.</p>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Three patterns that consistently fail</h2>
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:#e87060;">fail 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The wishlist task</h3>
+          <p class="small muted" style="margin-top:8px;">"Improve the codebase." "Make it more performant." "Clean things up." Zero actionable signal. The agent will make plausible-looking changes that may or may not be what you wanted. Specific tasks only.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:#e87060;">fail 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The no-test task</h3>
+          <p class="small muted" style="margin-top:8px;">Any non-trivial task without a test suite. The agent ships code it believes is correct. Without a feedback loop it has no way to verify, so it does not. The PR looks good. The bug shows up in production three weeks later.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:#e87060;">fail 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The grand refactor</h3>
+          <p class="small muted" style="margin-top:8px;">"Refactor the entire architecture." Large-scope, high-ambiguity tasks produce massive diffs that are impossible to review. The agent touches everything, tests break in complex ways, and you spend more time fixing than you saved. Slice into narrow tasks.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s8">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L11"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('patterns', [
+    {id:'s1', label:'The library'},
+    {id:'s2', label:'Pattern 01 — TDD with AI'},
+    {id:'s3', label:'Pattern 02 — Brownfield'},
+    {id:'s4', label:'Pattern 03 — Refactoring'},
+    {id:'s5', label:'Pattern 04 — Debugging'},
+    {id:'s6', label:'Pattern 05 — Two revisions'},
+    {id:'s7', label:'Patterns that fail'},
+    {id:'s8', label:'Quick check'},
+  ]);
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Brownfield task: with vs. without exploration',
+    badLabel: 'Skip exploration',
+    goodLabel: 'Explore first',
+    bad: 'Task: "Add rate limiting to the API."\n\nAgent starts writing immediately. Adds a new RateLimiter class. Does not notice there is already a throttle decorator in middleware/. Does not match the error-response format used by the rest of the API. Creates a new config key instead of extending the existing one.\n\nResult: duplicate infrastructure, inconsistent behavior, PR rejected.',
+    good: 'Task: "Before writing any code: read the relevant files and tell me (1) what rate limiting infrastructure already exists, (2) how errors are currently returned by the API, (3) where rate-limit config lives. Then propose an approach."\n\nAgent finds the throttle decorator, understands the error format, locates the config. Proposes extending what is already there.\n\nResult: minimal, consistent change. PR approved.',
+    note: 'The exploration step costs 2 minutes. Reviewing a PR built on wrong assumptions costs 30. Always spend the 2 minutes on brownfield tasks.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'patterns', cpId: 'q1',
+    question: 'You ask an agent to write tests for a new feature and implement it in a single task. The tests all pass. What is the likely problem?',
+    options: [
+      'The implementation is probably wrong.',
+      'The tests probably do not verify real behavior — the agent likely wrote the implementation first and then wrote tests that pass against what it built, making them circular.',
+      'Nothing — green tests mean the feature is correct.',
+      'The tests are probably too slow.',
+    ],
+    correct: 1,
+    explanation: 'When tests and implementation are written together, agents almost always write the implementation first (or simultaneously) and then write tests to match. The tests pass, but they test the agent\'s own assumptions about what the code should do — not whether it does what you wanted. Split the phases: tests first (and verify they fail), then implementation.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'patterns', cpId: 'q2',
+    question: 'A PR has gone through three rounds of comments and the agent still has not landed the fix correctly. What is the right move?',
+    options: [
+      'Add more detail to the next comment and try a fourth round.',
+      'Re-spec the task from scratch. Three revision rounds signals the original spec was underspecified — no amount of nudging will fix that. Rewrite, rerun.',
+      'Accept the PR as-is since you have spent enough time on it.',
+      'Switch to a different AI tool.',
+    ],
+    correct: 1,
+    explanation: 'Two revision rounds is the ceiling. If you are at three, the problem is the spec, not the agent. Re-speccing takes 10 minutes and almost always produces a clean PR on the first pass. Continuing to add comments compounds the original specification error.'
+  });
+</script>
+
+<script src="../js/lessons/L11.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

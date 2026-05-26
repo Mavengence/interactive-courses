@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>07 · Batch Pipelines: ETL, ELT, Orchestration — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 07 · track 03 — processing</div>
+    <h1>Batch pipelines:<br/>ETL, ELT, DAGs.</h1>
+    <p class="subtitle">The shape of every batch system you'll build. ETL versus ELT and why ELT won. dbt's mental model. Airflow DAGs and why "every job is idempotent" is the only line that matters.</p>
+    <div class="meta">
+      <span>⏱ <b>13 min</b></span>
+      <span>◆ <b>3 simulations</b></span>
+      <span>✦ <b>+85 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <div class="callout" style="margin-bottom:18px;"><span class="icon">◎</span><div><b>Learning objectives.</b> After this lesson you can: (1) explain why ELT displaced ETL and state the replayability argument; (2) describe dbt's four materialization types and when to use each; (3) implement an idempotent incremental load using MERGE; (4) distinguish SCD Type 1 and Type 2 and implement both with dbt; (5) explain what makes a batch job safe to retry.</div></div>
+        <p>A batch pipeline is the simplest data system there is: <em>at some cadence, take bounded input, run a transformation, produce bounded output.</em> Every nightly job, every hourly aggregate, every "regenerate the recommendation table at 3 AM" cron is this shape.</p>
+        <p>The interesting questions aren't whether to use batch — for most analytical workloads, batch is the right answer and streaming is overkill. The interesting questions are about <em>structure</em>: where transforms live, how dependencies are expressed, what happens when something fails.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>ETL versus ELT</h2>
+      <div class="prose">
+        <p>For thirty years the standard order was <strong>Extract → Transform → Load</strong>. You'd pull data from the source, run it through a transform engine (Informatica, SSIS, custom Python), and only then load the cleaned output into the warehouse. The warehouse was expensive; you didn't waste it on raw data.</p>
+        <p>Around 2015 that flipped. Snowflake and BigQuery made warehouse compute almost free at the margin. Now the standard order is <strong>Extract → Load → Transform</strong>. Dump raw into the warehouse first, transform in-place using SQL (or dbt). Two reasons it won:</p>
+        <ul>
+          <li><strong>Replayability.</strong> Raw lives forever in the warehouse. If your transform has a bug, fix the SQL, re-run, the corrected data is there in 10 minutes. With ETL, the bug is in a transform engine and you may have lost the source.</li>
+          <li><strong>Tooling democracy.</strong> Anyone who writes SQL can write a transform. With ETL, only the data engineering team owns the transformation tier.</li>
+        </ul>
+        <p>The only places ETL still wins: regulated data that <em>must</em> be cleaned/redacted before landing (HIPAA, PCI), and source systems where extraction is so heavy that pre-aggregating in the source-side process is necessary.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>dbt: the transform layer, properly</h2>
+      <div class="prose">
+        <p>dbt is the standard tool for the <em>T</em> in ELT. The mental model is small enough to fit on one slide:</p>
+        <ul>
+          <li>Every transform is a <strong>model</strong>: a single SQL <code>SELECT</code> statement in a file. dbt wraps it in <code>CREATE TABLE</code> or <code>CREATE VIEW</code>.</li>
+          <li>Models reference other models via <code>{{ ref('upstream_model') }}</code>. dbt builds a dependency DAG from those references.</li>
+          <li>Materializations are a config: <code>view</code>, <code>table</code>, <code>incremental</code>, <code>ephemeral</code>. Same SQL, different physical strategy.</li>
+          <li>Tests are SQL queries that should return zero rows. <code>not_null</code>, <code>unique</code>, <code>relationships</code>, plus arbitrary custom assertions.</li>
+        </ul>
+        <p>The four materialization types in detail:</p>
+        <ul>
+          <li><strong>view</strong> — a SQL view; no data stored; runs the full query at read time. Zero storage cost, but re-computes everything on every query. Use for lightweight staging models that are fast to compute.</li>
+          <li><strong>table</strong> — materializes the full SELECT into a physical table every run (<code>CREATE OR REPLACE TABLE</code>). Expensive: always a full-refresh. Use for small-to-medium dimension tables where correctness trumps cost.</li>
+          <li><strong>incremental</strong> — on first run, builds the full table. On subsequent runs, computes only the new/changed rows (using the <code>{% if is_incremental() %}</code> filter) and merges them in. Use for large fact tables where full rebuilds are prohibitively expensive. Requires a <code>unique_key</code> for safe upserts.</li>
+          <li><strong>ephemeral</strong> — not materialized at all; inlined as a CTE in downstream models. Use for intermediate transformation logic you want to reuse without a separate table. Invisible to BI tools.</li>
+        </ul>
+      </div>
+      <pre style="font-family: var(--mono); font-size: 0.82rem; background: var(--paper-2); padding: 14px; border-radius: 8px; border: 1px solid var(--rule); overflow-x: auto;">-- models/marts/fact_orders.sql
+{{ config(materialized='incremental', unique_key='order_id') }}
+
+select
+  order_id,
+  user_id,
+  amount_usd,
+  status,
+  created_at
+from {{ ref('stg_orders') }}
+{% if is_incremental() %}
+  where created_at > (select max(created_at) from {{ this }})
+{% endif %}</pre>
+      <div class="prose"><p>That's a complete production model. Read fresh rows from staging, append to the table, only on the rows newer than what's already there. Idempotent: re-running the same window is a no-op because the MAX filter excludes already-loaded rows.</p></div>
+    </section>
+
+    <section id="s3b">
+      <h2>Incremental load patterns: merge vs insert-overwrite, SCD types</h2>
+      <div class="prose">
+        <p>How you apply incremental changes to a target table is one of the most interview-heavy topics in data engineering. Two physical strategies:</p>
+        <ul>
+          <li><strong>MERGE (upsert).</strong> For each incoming row, if a row with the same key already exists in the target, UPDATE it; otherwise INSERT it. Idempotent by construction. Requires a unique key. Works well when you want the latest state only and don't need history. This is dbt's <code>incremental</code> + <code>unique_key</code> strategy.</li>
+          <li><strong>Insert-overwrite (partition replacement).</strong> For a given partition (e.g. yesterday's date), DROP the old partition and INSERT the new one. Atomic at the partition level. Works well when you process complete partitions at a time and the partition fully defines the window. No key needed; the entire partition is replaced atomically. Preferred in Spark for large-volume date-partitioned tables because it avoids the per-row lookup cost of MERGE.</li>
+        </ul>
+        <p>Trade-off: MERGE is more flexible (handles any key-based update), but expensive at scale (requires a join against the whole target table or a large target partition). Insert-overwrite is simpler and faster for partition-aligned workloads, but requires that each run fully recomputes the partition.</p>
+        <h3 style="margin-top:20px; font-size:0.95rem;">Slowly Changing Dimensions (SCD)</h3>
+        <p>When a source attribute changes over time (a customer's email, an employee's department), you have to decide how to model that change. Two standard approaches:</p>
+        <ul>
+          <li><strong>SCD Type 1 — overwrite.</strong> When the attribute changes, update the row in place. No history preserved. The dimension always reflects the current state. Simple; cheap. Use when historical accuracy doesn't matter (e.g. correcting a typo in a name).</li>
+          <li><strong>SCD Type 2 — add a new version.</strong> When the attribute changes, close the old row (set <code>valid_to = change_date</code>, <code>is_current = false</code>) and insert a new row (<code>valid_from = change_date</code>, <code>is_current = true</code>). Full history preserved; fact tables can join to the dimension-as-of-event-date. Expensive: a single customer update creates a new row; high-churn attributes balloon the table. Use when historical reporting accuracy is required (e.g. "what region was this customer in when they placed this order?").</li>
+        </ul>
+      </div>
+      <pre style="font-family: var(--mono); font-size: 0.82rem; background: var(--paper-2); padding: 14px; border-radius: 8px; border: 1px solid var(--rule); overflow-x: auto;">-- SCD Type 2 in dbt (simplified)
+-- models/dims/dim_customers.sql
+{{ config(materialized='incremental', unique_key='customer_key',
+          strategy='type_2', updated_at='updated_at') }}
+
+select
+  {{ dbt_utils.surrogate_key(['customer_id', 'updated_at']) }} as customer_key,
+  customer_id,
+  email,
+  region,
+  updated_at
+from {{ ref('stg_customers') }}
+
+-- dbt-utils snapshot strategy inserts new surrogate-key rows when
+-- any tracked column changes; closes old rows with valid_to.</pre>
+      <div class="callout"><span class="icon">▸</span><div><b>The IC5 SCD decision.</b> Always ask: "Does any downstream query need to join facts to the dimension as-of-event-time?" If yes → Type 2. If no → Type 1. A common mistake is defaulting to Type 2 everywhere, then paying a 10× storage and join-complexity cost for attributes nobody ever queries historically.</div></div>
+    </section>
+
+    <section id="s4">
+      <h2>Backfill, retry, and the DAG</h2>
+      <div class="prose"><p>Three runs of the same 30-day backfill, drawn against a shared time axis. The story is concurrency: workers cut wall time roughly linearly, until the per-task variance and retry overhead start to dominate (notice 4×→10× isn't a clean 2.5× speedup). Days <code>06</code>, <code>14</code>, <code>22</code> fail on first attempt — a partial failure mid-backfill is the realistic case, and what makes a pipeline <em>good</em> is whether the retry happens without manual intervention and without contaminating downstream tables.</p></div>
+      <div id="w-dag"></div>
+      <div class="callout"><span class="icon">▸</span><div><b>The IC5 rule.</b> Every batch job must be <em>idempotent</em> for a given input window. Run it once, run it ten times, the output is the same. Achieve this with: deterministic <code>WHERE</code> clauses on the input window, <code>MERGE</code>/upsert instead of <code>INSERT</code>, and never <code>DELETE</code>-then-<code>INSERT</code> without a transaction.</div></div>
+    </section>
+
+    <section id="s5">
+      <h2>Airflow vs Dagster vs Prefect</h2>
+      <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.82rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
+            <th style="padding: 8px;"></th><th style="padding: 8px;">Airflow</th><th style="padding: 8px;">Dagster</th><th style="padding: 8px;">Prefect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Mental model</td><td style="padding:8px;">Tasks in a DAG</td><td style="padding:8px;">Assets that produce data</td><td style="padding:8px;">Flows of tasks</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Strength</td><td style="padding:8px;">Ubiquitous, mature, huge ecosystem</td><td style="padding:8px;">Type-safe IO, asset lineage built-in</td><td style="padding:8px;">Pythonic, dynamic flows, modern API</td></tr>
+          <tr><td style="padding:8px; color:var(--cyan-deep);">Friction</td><td style="padding:8px;">Operator-heavy boilerplate</td><td style="padding:8px;">Smaller ecosystem</td><td style="padding:8px;">Hosted-first, less mature on-prem</td></tr>
+        </tbody>
+      </table>
+      <div class="prose"><p>For an interview: pick Airflow if the team is already on it. Pick Dagster if you're starting fresh and care about data quality / lineage. The orchestrator is rarely the bottleneck; the design of your jobs is.</p></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Key takeaways</h2>
+      <div class="prose">
+        <ul>
+          <li><strong>ELT wins because of replayability.</strong> Raw data preserved in the warehouse means transform bugs are fixable by re-running SQL — not by re-extracting from potentially-changed sources.</li>
+          <li><strong>Idempotency is non-negotiable.</strong> Every batch job will be retried. A job that produces wrong output on retry is not a batch job — it's a time bomb. Achieve idempotency with MERGE on a unique key or insert-overwrite at the partition level.</li>
+          <li><strong>Choose dbt materialization deliberately.</strong> view for cheap staging; table for small dimensions needing full correctness; incremental for large fact tables; ephemeral for reusable CTEs. The wrong materialization is a performance bug at scale.</li>
+          <li><strong>SCD Type 1 vs Type 2 is a product decision.</strong> Type 1 is simpler and cheaper; Type 2 preserves history for as-of queries. Default to Type 1 and only use Type 2 when downstream analysts actually need historical dimension state.</li>
+          <li><strong>MERGE vs insert-overwrite depends on access pattern.</strong> MERGE for key-based upserts with no partition alignment; insert-overwrite for partition-aligned full refreshes at scale where the per-row join cost of MERGE is prohibitive.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s8">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'batch-elt';
+initLesson(LID, [
+  { id: 's1', label: 'Shape of batch' },
+  { id: 's2', label: 'ETL vs ELT' },
+  { id: 's3', label: 'dbt materializations' },
+  { id: 's3b', label: 'Incremental / SCD' },
+  { id: 's4', label: 'DAG, backfill, retry' },
+  { id: 's5', label: 'Orchestrators' },
+  { id: 's6', label: 'Quick check' },
+  { id: 's7', label: 'Key takeaways' },
+  { id: 's8', label: 'Vocab' },
+]);
+
+D.BackfillDAG(document.getElementById('w-dag'), { lessonId: LID, cpId: 'dag' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'The 3 AM page',
+  question: 'A nightly job inserts yesterday\'s orders into <code>fact_orders</code>. It crashes halfway through. The on-call retries it. They get duplicate rows. What\'s wrong with the job?',
+  options: [
+    'Nothing — that\'s expected behavior.',
+    'It uses <code>INSERT</code> instead of <code>MERGE</code>/upsert keyed on <code>order_id</code>. The job is not idempotent.',
+    'It needs a try/catch.',
+    'It needs more retries.',
+  ],
+  correct: 1,
+  explanation: 'A re-runnable job should be idempotent: running it twice on the same window produces the same result. <code>INSERT</code> appends — re-running duplicates. <code>MERGE</code> on a unique key (<code>order_id</code>) updates if exists, inserts if not. <em>Idempotency is the fundamental discipline of batch.</em> Most production failures involving "weird duplicate data" trace back to a job that wasn\'t idempotent.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Why ELT won',
+  question: 'A skeptical staff engineer asks: "We have a Python ETL framework that works fine. Why move to ELT/dbt?" What\'s the strongest single argument?',
+  options: [
+    'SQL is easier than Python.',
+    'Raw data lives in the warehouse, so transformations become <em>replayable</em> — fix a bug, re-run, get correct historical data without re-extracting from source.',
+    'Snowflake is faster.',
+    'It\'s the modern way.',
+  ],
+  correct: 1,
+  explanation: 'Replayability is the killer feature. With ETL, if you discover a transform bug six months later, you have to re-extract from source — and the source may have changed, deleted, or rate-limited you. With ELT, raw is preserved in cheap warehouse storage and transforms are pure functions over it. Re-running is free. <em>This is also why "raw landing zone" is sacred — never modify raw.</em>'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Idempotent', q: 'Why is it the only thing that matters?', a: 'Because retries, partial failures, and backfills are the rule, not the exception. A non-idempotent job is a job that breaks under retries — and you <em>will</em> retry. Build idempotency in from line one.' },
+    { term: 'Incremental model', q: 'How does dbt do it?', a: '<code>{% if is_incremental() %} WHERE ts &gt; (SELECT MAX(ts) FROM {{ this }}) {% endif %}</code> — only process rows newer than what\'s already in the table. With <code>unique_key</code>, dbt does an upsert (MERGE); without it, an append (INSERT). Note: dbt uses Jinja block tags <code>{% %}</code> for control flow, not expression tags <code>{{ }}</code>.' },
+    { term: 'SLA / freshness', q: 'How is freshness specified?', a: 'A target latency between source data appearing and the model being available. dbt\'s <code>sources.yml</code> exposes <code>warn_after</code> and <code>error_after</code>. Airflow has DAG-level SLA misses. Both feed alerts.' },
+    { term: 'Lineage', q: 'Why does it matter?', a: 'When something breaks downstream, lineage tells you which upstream changed. dbt and Dagster generate lineage automatically from <code>ref()</code>. Without lineage, root-cause analysis is grep + intuition.' },
+    { term: 'SCD Type 1', q: 'When to use it?', a: 'Overwrite the row in place when an attribute changes. No history. Use when historical values don\'t matter for reporting (e.g. correcting a typo, updating a phone number). Simple and cheap.' },
+    { term: 'SCD Type 2', q: 'When to use it?', a: 'Close the old row (set valid_to + is_current=false) and insert a new row when an attribute changes. Full history preserved. Use when fact tables need to join to dimension-as-of-event-date (e.g. "what region was this customer in when they bought?"). Expensive: one row per version.' },
+    { term: 'MERGE vs insert-overwrite', q: 'Which is idempotent?', a: 'Both, but for different reasons. MERGE is idempotent by key: running twice inserts once, updates the second time. Insert-overwrite is idempotent by partition: running twice replaces the same partition twice, always with the same result. MERGE: flexible but costly at scale. Insert-overwrite: simpler and faster for partition-aligned workloads.' },
+    { term: 'Sensor', q: 'Airflow concept', a: 'A task that waits for an external condition (file lands, table updates, API returns 200) before downstream runs. The bridge between event-driven sources and time-driven DAGs.' },
+  ]
+});
+</script>
+
+</body>
+</html>

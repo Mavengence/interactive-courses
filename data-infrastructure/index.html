@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Data Infrastructure — An IC5 System Design Field Guide</title>
+<meta name="description" content="A 12-lesson, deeply animated guide to data engineering system design at the IC5/staff level. Storage, streaming, lakehouses, observability — and a live interview replay."/>
+<link rel="stylesheet" href="styles/core.css?v=1"/>
+<link rel="stylesheet" href="styles/home.css?v=1"/>
+<link rel="stylesheet" href="styles/lesson.css?v=1"/>
+<style>
+  /* hero overrides for data theme */
+  .hero-rail .dot { background: var(--cyan-ink); }
+  .hero-title em { color: var(--cyan-ink); font-style: normal; }
+  .blink-caret { color: var(--cyan-ink); }
+
+  /* signature: a flowing data-stack diagram */
+  .stack-diagram {
+    margin-top: 36px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .stack-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; border-bottom: 1px solid var(--rule);
+    background: var(--paper-2);
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3);
+  }
+  .stack-head .dots { display: inline-flex; gap: 6px; }
+  .stack-head .dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--rule-2); }
+  .stack-head .dots span:nth-child(1){ background: oklch(0.7 0.16 25); }
+  .stack-head .dots span:nth-child(2){ background: oklch(0.78 0.13 75); }
+  .stack-head .dots span:nth-child(3){ background: oklch(0.65 0.12 155); }
+  .stack-head .title { margin-left: auto; opacity: 0.7; }
+  .stack-body { padding: 18px; display: grid; gap: 12px; }
+  .stack-row {
+    display: grid; grid-template-columns: 110px 1fr 200px;
+    align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: var(--paper-2);
+    position: relative;
+    overflow: hidden;
+  }
+  .stack-row .label {
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3); font-weight: 600;
+  }
+  .stack-row .label .num { display: block; font-size: 1.6rem; color: var(--ink); letter-spacing: -0.04em; margin-bottom: 2px; }
+  .stack-row .body h4 { font-family: var(--mono); font-size: 1rem; margin: 0 0 4px; }
+  .stack-row .body p { font-size: 0.86rem; color: var(--ink-3); margin: 0; }
+  .stack-row .tools {
+    font-family: var(--mono); font-size: 0.74rem; color: var(--ink-3);
+    text-align: right;
+  }
+  .stack-row .tools span {
+    display: inline-block; padding: 2px 8px; border: 1px solid var(--rule-2);
+    border-radius: 999px; margin: 1px 2px; background: var(--paper);
+  }
+  .stack-row::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--cyan-ink); opacity: 0.5;
+  }
+  .stack-row.row-1::before { background: oklch(0.65 0.18 25); }
+  .stack-row.row-2::before { background: oklch(0.7  0.15 60); }
+  .stack-row.row-3::before { background: oklch(0.7  0.13 110); }
+  .stack-row.row-4::before { background: oklch(0.65 0.12 165); }
+  .stack-row.row-5::before { background: oklch(0.6  0.14 215); }
+  .stack-row.row-6::before { background: oklch(0.55 0.18 295); }
+
+</style>
+</head>
+<body class="grid">
+
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-scanline"></div>
+  <div class="hero-inner">
+    <div class="container">
+      <div class="hero-rail">
+        <span class="dot"></span>
+        <span>data-infra / field-guide</span>
+        <span class="spacer"></span>
+        <span>v1.0 · 12 lessons · ~3h · IC5 / staff</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="l1">Data infrastructure,</span>
+        <span class="l2">at <em>system-design</em> depth.<span class="blink-caret">_</span></span>
+      </h1>
+      <p class="hero-lede">
+        A field guide to the data stack at the level of an IC5 / staff system-design interview. Storage internals, streaming semantics, lakehouse formats, and the operational craft — built around interactive simulators of every concept that's usually drawn on a whiteboard.
+      </p>
+      <div class="hero-cta">
+        <a href="lessons/01-mental-model.html" class="btn primary lg">$ start lesson 01 →</a>
+        <a href="#tracks" class="btn lg">Browse the course</a>
+      </div>
+      <div class="hero-meta">
+        <span><b>12</b> lessons</span>
+        <span><b>40+</b> live simulations</span>
+        <span><b>~3h</b> total</span>
+        <span><b>1</b> mock interview at the end</span>
+      </div>
+
+      <!-- signature diagram: the data stack, top to bottom -->
+      <div class="stack-diagram">
+        <div class="stack-head">
+          <span class="dots"><span></span><span></span><span></span></span>
+          <span>the data stack · top → bottom</span>
+          <span class="title">stack.svg</span>
+        </div>
+        <div class="stack-body" id="stack-body">
+          <div class="stack-row row-1"><div class="label"><span class="num">01</span>source</div><div class="body"><h4>Where data is born.</h4><p>App backends, mobile clients, IoT sensors, third-party APIs. Every event has a creator.</p></div><div class="tools"><span>Postgres</span><span>iOS SDK</span><span>Stripe</span></div></div>
+          <div class="stack-row row-2"><div class="label"><span class="num">02</span>log</div><div class="body"><h4>The append-only spine.</h4><p>An ordered, durable, partitioned log. Decouples producers from consumers. The cleanest abstraction in this whole stack.</p></div><div class="tools"><span>Kafka</span><span>Kinesis</span><span>Pub/Sub</span></div></div>
+          <div class="stack-row row-3"><div class="label"><span class="num">03</span>process</div><div class="body"><h4>Where shape changes.</h4><p>Stream jobs filter, enrich, window, aggregate. Batch jobs do the same, just on bounded data.</p></div><div class="tools"><span>Flink</span><span>Spark</span><span>dbt</span></div></div>
+          <div class="stack-row row-4"><div class="label"><span class="num">04</span>store</div><div class="body"><h4>Bytes that survive.</h4><p>Object storage holds the raw. Open table formats give it ACID. Indexes give it speed.</p></div><div class="tools"><span>S3</span><span>Iceberg</span><span>Parquet</span></div></div>
+          <div class="stack-row row-5"><div class="label"><span class="num">05</span>serve</div><div class="body"><h4>Sub-second answers.</h4><p>OLAP engines for BI, vector stores for ML, key-value stores for online features.</p></div><div class="tools"><span>Snowflake</span><span>Trino</span><span>DynamoDB</span></div></div>
+          <div class="stack-row row-6"><div class="label"><span class="num">06</span>consume</div><div class="body"><h4>The whole point.</h4><p>Dashboards, ML features, billing, fraud, the recommender. The stack only matters because of this row.</p></div><div class="tools"><span>Looker</span><span>Feature store</span><span>API</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats-band">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat"><div class="n">12</div><div class="l">lessons</div></div>
+      <div class="stat"><div class="n">40+</div><div class="l">live simulations</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">tracks</div></div>
+      <div class="stat"><div class="n">IC5</div><div class="l">target depth</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks" id="tracks">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow cyan">/ the course</span>
+      <h2>Four tracks. Twelve lessons. One mock interview.</h2>
+      <p>Linear the first time — each lesson assumes the last. Reference order after that. The capstone (lesson 12) is a 45-minute IC5 system-design walkthrough you can step through one move at a time.</p>
+    </div>
+    <div id="tracks-out"></div>
+  </div>
+</section>
+
+<section class="progress-section" id="badges">
+  <div class="container">
+    <div class="progress-panel">
+      <div class="progress-intro">
+        <span class="eyebrow">/ progress</span>
+        <h2>One badge per lesson. XP for every drill.</h2>
+        <p>Progress is tracked in your browser. No accounts, no servers. Reset anytime from the footer.</p>
+        <div style="margin-top:18px;">
+          <span class="chip cyan" id="hp-xp">0 XP</span>
+          <span class="chip" id="hp-done">0 / 12 lessons</span>
+        </div>
+      </div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div>
+      <h2>Open lesson 01.</h2>
+      <p>The stack, top to bottom — in twelve minutes. Then the rest of the course is just zooming in.</p>
+    </div>
+    <a href="lessons/01-mental-model.html" class="btn cyan lg">$ start →</a>
+  </div>
+</section>
+
+<div class="container">
+  <footer class="site-foot">
+    <div>data-infra/field-guide · v1.0</div>
+    <div class="r">
+      <a href="#" onclick="if(confirm('Reset all XP and lesson progress?')){Progress.reset();}return false;">reset progress</a>
+      <span>built as a learning artifact · IC5 / staff target</span>
+    </div>
+  </footer>
+</div>
+
+<script src="js/progress.js"></script>
+<script src="js/lessons.js?v=3"></script>
+<script src="js/topbar.js?v=2"></script>
+<script>
+  mountTopbar({ brand: 'data-infra' });
+
+  const tracksOut = document.getElementById('tracks-out');
+  TRACKS.forEach(track => {
+    const items = LESSONS.filter(l => l.track === track.id);
+    const done = items.filter(l => Progress.isDone(l.id)).length;
+    const pct = Math.round(done / items.length * 100);
+    tracksOut.insertAdjacentHTML('beforeend', `
+      <div class="track">
+        <div class="track-head">
+          <span class="track-badge">${track.label}</span>
+          <div>
+            <h2>${track.title}</h2>
+            <p class="hint">${track.hint}</p>
+          </div>
+          <div class="track-prog">
+            <div class="track-prog-bar"><div style="width:${pct}%"></div></div>
+            <span class="track-prog-num">${done}<span class="m"> / ${items.length} done</span></span>
+          </div>
+        </div>
+        <div class="lesson-grid">
+          ${items.map(l => {
+            const completed = Progress.isDone(l.id);
+            return `<a class="lesson-card${completed ? ' done':''}" href="${l.file}">
+              ${completed ? '<span class="check">✓</span>' : ''}
+              <div class="num"><span class="bracket">[</span>LESSON ${String(l.n).padStart(2,'0')}<span class="bracket">]</span></div>
+              <h3>${l.title}</h3>
+              <div class="sub">${l.sub}</div>
+              <div class="hook">— ${l.hook}</div>
+              <div class="foot">
+                <span>${l.time}  ·  ${l.interactives} sims</span>
+                <span class="arrow">→</span>
+              </div>
+            </a>`;
+          }).join('')}
+        </div>
+      </div>
+    `);
+  });
+
+  // badges
+  const bg = document.getElementById('badges-grid');
+  LESSONS.forEach(l => {
+    const earned = Progress.isDone(l.id);
+    bg.insertAdjacentHTML('beforeend', `
+      <div class="badge ${earned ? 'earned' : 'locked'}">
+        <div class="icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="2" y="2" width="18" height="18" rx="4" stroke="currentColor" stroke-width="1.5"/>
+            <text x="11" y="14.5" text-anchor="middle" font-family="JetBrains Mono" font-size="7" font-weight="700" fill="currentColor">${l.n}</text>
+          </svg>
+        </div>
+        <div class="name">${l.title}</div>
+        <div class="hint">${earned ? 'earned' : 'locked'}</div>
+      </div>
+    `);
+  });
+
+  document.getElementById('hp-xp').textContent = `${Progress.getXP()} XP`;
+  document.getElementById('hp-done').textContent = `${Progress.countCompleted()} / ${LESSONS.length} lessons`;
+
+</script>
+
+</body>
+</html>

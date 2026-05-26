@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>04 · Row vs Column: Inside Parquet — Data Infra</title>
+<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=11"/>
+<link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
+<link rel="stylesheet" href="../styles/lesson-diagrams.css?v=1"/>
+</head>
+<body class="grid">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 04 · track 02 — storage</div>
+    <h1>Row vs column,<br/>and inside Parquet.</h1>
+    <p class="subtitle">Why columnar wins for analytics. A Parquet file dissected — encodings, row groups, statistics, predicate pushdown. The exact thing your warehouse is doing under the hood.</p>
+    <div style="margin-top:18px; padding:14px 18px; background:oklch(0.97 0.006 80); border-radius:10px; border:1px solid oklch(0.86 0.01 80);">
+      <div style="font-family:var(--mono); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:oklch(0.5 0.02 250); font-weight:600; margin-bottom:8px;">Learning objectives</div>
+      <ul style="font-family:var(--sans); font-size:0.9rem; line-height:1.65; margin:0; padding-left:1.2em; color:oklch(0.32 0.02 250);">
+        <li>Explain why columnar layout reduces IO for analytical queries compared to row-oriented storage</li>
+        <li>Describe the Parquet file structure: magic bytes, row groups, column chunks, pages, footer</li>
+        <li>Name the five Parquet encodings and state which data types each suits best</li>
+        <li>Explain predicate pushdown and Bloom filters as complementary row-group pruning mechanisms</li>
+      </ul>
+    </div>
+    <div class="meta">
+      <span>⏱ <b>13 min</b></span>
+      <span>◆ <b>4 simulations</b></span>
+      <span>✦ <b>+90 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Almost every analytical query is shaped like: <em>"give me a few columns, filtered, aggregated, over many rows."</em> The query engine has to read bytes from disk to answer it. The crucial question — and almost the entire reason columnar storage exists — is: <strong>how many of those bytes are useful?</strong></p>
+        <p>In a row-oriented store, all of a row's columns are physically next to each other. To get one column from a billion rows, you read all the other columns too. The disk doesn't know which bytes you wanted; the OS just hands them over.</p>
+        <p>In a column-oriented store, all values of one column are physically next to each other. You read only the columns you asked for. For a typical analytical query that touches 4 of 200 columns, that's a 50× IO reduction. And once values are co-located by column, they compress vastly better, because they're all the same type — usually with very low cardinality.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The same query, two layouts</h2>
+      <div id="w-rc"></div>
+    </section>
+
+    <section id="s3">
+      <h2>Anatomy of a Parquet file</h2>
+      <div class="prose">
+        <p>Parquet is the de-facto columnar format for analytics on object storage. It's a binary file, but its structure is the most useful thing in this entire course. Memorize this layout.</p>
+      </div>
+      <figure class="ld-fig" id="fig-parquet">
+        <div class="ld-fig-head">
+          <span class="ld-fig-num">Fig. 01 · parquet on disk</span>
+          <span class="ld-fig-title">A file is row groups stacked, with a footer index at the end</span>
+          <span class="ld-fig-sub">left → right = byte order</span>
+        </div>
+        <div class="ld-fig-stage">
+          <svg class="ld-svg" viewBox="0 0 880 660" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Parquet file layout">
+            <!-- file outer container -->
+            <rect x="60" y="40" width="640" height="580" rx="10" fill="var(--paper)" stroke="var(--rule-2)" stroke-width="1.5"/>
+
+            <!-- top PAR1 magic bar -->
+            <rect class="ld-pq-magic" x="60" y="40" width="640" height="22" rx="10" ry="10"/>
+            <rect class="ld-pq-magic" x="60" y="52" width="640" height="10"/>
+            <text class="ld-pq-magic-text" x="380" y="56" text-anchor="middle">PAR1 · magic header</text>
+
+            <!-- ============== Row Group 0 ============== -->
+            <g transform="translate(76,76)">
+              <rect class="ld-pq-rg" x="0" y="0" width="608" height="232" rx="6"/>
+              <rect class="ld-pq-rg-head" x="0" y="0" width="608" height="28" rx="6"/>
+              <line class="ld-rule" x1="0" y1="28" x2="608" y2="28"/>
+              <text class="ld-title" x="14" y="19">ROW GROUP 0</text>
+              <text class="ld-sub" x="170" y="19">~128 MB · ~1M rows</text>
+
+              <!-- 4 column chunks -->
+              <g transform="translate(14,42)">
+                <!-- col A -->
+                <g transform="translate(0,0)">
+                  <rect class="ld-pq-col" x="0" y="0" width="138" height="178" rx="4"/>
+                  <rect class="ld-pq-col-head" x="0" y="0" width="138" height="22" rx="4"/>
+                  <line class="ld-rule" x1="0" y1="22" x2="138" y2="22"/>
+                  <text class="ld-label" x="10" y="16" font-weight="600">order_id</text>
+                  <text class="ld-mini" x="128" y="16" text-anchor="end">bigint</text>
+                  <!-- pages -->
+                  <rect class="ld-pq-page" x="10" y="32" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="48" font-weight="600">page 0</text>
+                  <text class="ld-mini" x="18" y="62" fill="var(--ink-3)">PLAIN · 1 MB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="74" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="90" font-weight="600">page 1</text>
+                  <text class="ld-mini" x="18" y="104" fill="var(--ink-3)">PLAIN · 1 MB</text>
+
+                  <rect class="ld-pq-page" x="10" y="116" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="132" font-weight="600">page 2</text>
+                  <text class="ld-mini" x="18" y="146" fill="var(--ink-3)">PLAIN · 1 MB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="158" width="118" height="14" rx="2"/>
+                  <text class="ld-mini" x="68" y="168" text-anchor="middle">…</text>
+                </g>
+                <!-- col B -->
+                <g transform="translate(146,0)">
+                  <rect class="ld-pq-col" x="0" y="0" width="138" height="178" rx="4"/>
+                  <rect class="ld-pq-col-head" x="0" y="0" width="138" height="22" rx="4"/>
+                  <line class="ld-rule" x1="0" y1="22" x2="138" y2="22"/>
+                  <text class="ld-label" x="10" y="16" font-weight="600">country</text>
+                  <text class="ld-mini" x="128" y="16" text-anchor="end">string</text>
+
+                  <rect class="ld-pq-page" x="10" y="32" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="48" font-weight="600">page 0</text>
+                  <text class="ld-mini" x="18" y="62" fill="var(--ink-3)">DICT · 64 KB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="74" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="90" font-weight="600">page 1</text>
+                  <text class="ld-mini" x="18" y="104" fill="var(--ink-3)">RLE · 12 KB</text>
+
+                  <rect class="ld-pq-page" x="10" y="116" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="132" font-weight="600">page 2</text>
+                  <text class="ld-mini" x="18" y="146" fill="var(--ink-3)">RLE · 12 KB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="158" width="118" height="14" rx="2"/>
+                  <text class="ld-mini" x="68" y="168" text-anchor="middle">…</text>
+                </g>
+                <!-- col C -->
+                <g transform="translate(292,0)">
+                  <rect class="ld-pq-col" x="0" y="0" width="138" height="178" rx="4"/>
+                  <rect class="ld-pq-col-head" x="0" y="0" width="138" height="22" rx="4"/>
+                  <line class="ld-rule" x1="0" y1="22" x2="138" y2="22"/>
+                  <text class="ld-label" x="10" y="16" font-weight="600">amount</text>
+                  <text class="ld-mini" x="128" y="16" text-anchor="end">decimal</text>
+
+                  <rect class="ld-pq-page" x="10" y="32" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="48" font-weight="600">page 0</text>
+                  <text class="ld-mini" x="18" y="62" fill="var(--ink-3)">PLAIN · 1 MB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="74" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="90" font-weight="600">page 1</text>
+                  <text class="ld-mini" x="18" y="104" fill="var(--ink-3)">PLAIN · 1 MB</text>
+
+                  <rect class="ld-pq-page" x="10" y="116" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="132" font-weight="600">page 2</text>
+                  <text class="ld-mini" x="18" y="146" fill="var(--ink-3)">PLAIN · 1 MB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="158" width="118" height="14" rx="2"/>
+                  <text class="ld-mini" x="68" y="168" text-anchor="middle">…</text>
+                </g>
+                <!-- col D -->
+                <g transform="translate(438,0)">
+                  <rect class="ld-pq-col" x="0" y="0" width="138" height="178" rx="4"/>
+                  <rect class="ld-pq-col-head" x="0" y="0" width="138" height="22" rx="4"/>
+                  <line class="ld-rule" x1="0" y1="22" x2="138" y2="22"/>
+                  <text class="ld-label" x="10" y="16" font-weight="600">ts</text>
+                  <text class="ld-mini" x="128" y="16" text-anchor="end">timestamp</text>
+
+                  <rect class="ld-pq-page" x="10" y="32" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="48" font-weight="600">page 0</text>
+                  <text class="ld-mini" x="18" y="62" fill="var(--ink-3)">DELTA · 24 KB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="74" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="90" font-weight="600">page 1</text>
+                  <text class="ld-mini" x="18" y="104" fill="var(--ink-3)">DELTA · 24 KB</text>
+
+                  <rect class="ld-pq-page" x="10" y="116" width="118" height="38" rx="2"/>
+                  <text class="ld-mini" x="18" y="132" font-weight="600">page 2</text>
+                  <text class="ld-mini" x="18" y="146" fill="var(--ink-3)">DELTA · 24 KB</text>
+
+                  <rect class="ld-pq-page alt" x="10" y="158" width="118" height="14" rx="2"/>
+                  <text class="ld-mini" x="68" y="168" text-anchor="middle">…</text>
+                </g>
+              </g>
+            </g>
+
+            <!-- ============== Row Group 1 (compact) ============== -->
+            <g transform="translate(76,322)">
+              <rect class="ld-pq-rg" x="0" y="0" width="608" height="76" rx="6"/>
+              <rect class="ld-pq-rg-head" x="0" y="0" width="608" height="28" rx="6"/>
+              <line class="ld-rule" x1="0" y1="28" x2="608" y2="28"/>
+              <text class="ld-title" x="14" y="19">ROW GROUP 1</text>
+              <text class="ld-sub" x="170" y="19">same shape · 4 columns × N pages</text>
+              <text class="ld-mini" x="304" y="58" text-anchor="middle" fill="var(--ink-3)">…repeats for every row group in the file…</text>
+            </g>
+
+            <!-- divider -->
+            <text class="ld-mini" x="380" y="416" text-anchor="middle" fill="var(--ink-4)" letter-spacing="0.4em">⋮</text>
+
+            <!-- ============== Footer ============== -->
+            <g transform="translate(76,432)">
+              <rect class="ld-pq-footer" x="0" y="0" width="608" height="156" rx="6"/>
+              <rect class="ld-pq-footer-head" x="0" y="0" width="608" height="28" rx="6"/>
+              <line stroke="oklch(0.7 0.08 60)" stroke-width="0.8" x1="0" y1="28" x2="608" y2="28"/>
+              <text class="ld-title" x="14" y="19">FOOTER</text>
+              <text class="ld-sub" x="100" y="19" fill="oklch(0.45 0.1 60)">read first · the index of the file</text>
+
+              <!-- footer items -->
+              <g font-family="var(--mono)" font-size="11.5px" fill="var(--ink-2)">
+                <text x="22" y="52">├─</text><text x="44" y="52" font-weight="600" fill="var(--ink)">schema</text><text x="120" y="52" fill="var(--ink-3)">— Thrift-encoded column types</text>
+                <text x="22" y="74">├─</text><text x="44" y="74" font-weight="600" fill="var(--ink)">row group metadata</text><text x="220" y="74" fill="var(--ink-3)">— byte offsets, sizes</text>
+                <text x="22" y="96">├─</text><text x="44" y="96" font-weight="600" fill="var(--ink)">column chunk metadata</text><text x="240" y="96" fill="var(--ink-3)">— min/max, null_count, encodings</text>
+                <text x="22" y="118">└─</text><text x="44" y="118" font-weight="600" fill="var(--ink)">key/value user metadata</text>
+              </g>
+            </g>
+
+            <!-- bottom PAR1 magic bar -->
+            <rect class="ld-pq-magic" x="60" y="598" width="640" height="22" rx="10" ry="10"/>
+            <rect class="ld-pq-magic" x="60" y="598" width="640" height="10"/>
+            <text class="ld-pq-magic-text" x="380" y="613" text-anchor="middle">PAR1 · magic footer</text>
+
+            <!-- ============== Right side annotations ============== -->
+            <g class="ld-pq-anno">
+              <!-- column chunk annotation -->
+              <line class="ld-pq-anno-line" x1="700" y1="118" x2="722" y2="118"/>
+              <line class="ld-pq-anno-line" x1="722" y1="118" x2="722" y2="98" stroke-dasharray="0"/>
+              <text x="730" y="92" font-weight="700" fill="var(--cyan-ink)">column chunk</text>
+              <text x="730" y="108">all values of one</text>
+              <text x="730" y="122">column, contiguous</text>
+
+              <!-- page annotation -->
+              <line class="ld-pq-anno-line" x1="700" y1="200" x2="722" y2="200"/>
+              <text x="730" y="186" font-weight="700" fill="oklch(0.5 0.13 215)">pages</text>
+              <text x="730" y="200">smallest unit of</text>
+              <text x="730" y="214">decompression · ~1 MB</text>
+
+              <!-- row group -->
+              <line class="ld-pq-anno-line" x1="700" y1="356" x2="730" y2="356"/>
+              <text x="730" y="342" font-weight="700" fill="var(--ink)">row group</text>
+              <text x="730" y="356">~128 MB of rows</text>
+              <text x="730" y="370">prunable as a unit</text>
+
+              <!-- footer -->
+              <line class="ld-pq-anno-line" x1="700" y1="510" x2="730" y2="510"/>
+              <text x="730" y="496" font-weight="700" fill="oklch(0.45 0.1 60)">footer</text>
+              <text x="730" y="510">where readers seek</text>
+              <text x="730" y="524">first · the index</text>
+
+              <!-- read order arrow -->
+              <path d="M 770 50 L 770 596" fill="none" stroke="var(--ink-4)" stroke-width="1" stroke-dasharray="2 4"/>
+              <path d="M 770 596 L 766 588 M 770 596 L 774 588" stroke="var(--ink-4)" stroke-width="1" fill="none"/>
+              <text x="780" y="56" fill="var(--ink-4)">byte 0</text>
+              <text x="780" y="600" fill="var(--ink-4)">EOF</text>
+              <text x="784" y="320" fill="var(--ink-4)" transform="rotate(90 784 320)" text-anchor="middle">file order</text>
+            </g>
+          </svg>
+        </div>
+        <figcaption class="ld-fig-cap">
+          <b>The whole format.</b> Bytes from top to bottom: <code>PAR1</code>, then row groups, then a footer that indexes everything, then <code>PAR1</code> again. Readers <em>seek to the end first</em>, parse the footer to learn schema and per-column-chunk min/max, then jump to just the pages they need. Three columns ignored, one column read, one row group skipped — that's a 50× IO reduction without ever touching the bulk of the file.
+        </figcaption>
+      </figure>
+      <div class="prose">
+        <p>Three things make this format fast:</p>
+        <ol>
+          <li><strong>Columnar layout.</strong> A query for <code>SUM(amount)</code> reads the <em>amount</em> column chunk in each row group, and nothing else.</li>
+          <li><strong>Per-column encoding.</strong> Run-length encoding for repeated values, dictionary encoding for low-cardinality strings (<code>country</code> = US, US, US, UK becomes ints 0, 0, 0, 1 + a tiny dict). Often 5-10× compression on top of GZIP/Snappy.</li>
+          <li><strong>Min/max statistics per row group, per column.</strong> If a query says <code>WHERE amount > 1000</code> and a row group's max <code>amount</code> is 50, the engine skips the entire row group <em>without reading a single byte from it</em>. This is called <strong>predicate pushdown</strong>, and it's the main reason analytical queries can hit a petabyte and return in 200ms.</li>
+        </ol>
+        <p>That's it. That's the whole format. ORC (Optimized Row Columnar) is Parquet's closest sibling — it's also columnar, born in Hive, and shares the same core ideas: column chunks, per-chunk statistics, and footer-first reading. Avro is the row-oriented complement: schema-embedded, great for streaming and Kafka payloads, bad for analytics. The pattern is almost always <em>Avro on the wire, Parquet at rest.</em></p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Encodings, dissected</h2>
+      <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.84rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
+            <th style="padding: 8px;">Encoding</th><th style="padding: 8px;">Best for</th><th style="padding: 8px;">Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Plain</td><td style="padding:8px; color:var(--ink-2);">High-entropy data; floats, hashes.</td><td style="padding:8px; color:var(--ink-3);">Just the raw bytes.</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Dictionary</td><td style="padding:8px; color:var(--ink-2);">Low-cardinality strings.</td><td style="padding:8px; color:var(--ink-3);">"US"→0, "UK"→1 + index list.</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">RLE</td><td style="padding:8px; color:var(--ink-2);">Long runs of repeats.</td><td style="padding:8px; color:var(--ink-3);">[0,0,0,0,1,1] → [(0,4),(1,2)].</td></tr>
+          <tr style="border-bottom: 1px dashed var(--rule);"><td style="padding:8px; color:var(--cyan-deep);">Bit-packing</td><td style="padding:8px; color:var(--ink-2);">Small integers.</td><td style="padding:8px; color:var(--ink-3);">Pack 8 booleans into a byte.</td></tr>
+          <tr><td style="padding:8px; color:var(--cyan-deep);">Delta encoding</td><td style="padding:8px; color:var(--ink-2);">Sorted columns (timestamps, auto-increment IDs).</td><td style="padding:8px; color:var(--ink-3);">Store diffs from prev value, not absolute values. Unrelated to Delta Lake.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout"><span class="icon">▸</span><div><b>The interview move.</b> When asked to compute storage cost or query latency, separate <em>logical row count × bytes-per-row</em> from <em>physical bytes after encoding + compression</em>. They differ by 5-20× for typical analytical data. A 1TB CSV is usually 50-200GB as Parquet.</div></div>
+    </section>
+
+    <section id="s5">
+      <h2>Parquet vs Iceberg vs Delta Lake</h2>
+      <div class="prose">
+        <p>A common confusion: Parquet, Iceberg, and Delta Lake are not competing formats. They operate at different levels.</p>
+        <ul>
+          <li><strong>Parquet</strong> is a <em>file format</em>. It defines how bytes are laid out within a single file: row groups, column chunks, encodings, footer stats. It knows nothing about transactions, schema evolution across files, or which files make up a "table."</li>
+          <li><strong>Apache Iceberg</strong> and <strong>Delta Lake</strong> are <em>open table formats</em> (also called lakehouse table formats). They sit one layer above Parquet: they manage a <em>collection</em> of Parquet (or ORC) files as a logical table and add the things Parquet lacks: ACID transactions, snapshot isolation, time-travel queries, schema and partition evolution, and file-level manifests that enable efficient planning.</li>
+        </ul>
+        <p>The key architectural differences between Iceberg and Delta Lake:</p>
+        <ul>
+          <li><strong>Metadata model.</strong> Iceberg uses a tree of JSON manifest files — a snapshot points to one or more manifest lists, each of which points to individual Parquet files. Delta uses a transaction log (<code>_delta_log/</code>) of JSON commit files with sequential numbering. Both support time travel; Iceberg's tree is better for large-scale concurrent writes; Delta's linear log is simpler to reason about for single-writer workloads.</li>
+          <li><strong>Partition evolution.</strong> Iceberg supports partition spec changes without rewriting data — old partitions stay on the old spec, new writes use the new spec, and the engine handles both transparently. Delta Lake requires a full rewrite to change partition layout.</li>
+          <li><strong>Hidden partitioning.</strong> Iceberg can partition by a transform of a column (e.g., <code>months(order_date)</code>) and hide that from the query writer — queries filter by <code>order_date</code> and the engine maps to partition files automatically. Delta Lake uses physical partition directories (Hive-style), so the partition column must appear in the query.</li>
+          <li><strong>Ecosystem.</strong> Delta Lake is tightly integrated with Databricks and Spark; Iceberg has broader engine support (Flink, Trino, Snowflake, Athena, Spark) and is the preferred default for multi-engine architectures.</li>
+        </ul>
+        <div class="callout"><span class="icon">▸</span><div><b>The interview move.</b> If asked "should we use Iceberg or Delta?", the honest answer is: Delta wins if you're a Databricks shop (better tooling, Liquid Clustering, DML optimisations). Iceberg wins if you need engine portability or partition evolution. Both are vastly better than bare Parquet files with Hive-style directories.</div></div>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Bloom filters: a free win</h2>
+      <div class="prose">
+        <p>Min/max stats only help with range predicates. For <em>point lookups</em> — "<code>WHERE user_id = 'abc-123'</code>" — min/max is useless because almost every row group will contain that range. The fix: a <strong>Bloom filter</strong> per column chunk. A small probabilistic data structure that can answer "is X definitely not here?" with zero false negatives. False positives are tunable — usually 1%.</p>
+      </div>
+      <div id="w-bf"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Vocab</h2>
+      <div id="flash"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div></div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js?v=3"></script>
+<script src="../js/topbar.js?v=2"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/data-widgets.js?v=13"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script>
+const LID = 'storage-formats';
+initLesson(LID, [
+  { id: 's1', label: 'Why columnar wins' },
+  { id: 's2', label: 'Same query, two layouts' },
+  { id: 's3', label: 'Anatomy of Parquet' },
+  { id: 's4', label: 'Encodings' },
+  { id: 's5', label: 'Iceberg vs Delta' },
+  { id: 's6', label: 'Bloom filters' },
+  { id: 's7', label: 'Quick check' },
+  { id: 's8', label: 'Vocab' },
+]);
+
+D.RowColumn(document.getElementById('w-rc'), { lessonId: LID, cpId: 'rc' });
+D.BloomFilter(document.getElementById('w-bf'), { lessonId: LID, cpId: 'bf' });
+
+W.Quiz(document.getElementById('q1'), {
+  lessonId: LID, cpId: 'q1', title: 'Predicate pushdown',
+  question: 'Your table has 1,000 row groups. The query is <code>WHERE order_date = \'2026-04-15\'</code>. The data is sorted by <code>order_date</code>. Roughly how many row groups does the engine actually open?',
+  options: [
+    'All 1,000 — it has to check.',
+    'About 1 — sorted data + min/max stats means most row groups have <code>order_date</code> ranges that don\'t include April 15, so they\'re skipped without being read.',
+    'About 100 — there\'s no way to skip.',
+    'It depends on the encoding.',
+  ],
+  correct: 1,
+  explanation: 'When data is sorted by the predicate column, min/max stats are <em>tight</em> per row group — typically only one or two row groups will have an overlapping range. Predicate pushdown skips the rest entirely. This is why <em>data layout matters as much as the format</em>: Parquet on unsorted data is barely faster than CSV; Parquet on sorted-by-the-right-column data is 100× faster.'
+});
+
+W.Quiz(document.getElementById('q2'), {
+  lessonId: LID, cpId: 'q2', title: 'Bloom verdict',
+  question: 'A query asks <code>WHERE user_id = \'abc-123\'</code>. The Bloom filter for the <code>user_id</code> column says: <em>"definitely not in this row group."</em> What does the engine do?',
+  options: [
+    'Open the row group anyway, just to be safe.',
+    'Skip the row group entirely without reading any data pages.',
+    'Re-check using the min/max statistics.',
+    'Probabilistically open ~50% of the row groups.',
+  ],
+  correct: 1,
+  explanation: 'Bloom filters have <em>zero false negatives</em>. A "definitely not" answer is final — the engine skips the entire row group, saving the IO. The flip side: a "maybe" is just that — the value <em>might</em> be in there, or might not, and you have to actually open the row group to know. Tuning the false-positive rate (typically 1%) is a knob in Iceberg/Delta.'
+});
+
+W.Flashcards(document.getElementById('flash'), {
+  lessonId: LID, cpId: 'flash',
+  cards: [
+    { term: 'Row group', q: 'What is the right size?', a: '128MB-512MB is the sweet spot. Too small → metadata dominates, too many tiny IO ops. Too large → can\'t parallelize work, can\'t skip cleanly.' },
+    { term: 'Page', q: 'Why are pages a thing?', a: 'A page is the smallest unit of decompression. ~1MB by default. Lets the engine load just the part of a column chunk it needs, without inflating the whole thing.' },
+    { term: 'Footer-first', q: 'Why is the footer at the end?', a: 'Streaming writers don\'t know the schema/stats until they\'ve seen all the data. Readers seek to the end first, parse the footer, then jump to the relevant pages. Two seeks, no full scan.' },
+    { term: 'ORC', q: 'How is ORC different?', a: 'ORC is Parquet\'s sibling — columnar, similar layout, born in Hive. Slightly better compression on some workloads, slightly worse ecosystem support outside Hadoop. Most modern stacks pick Parquet.' },
+    { term: 'Avro', q: 'When do you use Avro?', a: 'Row-oriented, schema-embedded, great for streaming and Kafka payloads. Bad for analytics. Often: Avro on the wire, Parquet at rest.' },
+    { term: 'Z-ordering', q: 'What does it do?', a: 'A space-filling curve that lets you sort by multiple columns at once, so min/max stats prune well across <em>any</em> of those columns. Delta\'s killer feature for multi-dim queries.' },
+  ]
+});
+</script>
+
+</body>
+</html>

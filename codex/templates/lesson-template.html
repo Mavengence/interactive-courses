@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  LESSON TEMPLATE — Codex Course
+  Copy this file, rename to `lessons/NN-slug.html`, then:
+
+    1. Register in `js/lessons.js` (add an entry to window.LESSONS).
+    2. Create a bespoke widget script at `js/lessons/LNN.js` (optional).
+    3. Replace all TEMPLATE:... tokens below with your lesson's content.
+    4. Run `python3 -m http.server 8787` from the site root and open the page.
+
+  Every section below is optional. Delete what you don't use.
+  Widgets (Quiz / Compare / Replay / Flashcards) are declared via
+  `data-widget="<name>"` attributes — the module-loader mounts them.
+  ============================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TEMPLATE:LESSON_TITLE · Codex Course</title>
+  <meta name="description" content="TEMPLATE:LESSON_DESCRIPTION (140–160 chars)."/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <!-- Core stylesheet chain. Order matters. final.css is always last. -->
+  <link rel="stylesheet" href="../styles/core.css"/>
+  <link rel="stylesheet" href="../styles/home.css"/>
+  <link rel="stylesheet" href="../styles/lesson.css"/>
+  <link rel="stylesheet" href="../styles/motion.css"/>
+  <link rel="stylesheet" href="../styles/prod.css"/>
+  <link rel="stylesheet" href="../styles/theme.css"/>
+  <link rel="stylesheet" href="../styles/polish.css"/>
+  <link rel="stylesheet" href="../styles/a11y.css"/>
+  <link rel="stylesheet" href="../styles/final.css"/>
+
+  <!-- Structured data (LearningResource). Fill in the three TEMPLATE tokens. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "TEMPLATE:LESSON_TITLE",
+    "description": "TEMPLATE:LESSON_DESCRIPTION",
+    "inLanguage": "en",
+    "learningResourceType": "Lesson",
+    "isPartOf": { "@type": "Course", "name": "Codex Course" }
+  }
+  </script>
+</head>
+
+<body class="grid lesson-NN">
+  <!-- a11y: skip link (a11y.css styles it offscreen until focused) -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Topbar mounts here via js/topbar.js -->
+  <div id="topbar"></div>
+
+  <main id="main" class="lesson">
+    <!--  ─── Hero  ───────────────────────────────────────────────── -->
+    <section class="lesson-hero">
+      <div class="container">
+        <p class="eyebrow">LESSON NN · TRACK NN — TEMPLATE:TRACK_NAME</p>
+        <h1>TEMPLATE:LESSON_TITLE.</h1>
+        <p class="subtitle">TEMPLATE:LESSON_SUBTITLE — one sentence, no buzzwords.</p>
+        <div class="meta">
+          <span>⏱ <b>X min</b> read</span>
+          <span>◆ <b>X</b> interactives</span>
+          <span>✦ <b>+XX XP</b> available</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="lesson-body">
+        <!--  ─── Sidebar TOC (auto-populated by lesson-init.js) ────── -->
+        <aside class="lesson-sidebar" id="toc" aria-label="Lesson contents"></aside>
+
+        <!--  ─── Lesson content  ───────────────────────────────────── -->
+        <div class="lesson-content">
+          <!-- Section 1 — intro prose -->
+          <section id="s1" data-title="Intro">
+            <h2>TEMPLATE:SECTION_1_HEADING.</h2>
+            <p>Opening paragraph. Keep it under 80 words. Terminal-first tone.</p>
+            <p>Optional supporting paragraph.</p>
+          </section>
+
+          <!-- Section 2 — callout + cards -->
+          <section id="s2" data-title="Details">
+            <h2>TEMPLATE:SECTION_2_HEADING.</h2>
+
+            <aside class="callout callout--cyan">
+              <b>Watch for.</b> TEMPLATE:CALLOUT_BODY.
+            </aside>
+
+            <div class="grid-3">
+              <article class="card">
+                <p class="eyebrow">01</p>
+                <h3>Card title.</h3>
+                <p>Card body, two lines max.</p>
+              </article>
+              <article class="card">
+                <p class="eyebrow">02</p>
+                <h3>Card title.</h3>
+                <p>Card body, two lines max.</p>
+              </article>
+              <article class="card">
+                <p class="eyebrow">03</p>
+                <h3>Card title.</h3>
+                <p>Card body, two lines max.</p>
+              </article>
+            </div>
+          </section>
+
+          <!-- Section 3 — Replay widget (declarative mount) -->
+          <section id="s3" data-title="Replay">
+            <h2>TEMPLATE:SECTION_3_HEADING.</h2>
+            <p>Short preamble framing the replay.</p>
+            <div id="replay1"
+                 data-widget="replay"
+                 data-script='[{"t":0,"type":"cmd","text":"$ codex run"},
+                               {"t":600,"type":"out","text":"ok"}]'></div>
+          </section>
+
+          <!-- Section 4 — Compare widget -->
+          <section id="s4" data-title="Compare">
+            <h2>TEMPLATE:SECTION_4_HEADING.</h2>
+            <div id="cmp1"
+                 data-widget="compare"
+                 data-left='{"label":"Before","body":"Vague prompt"}'
+                 data-right='{"label":"After","body":"Crisp spec"}'></div>
+          </section>
+
+          <!-- Section 5 — Quick-check quiz -->
+          <section id="s5" data-title="Quick check">
+            <h2>TEMPLATE:SECTION_5_HEADING.</h2>
+            <div id="q1"
+                 data-widget="quiz"
+                 data-question="Which of these is the best spec?"
+                 data-options='["Option A","Option B","Option C","Option D"]'
+                 data-answer="1"></div>
+          </section>
+
+          <!-- Section 6 — Flashcards -->
+          <section id="s6" data-title="Flashcards">
+            <h2>TEMPLATE:SECTION_6_HEADING.</h2>
+            <div id="fc1"
+                 data-widget="flashcards"
+                 data-cards='[{"q":"Front","a":"Back"}]'></div>
+          </section>
+
+          <!-- Section 7 — Bespoke widget host for LNN.js -->
+          <section id="s7" data-title="Practice">
+            <h2>Practice widget.</h2>
+            <div id="bespoke-host"></div>
+          </section>
+
+          <!-- Footer: next/previous + mark-complete (lesson-init.js mounts it) -->
+          <nav class="lesson-footer" id="lesson-footer" aria-label="Lesson navigation"></nav>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Core scripts — keep order -->
+  <script src="../js/lessons.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/topbar.js"></script>
+  <script src="../js/widgets.js"></script>
+  <script src="../js/lesson-init.js"></script>
+  <script src="../js/motion.js"></script>
+  <script src="../js/prod.js"></script>
+
+  <!-- Bespoke widget for THIS lesson (optional) -->
+  <script src="../js/lessons/LNN.js" defer></script>
+
+  <!-- Module loader (CC2) — auto-wires topbar crumb, footer, data-widgets -->
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+/* ==========================================================================
+   v7 · Shared simulation styles — LIGHT edition
+   ========================================================================== */
+
+.sim-row {
+  display: grid; grid-template-columns: 280px 1fr; gap: 22px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .sim-row { grid-template-columns: 1fr; }
+}
+.sim-controls {
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 16px; background: var(--panel-hi); border-radius: 12px;
+  border: 1px solid var(--hair-2);
+}
+.sim-ctrl { display: flex; flex-direction: column; gap: 6px; }
+.sim-ctrl label {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--ink-3); letter-spacing: 0.12em; text-transform: uppercase;
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.sim-ctrl label .mono {
+  color: var(--ink-1); font-weight: 700; letter-spacing: 0;
+  text-transform: none; font-size: 13px;
+  font-family: var(--font-mono);
+  padding: 1px 8px; background: var(--panel);
+  border: 1px solid var(--hair-2); border-radius: 4px;
+}
+.sim-ctrl-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg {
+  display: flex; background: var(--panel); border: 1px solid var(--hair-2);
+  border-radius: 7px; padding: 2px; gap: 2px;
+}
+.seg button {
+  flex: 1; font: inherit; font-size: 11px; font-weight: 600;
+  padding: 6px 8px; background: transparent; border: none; border-radius: 5px;
+  color: var(--ink-3); cursor: pointer; text-transform: capitalize;
+  transition: background 150ms, color 150ms;
+}
+.seg button:hover { color: var(--ink-1); }
+.seg button.on {
+  background: var(--ink-1);
+  color: var(--bg-elev); font-weight: 700;
+}
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; background: var(--hair-2);
+  border-radius: 2px; outline: none; border: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--magenta); cursor: pointer;
+  box-shadow: 0 2px 8px rgba(232,49,143,0.35), 0 0 0 4px rgba(232,49,143,0.12);
+  border: 2px solid #FBF8F1;
+  transition: transform 120ms var(--ease-spring);
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--magenta); cursor: pointer; border: 2px solid #FBF8F1;
+}
+
+.sim-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-top: 4px; padding-top: 14px; border-top: 1px dashed var(--hair-2);
+}
+.sim-stats .k { font-family: var(--font-mono); font-size: 9px; font-weight: 700; color: var(--ink-3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+.sim-stats .v { font-family: var(--font-serif); font-size: 26px; color: var(--ink-1); letter-spacing: -0.015em; line-height: 1; }
+
+.sim-plots { display: flex; flex-direction: column; gap: 14px; }
+.sim-plot-head {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--ink-3); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.sim-plot-head .hint {
+  font-size: 10px; color: var(--ink-4); text-transform: none; letter-spacing: 0.02em; font-weight: 500;
+}
+.hist {
+  width: 100%; aspect-ratio: 400/140; display: block;
+  background: var(--panel); border-radius: 8px; border: 1px solid var(--hair-2);
+}
+
+/* loop mini */
+.loop-mini {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;
+  margin: 22px 0;
+}
+.loop-mini-stage {
+  background: var(--panel);
+  border: 1px solid var(--hair-2);
+  border-radius: 10px;
+  padding: 14px 12px;
+  text-align: center;
+  position: relative;
+}
+.loop-mini-stage:not(:last-child)::after {
+  content: "→"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+  color: var(--ink-4); font-family: var(--font-mono); font-size: 14px; pointer-events: none;
+}
+.loop-mini-n {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--magenta); letter-spacing: 0.1em;
+}
+.loop-mini-t {
+  font-family: var(--font-serif); font-size: 20px; color: var(--ink-1);
+  letter-spacing: -0.012em; margin-top: 4px;
+}
+
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  margin: 20px 0;
+}
+
+.tag-pill {
+  display: inline-flex; padding: 3px 9px; font-family: var(--font-mono);
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em;
+  border-radius: 5px; background: var(--panel); color: var(--ink-2);
+  border: 1px solid var(--hair-2);
+}
+.tag-pill.good { background: rgba(31,175,126,0.1); color: var(--mint); border-color: rgba(31,175,126,0.3); }
+.tag-pill.bad  { background: rgba(216,58,58,0.1); color: var(--bad); border-color: rgba(216,58,58,0.3); }
+.tag-pill.warn { background: rgba(232,160,49,0.1); color: var(--warn); border-color: rgba(232,160,49,0.3); }
+
+.plot-wrap {
+  background: var(--panel);
+  border: 1px solid var(--hair-2);
+  border-radius: 12px;
+  padding: 14px;
+}
+.plot-wrap svg { display: block; width: 100%; height: auto; }
+
+/* Confusion matrix grid */
+.cm-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+  max-width: 420px;
+}
+.cm-cell {
+  padding: 22px 18px; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 4px;
+  transition: transform 220ms var(--ease-spring);
+}
+.cm-lab { font-family: var(--font-mono); font-size: 10px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+.cm-val {
+  font-family: var(--font-serif); font-size: 36px; color: var(--ink-1); line-height: 1;
+  letter-spacing: -0.02em;
+  transition: color 200ms;
+}
+
+/* Shared plot axis text */
+.plot-wrap text,
+.hist-wrap text {
+  font-family: var(--font-mono);
+  fill: var(--ink-3);
+}
+
+/* ========= Galton board ============================================= */
+.sim-row.galton-row { grid-template-columns: 260px 1fr; }
+.galton-stage {
+  background:
+    linear-gradient(180deg, rgba(91,62,232,0.02), rgba(232,49,143,0.03));
+  border: 1px solid var(--hair-2);
+  border-radius: 12px;
+  padding: 10px;
+}
+.galton-svg {
+  display: block; width: 100%; height: auto;
+  background: var(--panel);
+  border-radius: 8px;
+}
+.galton-note {
+  font-size: 12.5px; line-height: 1.5; color: var(--ink-3);
+  padding: 10px 12px; background: var(--panel);
+  border: 1px dashed var(--hair-2); border-radius: 8px;
+  display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+}
+.galton-note strong { color: var(--ink-1); font-weight: 600; }
+.galton-note code { font-family: var(--font-mono); color: var(--violet); }
+
+/* ========= Animated curve overlay ==================================== */
+.fit-overlay { mix-blend-mode: multiply; }
+
+/* ========= ROC/threshold canvas ====================================== */
+.roc-canvas {
+  background: var(--panel);
+  border: 1px solid var(--hair-2);
+  border-radius: 10px;
+  display: block; width: 100%; height: auto;
+}
+
+/* ========= A/B running exp =========================================== */
+.ab-stage {
+  background: var(--panel);
+  border: 1px solid var(--hair-2);
+  border-radius: 12px;
+  padding: 14px;
+}
+.ab-lift-bar {
+  position: relative;
+  height: 36px;
+  background: var(--bg-hi);
+  border-radius: 6px;
+  border: 1px solid var(--hair-2);
+  overflow: hidden;
+}
+.ab-lift-fill {
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--lime), var(--mint));
+  transition: width 220ms var(--ease-out);
+}
+
+/* ========= Peeking parallel experiments ============================= */
+.peek-grid {
+  display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
+}
+.peek-cell {
+  aspect-ratio: 1/1; border-radius: 4px;
+  background: var(--bg-hi); border: 1px solid var(--hair);
+  position: relative;
+}
+.peek-cell.peeked {
+  background: linear-gradient(135deg, var(--bad), #b32a2a);
+  border-color: var(--bad);
+}
+
+/* ===== A/B verdict + power bar ====================================== */
+.sim-stats .sub {
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--ink-4); margin-top: 2px; letter-spacing: 0.02em;
+}
+.ab-verdict {
+  padding: 12px 14px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--hair-2);
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  transition: background 200ms, border-color 200ms;
+}
+.ab-verdict[data-sig="yes"] {
+  background: rgba(31,175,126,0.08);
+  border-color: rgba(31,175,126,0.35);
+}
+.ab-verdict-k {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  color: var(--ink-3); letter-spacing: 0.18em; text-transform: uppercase;
+}
+.ab-verdict-v {
+  font-family: var(--font-serif); font-size: 26px; color: var(--ink-1);
+  letter-spacing: -0.02em; line-height: 1;
+}
+.ab-verdict[data-sig="yes"] .ab-verdict-v { color: var(--mint); }
+.ab-verdict-note {
+  font-size: 11.5px; color: var(--ink-3); flex-basis: 100%;
+}
+.ab-verdict[data-sig="yes"] .ab-verdict-note { color: var(--mint); font-weight: 600; }
+
+.ab-power {
+  padding: 12px 14px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--hair-2);
+}
+.ab-power-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.ab-power-bar {
+  height: 8px; background: var(--bg-hi); border-radius: 4px;
+  border: 1px solid var(--hair); overflow: hidden;
+}
+.ab-power-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--magenta));
+  transition: width 200ms var(--ease-out);
+}
+.ab-power-note {
+  margin-top: 8px; font-size: 11.5px; color: var(--ink-3);
+}
+.ab-power-note .mono {
+  font-family: var(--font-mono); color: var(--ink-1); font-weight: 600;
+}

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>03 · AGENTS.md — Codex's Memory — Codex Course</title>
+  <meta name="description" content="One file, committed to your repo. The difference between write a PR and write a PR the way we write PRs here."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="03 · AGENTS.md — Codex's Memory — Codex Course"/>
+  <meta property="og:description" content="One file, committed to your repo. The difference between write a PR and write a PR the way we write PRs here."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/03-agents-md.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="03 · AGENTS.md — Codex's Memory — Codex Course"/>
+  <meta name="twitter:description" content="One file, committed to your repo. The difference between write a PR and write a PR the way we write PRs here."/>
+  <link rel="canonical" href="../lessons/03-agents-md.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"AGENTS.md — Codex's Memory",
+    "description":"One file, committed to your repo. The difference between write a PR and write a PR the way we write PRs here.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":3
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-03">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 03 · track 01 — fundamentals</div>
+    <h1>AGENTS.md —<br/>Codex's Memory.</h1>
+    <p class="subtitle">One file, committed to your repo. It's the difference between "write a PR" and "write a PR the way we write PRs here."</p>
+    <div class="meta">
+      <span>⏱ <b>11 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+55 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Codex has no persistent memory. The sandbox is ephemeral. The agent has never met your team before. Yet, somehow, people get Codex to produce PRs that look like the humans on the team wrote them — same error-handling conventions, same test patterns, same casual profanity in commit messages. How?</p>
+        <p>Answer: <code>AGENTS.md</code>. A plain-text file, in your repo root, that Codex reads at the start of every task. It's your onboarding doc for the agent. The new-hire manual that the new hire actually reads on day one.</p>
+        <p>The concept is the same across tools. Claude Code uses <code>CLAUDE.md</code>. GitHub Copilot Workspace uses a repo instructions file. Cursor uses <code>.cursorrules</code>. The names differ; the principle is identical: a plain-text file committed to your repo that the agent reads before it touches anything. This lesson uses <code>AGENTS.md</code> as the canonical example — apply everything here to whatever convention file your tool expects.</p>
+        <p>Anything worth knowing about how your team builds software belongs here. Conventions. Folder structure. Test commands. Known quirks. The one library you love and the one you're migrating off. The exact set of things a competent junior engineer would pick up by osmosis over their first six weeks — except you're writing it down, once, and every agent run benefits.</p>
+      </div>
+
+      <div class="pull-quote">Think of AGENTS.md as the onboarding doc you wish your team had written years ago. Now you have a reason to write it.</div>
+    </section>
+
+    <section id="s2">
+      <h2>What a good AGENTS.md contains</h2>
+      <div class="prose">
+        <p>There's no schema. The file is read as context. But a few sections pay off reliably across every repo we've seen:</p>
+      </div>
+      <div id="w-spec"></div>
+    </section>
+
+    <section id="s3">
+      <h2>A real one, condensed</h2>
+      <div class="prose"><p>Here's the shape of a production <code>AGENTS.md</code>. Not a template — a sample. Your file should look nothing like this structurally. It should look exactly like this in <em>specificity</em>.</p></div>
+
+<pre class="code"><span class="tok-c"># AGENTS.md</span>
+
+<span class="tok-k">## What this repo is</span>
+Payments service. Python 3.11, Flask, Postgres, Stripe.
+Critical path: <span class="tok-s">/checkout</span> endpoint. Downtime costs money literally.
+
+<span class="tok-k">## Running locally</span>
+<span class="tok-p">$</span> make setup       <span class="tok-c"># installs everything</span>
+<span class="tok-p">$</span> make test         <span class="tok-c"># pytest, must pass before any PR</span>
+<span class="tok-p">$</span> make lint         <span class="tok-c"># ruff + mypy, also mandatory</span>
+
+<span class="tok-k">## Conventions we actually enforce</span>
+- No bare <span class="tok-s">except:</span> clauses. Catch specific exceptions.
+- Every endpoint gets an integration test in <span class="tok-s">tests/api/</span>.
+- Log with <span class="tok-s">structlog</span>, never <span class="tok-s">print</span>. Log context as kwargs, not f-strings.
+- Migrations go in <span class="tok-s">db/migrations/</span>, numbered, never edited after merge.
+- We use <span class="tok-s">pydantic v2</span>. If you see v1 patterns, flag it — we're mid-migration.
+
+<span class="tok-k">## Known quirks</span>
+- <span class="tok-s">tests/integration/test_webhooks.py</span> is flaky. Re-run once before debugging.
+- <span class="tok-s">user_service.py</span> has 400 lines we've been meaning to split. Don't make it worse.
+- Our Stripe test keys live in <span class="tok-s">.env.test</span>, already in the sandbox.
+
+<span class="tok-k">## Definitely don't</span>
+- Touch <span class="tok-s">legacy/</span> without explicit permission — it runs in prod, unowned.
+- Add new top-level dependencies without asking.
+- Write code in <span class="tok-s">server_v1.py</span>. It's deprecated.
+</pre>
+    </section>
+
+    <section id="s4">
+      <h2>The before/after</h2>
+      <div class="prose"><p>Same task — "add a <code>/health</code> endpoint that checks the database." Same repo. The only variable: whether <code>AGENTS.md</code> was present. Look at the resulting patches.</p></div>
+      <div class="diff" id="w-diff1"></div>
+      <div class="diff" id="w-diff2"></div>
+      <div class="callout">
+        <span class="icon">▸</span>
+        <div><b>Both versions work.</b> But the second one fits. It uses <code>structlog</code> because the repo does. It catches <code>OperationalError</code> specifically because the style guide says so. It writes a test in <code>tests/api/</code> because that's where tests go. A human reviewer spends 30 seconds on the second PR; they spend 10 minutes on the first asking "why didn't you…"</div>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Rolling it out</h2>
+      <div class="prose">
+        <p>Three moves to get value out of <code>AGENTS.md</code> in a week:</p>
+        <ol>
+          <li><strong>Start with 30 lines.</strong> A half-page is better than a perfect document that never ships. Answer: what does this repo do, how do I run it, what are three things a new hire always gets wrong?</li>
+          <li><strong>Grow it from rejections.</strong> Each time you reject an agent PR for a stylistic reason, add a line to <code>AGENTS.md</code> so the next run doesn't repeat the mistake. The file should get measurably smarter every sprint.</li>
+          <li><strong>Review it like code.</strong> The file is source. When conventions change, <code>AGENTS.md</code> changes. Stale docs poison the well worse than missing docs.</li>
+        </ol>
+        <h3 style="margin-top:1.5rem;">Context management: what goes in, what stays out</h3>
+        <p>The convention file competes for space in the context window with your task spec and the repo contents the agent reads. Keep it focused:</p>
+        <ul>
+          <li><strong>In:</strong> things that change how code is written (conventions, patterns, must-avoid). Anything a new engineer would ask on their first week.</li>
+          <li><strong>Out:</strong> things the agent can infer from the code itself (don't describe your folder structure if it's obvious). Marketing copy, meeting notes, personal preferences.</li>
+          <li><strong>In:</strong> exact commands. <code>make test</code>, not "run the tests." The agent executes commands literally.</li>
+          <li><strong>Out:</strong> vague principles. "Write clean code" adds no signal. "No bare <code>except:</code> clauses — catch specific exceptions" does.</li>
+        </ul>
+        <p>A 200-line <code>AGENTS.md</code> that is specific and accurate outperforms a 600-line one that's half filler. Prune aggressively. Every line should earn its spot by preventing a real mistake.</p>
+      </div>
+
+      <div class="callout">
+        <span class="icon">▸</span>
+        <div><b>Tool-specific note.</b> Claude Code reads <code>CLAUDE.md</code> and supports directory-level convention files (e.g., <code>src/CLAUDE.md</code> for frontend-specific rules). If you're using Claude Code on a monorepo, layer your convention files: root-level for universal rules, directory-level for domain-specific ones.</div>
+      </div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L03"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('agents-md', [
+    {id:'s1', label:'Onboarding the agent'},
+    {id:'s2', label:'What to put in it'},
+    {id:'s3', label:'A real example'},
+    {id:'s4', label:'Before & after'},
+    {id:'s5', label:'Quick check'},
+    {id:'s6', label:'Rollout plan'},
+  ]);
+
+  W.TaskSpec(document.getElementById('w-spec'), {
+    lessonId:'agents-md', cpId:'spec-1', threshold: 4,
+    title:'Assemble a useful AGENTS.md',
+    desc:"Toggle each section on if you'd include it in your team's first draft. Aim for at least four.",
+    goal:'Onboard Codex to a Python payments service in one file.',
+    items:[
+      { section:'What this repo is', hint:'One paragraph. Business purpose, not architecture.', body:['Payments service. Python 3.11, Flask, Postgres.','Critical path: /checkout endpoint.'] },
+      { section:'How to run tests & lint', hint:'The exact commands. Codex will run them.', body:['make test   # pytest, must pass','make lint   # ruff + mypy'] },
+      { section:'Conventions we enforce', hint:'Not "be clean." Specific rules.', body:['No bare except:. Catch specific exceptions.','Log with structlog, not print.'] },
+      { section:'Known quirks', hint:'The undocumented minefields. Saves wasted runs.', body:['test_webhooks.py is flaky — re-run once.','user_service.py is 400 lines — don\'t add to it.'] },
+      { section:'Definitely don\'t', hint:'Hard stops. More useful than style preferences.', body:['Never edit legacy/. Runs in prod, unowned.','No new top-level deps without asking.'] },
+      { section:'Our favorite color', hint:'Not useful. Not even a joke — don\'t add noise.', body:['#3B82F6'] },
+    ]
+  });
+
+  W.Diff(document.getElementById('w-diff1'), {
+    title: 'Without AGENTS.md — generic, doesn\'t match repo',
+    file: 'api/health.py · +15 / −0',
+    lines: [
+      { t: '+', s: 'from flask import Blueprint, jsonify' },
+      { t: '+', s: 'import logging' },
+      { t: '+', s: '' },
+      { t: '+', s: 'health_bp = Blueprint("health", __name__)' },
+      { t: '+', s: 'log = logging.getLogger(__name__)' },
+      { t: '+', s: '' },
+      { t: '+', s: '@health_bp.route("/health")' },
+      { t: '+', s: 'def health():' },
+      { t: '+', s: '    try:' },
+      { t: '+', s: '        db.session.execute("SELECT 1")' },
+      { t: '+', s: '        return jsonify({"ok": True})' },
+      { t: '+', s: '    except Exception as e:' },
+      { t: '+', s: '        log.error(f"health check failed: {e}")' },
+      { t: '+', s: '        return jsonify({"ok": False}), 500' },
+    ]
+  });
+
+  W.Diff(document.getElementById('w-diff2'), {
+    title: 'With AGENTS.md — fits the codebase, tests included',
+    file: 'api/health.py · +12 / −0',
+    lines: [
+      { t: '+', s: 'from flask import Blueprint, jsonify' },
+      { t: '+', s: 'from sqlalchemy.exc import OperationalError' },
+      { t: '+', s: 'import structlog' },
+      { t: '+', s: '' },
+      { t: '+', s: 'health_bp = Blueprint("health", __name__)' },
+      { t: '+', s: 'log = structlog.get_logger()' },
+      { t: '+', s: '' },
+      { t: '+', s: '@health_bp.route("/health")' },
+      { t: '+', s: 'def health():' },
+      { t: '+', s: '    try:' },
+      { t: '+', s: '        db.session.execute("SELECT 1")' },
+      { t: '+', s: '        return jsonify({"ok": True})' },
+      { t: '+', s: '    except OperationalError as e:' },
+      { t: '+', s: '        log.error("health_check_failed", error=str(e))' },
+      { t: '+', s: '        return jsonify({"ok": False}), 503' },
+      { t: ' ', s: '' },
+      { t: ' ', s: '# --- tests/api/test_health.py — also added ---' },
+    ],
+    note: 'Notice the specifics: <code>OperationalError</code> (not generic <code>Exception</code>), <code>structlog</code> with kwargs (not f-strings), <code>503</code> not <code>500</code>, and a test file in <code>tests/api/</code>. None of this was in the task. All of it was in <code>AGENTS.md</code>.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'agents-md', cpId: 'q1',
+    question: 'Which is the better AGENTS.md entry for "how we handle errors"?',
+    options: [
+      '"Handle errors thoughtfully and follow best practices."',
+      '"Catch specific exceptions, never bare except. Log with structlog. Return 4xx for client errors, 5xx only for server bugs. Don\'t swallow exceptions in endpoints — let the global handler format them."',
+      '"Errors should be handled."',
+      '"TODO: document error handling."',
+    ],
+    correct: 1,
+    explanation: 'The agent\'s output is bounded by the specificity of your instructions. "Best practices" is a non-instruction — the agent has to guess what you mean. Concrete rules give it something to actually apply. This is the single highest-leverage skill in AGENTS.md authoring.'
+  });
+</script>
+
+<script src="../js/lessons/L03.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

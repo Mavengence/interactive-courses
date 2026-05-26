@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>02 · The Sandbox Contract — Codex Course</title>
+  <meta name="description" content="Ephemeral filesystem, no network by default, a patch at the end. Every safety rail shapes how you prompt."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="02 · The Sandbox Contract — Codex Course"/>
+  <meta property="og:description" content="Ephemeral filesystem, no network by default, a patch at the end. Every safety rail shapes how you prompt."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/02-sandbox.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="02 · The Sandbox Contract — Codex Course"/>
+  <meta name="twitter:description" content="Ephemeral filesystem, no network by default, a patch at the end. Every safety rail shapes how you prompt."/>
+  <link rel="canonical" href="../lessons/02-sandbox.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"The Sandbox Contract",
+    "description":"Ephemeral filesystem, no network by default, a patch at the end. Every safety rail shapes how you prompt.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":2
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-02">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 02 · track 01 — fundamentals</div>
+    <h1>The Sandbox<br/>Contract.</h1>
+    <p class="subtitle">Ephemeral filesystem. No network by default. A patch at the end. Every safety rail Codex has shapes how you should prompt it.</p>
+    <div class="meta">
+      <span>⏱ <b>12 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+50 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Codex doesn't run on your laptop. It doesn't run in production. It runs in a <strong>sandbox</strong> — an isolated virtual environment, freshly spun up for each task, destroyed when the task finishes. Knowing the shape of that box is not an implementation detail. It's the thing that determines what tasks will work.</p>
+        <p>The sandbox contract has four properties worth memorizing:</p>
+        <ul>
+          <li><strong>Ephemeral.</strong> The filesystem exists only for the duration of the run. Nothing the agent writes survives unless it makes it into the output patch.</li>
+          <li><strong>Isolated.</strong> No access to your other repos, no access to your secrets, no access to production. A fresh universe each time.</li>
+          <li><strong>Offline by default.</strong> No network. No <code>pip install</code> from PyPI mid-run, no API calls to external services, no <code>curl</code> to a webhook. You grant network access explicitly, per-task.</li>
+          <li><strong>Transparent.</strong> Every command the agent runs, every file it touches, every test output — all logged. The PR isn't a black box; you can see exactly what happened.</li>
+        </ul>
+      </div>
+
+      <div class="pull-quote">The sandbox is a safety rail. It's also a design constraint. Every task you write is implicitly scoped by what the box can do.</div>
+    </section>
+
+    <section id="s2">
+      <h2>Why this shapes your prompts</h2>
+      <div class="prose">
+        <p>Three practical consequences. Each of these is a tripwire that new users hit at least once.</p>
+        <p><strong>Dependencies must be pre-installed.</strong> If your project needs <code>postgres</code>, <code>redis</code>, a headless Chrome, or a weird system library — the sandbox needs them baked in. Codex can't just go install things on the fly (unless you've granted network + a setup script). Your task will fail at the "run the tests" step and the agent will flail trying to work around it.</p>
+        <p><strong>External APIs are off-limits by default.</strong> Asking Codex to "fetch the latest OpenAPI spec from our docs site" will fail — the sandbox can't reach the internet. Workaround: paste the spec into the task, or commit it into the repo.</p>
+        <p><strong>The agent can't test against prod.</strong> "Run this against our staging database" isn't happening. If the task requires real external state, either stub it (give the agent a fixture) or break the task down so the external part is your job.</p>
+      </div>
+      <div id="w-compare"></div>
+    </section>
+
+    <section id="s3">
+      <h2>What's actually in the box</h2>
+      <div class="prose">
+        <p>Before you give the agent a task, it's worth having a rough inventory of the sandbox's contents. When you configure a Codex environment, you typically provide:</p>
+      </div>
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">provided by you</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Setup script</h3>
+          <p class="small muted" style="margin-top:6px;">Bash that runs once to install your language runtime, dependencies, dev tools, and fixtures. Think of it as <code>Dockerfile</code>-lite. Runs before Codex ever sees your code.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">provided by you</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Environment variables</h3>
+          <p class="small muted" style="margin-top:6px;">Fake API keys, test DB URLs, feature flags. Anything the agent needs to run your test suite without hitting real services.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">provided by you</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Network allow-list</h3>
+          <p class="small muted" style="margin-top:6px;">Domains Codex may reach (npm, PyPI, a specific internal registry). Empty by default. Opt-in, per domain.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">provided by Codex</div>
+          <h3 style="margin-top:6px;font-size:1rem;">The runtime</h3>
+          <p class="small muted" style="margin-top:6px;">A Linux container with common languages, compilers, git, and shell tools. Your setup script layers on top.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Live replay: what "no network" looks like</h2>
+      <div class="prose"><p>You ask the agent to "call our stripe test endpoint and check subscription status." Watch it hit the wall — gracefully, in this case, because its training says "if the network's off, say so."</p></div>
+      <div id="w-term"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Branching strategy for AI-assisted development</h2>
+      <div class="prose">
+        <p>Because each agent run produces a diff or PR on its own branch, your branching strategy matters more than it did before. A few patterns that work well:</p>
+        <ul>
+          <li><strong>One branch per task.</strong> Never give two concurrent agent runs the same base branch. They'll conflict. Let each run own its branch, then review and merge sequentially.</li>
+          <li><strong>Short-lived branches.</strong> Agent PRs should be small enough to review and merge in under 30 minutes. If the PR is 500+ lines, the task was too broad. Reject it, re-scope, re-run.</li>
+          <li><strong>Keep main green.</strong> The agent runs tests inside its sandbox, but your main branch CI is the final gate. Never merge an agent PR that CI hasn't signed off on — hallucinated test results do occur.</li>
+          <li><strong>Branch from the latest commit.</strong> Stale base branches cause the agent to produce changes that conflict with work your team already merged. Pull before you kick off a run.</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        <span class="icon">▸</span>
+        <div><b>Evaluating agent output.</b> When a PR arrives, the review question isn't "does this look reasonable?" — it's "do the tests pass, does the diff match the spec, and does nothing outside the stated scope change?" Start with the diff stat. If <code>+0 tests</code>, ask why. If files outside the spec changed, read them carefully or ask for a re-run scoped tighter.</div>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Pre-flight checklist</h2>
+      <div class="prose">
+        <p>Before you send a task to an agent, run through this checklist. These are the most common reasons a run fails silently.</p>
+      </div>
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">sandbox readiness</div>
+          <ul class="small muted" style="margin-top:8px;padding-left:1.2rem;">
+            <li>Does <code>make test</code> (or equivalent) pass locally right now?</li>
+            <li>Are all dependencies committed or baked into the setup script?</li>
+            <li>Do any tests hit external services? If yes — is there a fixture or an allow-list entry?</li>
+            <li>Are fake secrets / test env vars documented in <code>AGENTS.md</code>?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">task readiness</div>
+          <ul class="small muted" style="margin-top:8px;padding-left:1.2rem;">
+            <li>Is the goal one sentence and unambiguous?</li>
+            <li>Are the acceptance criteria checkable by the agent (i.e., runnable as tests)?</li>
+            <li>Is the scope narrow enough that a single PR can cover it?</li>
+            <li>Is there an explicit "don't touch X" list for anything adjacent?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L02"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('sandbox', [
+    {id:'s1', label:'The four properties'},
+    {id:'s2', label:'How it shapes prompts'},
+    {id:'s3', label:'What\'s in the box'},
+    {id:'s4', label:'Live replay'},
+    {id:'s5', label:'Branching strategy'},
+    {id:'s6', label:'Pre-flight checklist'},
+    {id:'s7', label:'Quick check'},
+  ]);
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Adjust the task for the sandbox',
+    bad: 'Fetch our OpenAPI spec from\n<span class="muted">https://docs.acme.com/v3/openapi.json</span>\nand generate TypeScript types.',
+    good: 'Using the spec at\n<span class="muted">./schemas/openapi.json</span>\n(committed to the repo), generate TypeScript types in\n<span class="muted">src/types/api.ts</span>. Regenerate on CI.',
+    note: '<b>Same goal.</b> Version on the left fails the moment the sandbox tries to <code>fetch</code>. Version on the right is deterministic, repeatable, and works offline.'
+  });
+
+  W.Terminal(document.getElementById('w-term'), {
+    lessonId: 'sandbox', cpId: 'term-1',
+    heading: 'Session replay: the network wall',
+    title: 'codex@sandbox · task-8d11',
+    frames: [
+      { line: '<span class="p">codex&gt;</span> planning…', delay: 500 },
+      { line: '  <span class="c">plan:</span> 1) hit stripe test api  2) parse response  3) update doc', delay: 700 },
+      { line: '<span class="p">$</span> curl -s https://api.stripe.com/v1/subscriptions', delay: 500 },
+      { line: '<span class="e">→ curl: (6) Could not resolve host: api.stripe.com</span>', delay: 700 },
+      { line: '<span class="p">codex&gt;</span> network appears blocked. checking AGENTS.md for fixtures…', delay: 700 },
+      { line: '<span class="p">$</span> ls tests/fixtures/', delay: 400 },
+      { line: '<span class="c">→ stripe_subscription_active.json · stripe_subscription_canceled.json</span>', delay: 600 },
+      { line: '<span class="p">codex&gt;</span> using fixtures instead. proceeding…', delay: 600 },
+      { line: '<span class="o">→ plan adapted: sandbox-compatible</span>', delay: 500 },
+    ]
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'sandbox', cpId: 'q1',
+    question: 'Your task is "run our e2e tests and fix any failing ones." The e2e suite hits a live staging API. What happens?',
+    options: [
+      'Codex runs the tests and fixes them normally.',
+      'Codex hits the network wall, can\'t reach staging, and either fails or hallucinates results.',
+      'Codex is smart enough to proxy through your laptop.',
+      'The tests run faster because the sandbox is closer to staging.'
+    ],
+    correct: 1,
+    explanation: 'Default sandbox = no network. You either (a) point tests at fixtures for the Codex run, (b) grant network access + the staging domain in the allow-list, or (c) break the task into two — Codex identifies the bug, you run the e2e verification locally.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'sandbox', cpId: 'q2',
+    question: 'Which of these is a design choice that follows directly from "the sandbox is ephemeral"?',
+    options: [
+      'Codex works faster than a human because it doesn\'t get tired.',
+      'The only durable artifact of a run is the patch. Files the agent writes but doesn\'t include in the patch are lost.',
+      'Your git history gets rewritten each run.',
+      'The sandbox automatically deploys to production on success.'
+    ],
+    correct: 1,
+    explanation: 'Ephemeral means "only the diff survives." Great for safety — a botched run leaves no trace. Mildly annoying when you want the agent to <i>explore</i> before patching. Pattern for that: ask it to do the exploration and put the notes into a file like <code>docs/exploration.md</code>, then include that file in the patch.'
+  });
+</script>
+
+<script src="../js/lessons/L02.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

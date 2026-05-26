@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>06 · Acceptance Criteria — Codex Course</title>
+  <meta name="description" content="Ambiguous done = ambiguous PR. Write the tests before you write the task. Or have Codex write them first."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="06 · Acceptance Criteria — Codex Course"/>
+  <meta property="og:description" content="Ambiguous done = ambiguous PR. Write the tests before you write the task. Or have Codex write them first."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/06-acceptance.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="06 · Acceptance Criteria — Codex Course"/>
+  <meta name="twitter:description" content="Ambiguous done = ambiguous PR. Write the tests before you write the task. Or have Codex write them first."/>
+  <link rel="canonical" href="../lessons/06-acceptance.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Acceptance Criteria",
+    "description":"Ambiguous done = ambiguous PR. Write the tests before you write the task. Or have Codex write them first.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":6
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-06">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 06 · track 02 — task craft</div>
+    <h1>Acceptance<br/>Criteria.</h1>
+    <p class="subtitle">Ambiguous done = ambiguous PR. Write the tests before you write the task. Or have Codex write them first.</p>
+    <div class="meta">
+      <span>⏱ <b>13 min read</b></span>
+      <span>◆ <b>3 interactives</b></span>
+      <span>✦ <b>+55 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Here's a small move with outsized impact. Before you write the task, write down how you'd know it's done. Not in prose — in <em>checks</em>. Commands you could run, or tests you could read. If you can't name the checks, the task isn't well-defined yet, and Codex will suffer the same ambiguity you just avoided.</p>
+        <p>The trick is to stop thinking of acceptance criteria as documentation and start thinking of them as <strong>Codex's stopping condition</strong>. The agent will, pretty literally, keep iterating until the checks pass. Give it bad checks and it'll stop at bad code. Give it good checks and it'll go further than you would.</p>
+      </div>
+
+      <div class="pull-quote">"Acceptance criteria" is just "what the agent runs before it says done."</div>
+    </section>
+
+    <section id="s2">
+      <h2>The three flavors</h2>
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">01 · executable</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Tests that must pass</h3>
+          <p class="small muted" style="margin-top:8px;">"<code>pytest tests/api/test_users.py::test_pagination</code> must pass." The gold standard. Codex runs it, sees green, knows it's done.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">02 · observable</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Commands with known outputs</h3>
+          <p class="small muted" style="margin-top:8px;">"<code>curl /health</code> returns <code>{"ok": true}</code> with status 200." Not a test file, but a verifiable signal the agent can check.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">03 · structural</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Shape of the patch</h3>
+          <p class="small muted" style="margin-top:8px;">"New files live in <code>src/auth/</code>. No changes outside that directory." Codex can self-check this after generating the patch.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Tests-first as a workflow</h2>
+      <div class="prose">
+        <p>The highest-leverage habit in Codex work is <em>tests-first</em>. Three shapes it can take:</p>
+        <p><strong>Write the tests yourself.</strong> Sketch the test file. Commit it with the failing tests in place. Then spec: "make <code>tests/api/test_users.py</code> pass." The entire job is now "turn red into green." Codex is excellent at this.</p>
+        <p><strong>Have Codex write the tests first.</strong> Two-task flow. Task A: "Given these requirements, write failing tests in <code>tests/api/test_users.py</code>. Do not implement." You review the tests. They capture intent? Good. Task B: "Make <code>tests/api/test_users.py</code> pass."</p>
+        <p><strong>Co-write.</strong> In the task: "Start by writing failing tests for the new behavior. Review them against the goal. Then implement." Codex produces both in one PR — the tests are your acceptance spec, the implementation is the work.</p>
+      </div>
+      <div class="callout">
+        <span class="icon">▸</span>
+        <div><b>Why this works so well:</b> tests compress a lot of spec into a small, checkable artifact. "Page 1 returns 20 items, page 2 returns the next 20, empty page returns 200 with an empty array" is four sentences. The equivalent test is fifteen lines. But both you <i>and Codex</i> know exactly when it's done. No ambiguity, no negotiation.</div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Evaluating the output: accept or reject?</h2>
+      <div class="prose">
+        <p>Once the AI returns something that passes your acceptance criteria, you face a second, subtler question: do the criteria themselves capture what you actually wanted? This is the "green but wrong" problem — the agent satisfied the letter of your spec while missing the spirit.</p>
+        <p>There are four common shapes this failure takes. Train yourself to check for them before hitting merge:</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Criteria gaming</h3>
+          <p class="small muted" style="margin-top:8px;">The agent wrote code that satisfies your acceptance test by special-casing it, rather than implementing the general behavior. If your criterion was "the test at line 42 passes," check that the implementation isn't literally hard-coded to match only that test input.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Adjacent problem solving</h3>
+          <p class="small muted" style="margin-top:8px;">The code solves a problem close to the one you posed, but not exactly it. This happens when acceptance criteria are checkable but underspecified — the agent found a valid path to green that doesn't match the intended design.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Hidden regression</h3>
+          <p class="small muted" style="margin-top:8px;">The new tests pass. The existing suite still passes. But the implementation subtly changed behavior that no test covers. The structural acceptance criterion ("only touches these files") catches some of this; a quick manual smoke test catches more.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 04</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Plausible but wrong library usage</h3>
+          <p class="small muted" style="margin-top:8px;">The code uses a library correctly in isolation but incorrectly in your context — wrong config, wrong threading model, wrong assumptions about call order. Tests often don't cover these because they test unit behavior, not integration behavior.</p>
+        </div>
+      </div>
+
+      <div class="prose" style="margin-top:16px;">
+        <p>The right response to any of these isn't to add more acceptance criteria retroactively — it's to add a <em>negative</em> acceptance criterion. "It must not do X" is often more powerful than "it must do Y" because it forecloses the unintended-but-passing paths. Example:</p>
+      </div>
+
+<pre class="code"><span class="tok-c"># weak: only specifies the happy path</span>
+<span class="tok-k">## Acceptance</span>
+- <span class="tok-s">pytest tests/api/test_pagination.py</span> passes
+
+<span class="tok-c"># strong: closes the "adjacent solution" doors</span>
+<span class="tok-k">## Acceptance</span>
+- <span class="tok-s">pytest tests/api/test_pagination.py</span> passes
+- <span class="tok-s">pytest tests/api/</span> still fully passes (regression guard)
+- Pagination is implemented via the DB query (LIMIT/OFFSET),
+  not by fetching all rows and slicing in Python
+- <span class="tok-s">api/users.py</span> is the only file that changes</pre>
+
+      <div class="callout" style="margin-top:14px;">
+        <span class="icon">▸</span>
+        <div><b>The evaluation heuristic:</b> before accepting any AI output, ask "could a broken implementation still pass all my criteria?" If yes, your criteria are under-specified. Adding one "must not" constraint per likely failure mode closes most of the gap.</div>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Build one</h2>
+      <div class="prose"><p>Three tasks, three acceptance criteria. Which is strongest? Toggle them on and watch the assembled spec evolve.</p></div>
+      <div id="w-spec"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L06"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('acceptance', [
+    {id:'s1', label:'A stopping condition'},
+    {id:'s2', label:'Three flavors'},
+    {id:'s3', label:'Tests-first workflow'},
+    {id:'s4', label:'Accept or reject?'},
+    {id:'s5', label:'Build one'},
+    {id:'s6', label:'Quick check'},
+  ]);
+
+  W.TaskSpec(document.getElementById('w-spec'), {
+    lessonId:'acceptance', cpId:'spec-1', threshold: 3,
+    title:'Build strong acceptance for a rate-limit feature',
+    desc:'Each row is a potential acceptance criterion. Toggle on the ones that are actually useful.',
+    goal:'Limit /login to 5 attempts per IP per minute.',
+    items:[
+      { section:'Executable: test_login_rate_limit.py passes', hint:'Real test. Covers the limit boundary and reset window.', body:['tests/api/test_login.py::test_rate_limit_blocks_at_6','tests/api/test_login.py::test_rate_limit_resets_after_60s'] },
+      { section:'Executable: full suite still passes', hint:'Regression guard. Cheap to add, expensive to skip.', body:['make test   # all green'] },
+      { section:'Observable: manual curl returns 429', hint:'Nice as a check for the reviewer, minor for the agent.', body:['$ for i in 1..6; do curl /login; done → last one is 429'] },
+      { section:'Structural: new code lives in api/limits/', hint:'Scopes the blast radius of the patch.', body:['Only api/auth.py and new files in api/limits/ change.'] },
+      { section:'"It should feel right."', hint:'Not checkable. Drop it.', body:['Vibes-based acceptance.'] },
+      { section:'Document the limit in API docs', hint:'Reasonable, but belongs in a separate task.', body:['docs/api/auth.md updated.'] },
+    ]
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'acceptance', cpId: 'q1',
+    question: 'Why is "make test passes" a stronger acceptance criterion than "the code should work"?',
+    options: [
+      '"Make test" is shorter, so the agent reads it faster.',
+      '"Make test" is a command Codex can literally run and check. "Should work" is an interpretation the agent has to guess at.',
+      'There is no meaningful difference.',
+      '"Should work" implies higher quality.'
+    ],
+    correct: 1,
+    explanation: 'Codex\'s loop is: execute → check → revise. Executable criteria plug directly into that loop. Prose criteria force the agent to judge its own work, which is exactly the thing it\'s not reliable at.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'acceptance', cpId: 'q2',
+    question: 'For a tricky new feature, you\'re not sure how to spec "done." What\'s the highest-leverage move?',
+    options: [
+      'Ship the task with vague criteria and iterate.',
+      'Spec a preliminary task: "write failing tests that capture the requirements, don\'t implement." Review the tests. Then spec the real task: "make those tests pass."',
+      'Skip acceptance criteria entirely.',
+      'Write a long prose description and hope.'
+    ],
+    correct: 1,
+    explanation: 'Tests-first as a two-step. You offload the "what does done look like" question to the agent, then review a test file — much cheaper than reviewing a 400-line PR. Once the tests capture intent, the implementation is a smaller, better-defined task.'
+  });
+</script>
+
+<script src="../js/lessons/L06.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>10 · Parallel Tasks &amp; Team Flow — Codex Course</title>
+  <meta name="description" content="Three agents, three branches, one main. How to run a mini team without merge hell — worktrees, task decomposition, and coordination patterns."/>
+  <!-- Open Graph + Twitter + canonical (curated) -->
+  <meta property="og:site_name" content="Codex Course"/>
+  <meta property="og:title" content="10 · Parallel Tasks, One Repo — Codex Course"/>
+  <meta property="og:description" content="Three agents, three branches, one main. How to run a mini team without merge hell — worktrees, task decomposition, and coordination patterns."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="../lessons/10-parallelism.html"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="10 · Parallel Tasks, One Repo — Codex Course"/>
+  <meta name="twitter:description" content="Three agents, three branches, one main. How to run a mini team without merge hell — worktrees, task decomposition, and coordination patterns."/>
+  <link rel="canonical" href="../lessons/10-parallelism.html"/>
+  <meta name="theme-color" content="#FAF9F6"/>
+
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"LearningResource",
+    "name":"Parallel Tasks, One Repo",
+    "description":"Three agents, three branches, one main. How to run a mini team without merge hell — worktrees, task decomposition, and coordination patterns.",
+    "inLanguage":"en",
+    "learningResourceType":"Lesson",
+    "isPartOf":{"@type":"Course","name":"Codex Course"},
+    "position":10
+  }
+  </script>
+
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=2"/>
+<link rel="stylesheet" href="../styles/motion.css?v=2"/>
+<link rel="stylesheet" href="../styles/prod.css?v=1"/>
+<link rel="stylesheet" href="../styles/theme.css?v=1"/>
+<link rel="stylesheet" href="../styles/a11y.css?v=1"/>
+<link rel="stylesheet" href="../styles/polish.css?v=1"/><link rel="stylesheet" href="../styles/final.css"></head>
+<body class="grid lesson-10">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 10 · track 04 — scaling it up</div>
+    <h1>Parallel Tasks<br/>&amp; Team Flow.</h1>
+    <p class="subtitle">One agent run equals a morning of work. Fifteen runs in parallel equals a week of work by lunch — if the tasks are independent. Here's how to make them that way.</p>
+    <div class="meta">
+      <span>&#9203; <b>12 min read</b></span>
+      <span>&#9670; <b>3 interactives</b></span>
+      <span>&#10022; <b>+50 XP</b> available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>The sneaky power of agentic coding isn't that one task goes faster than a human can type. It's that you can have ten of them going at once. Each in its own branch, each oblivious to the others. If you've structured the work right, you come back after lunch to ten PRs, review them in a batch, merge the clean ones.</p>
+        <p>That workflow only holds up if the tasks are <em>independent</em>. The moment two parallel runs touch the same file, you're in conflict-resolution land, which undoes all the speedup. The skill is learning to carve work into independent slabs.</p>
+      </div>
+
+      <div class="pull-quote">Parallelism is a structure problem, not a speed problem.</div>
+    </section>
+
+    <section id="s2">
+      <h2>Git worktrees: the local parallelism primitive</h2>
+      <div class="prose">
+        <p>When running multiple local AI agents simultaneously (Claude Code, Cursor, Aider), the usual pattern is to open multiple terminal tabs, each on a different branch. The problem: each agent's edits bleed into the others because they all share the same working directory.</p>
+        <p><strong>Git worktrees</strong> solve this. A worktree is a second (or third, or tenth) checkout of your repo, each pointing to a different branch, each with its own working directory on disk. The same git repository, multiple isolated workspaces.</p>
+      </div>
+
+<pre class="code"><span class="tok-c"># Set up three parallel worktrees</span>
+git worktree add ../myrepo-feat-auth feat/auth
+git worktree add ../myrepo-feat-export feat/export
+git worktree add ../myrepo-feat-api feat/api
+
+<span class="tok-c"># Now start an agent in each one</span>
+<span class="tok-c"># (using Claude Code as an example)</span>
+cd ../myrepo-feat-auth  &amp;&amp;  claude -n "auth-refactor"
+cd ../myrepo-feat-export &amp;&amp;  claude -n "csv-export"
+cd ../myrepo-feat-api   &amp;&amp;  claude -n "api-v2"
+
+<span class="tok-c"># Each agent operates in its own directory — no shared file state</span>
+<span class="tok-c"># Clean up when done:</span>
+git worktree remove ../myrepo-feat-auth
+</pre>
+
+      <div class="prose" style="margin-top:14px;">
+        <p>Worktrees are especially useful for overnight runs: start three or four agent sessions before you leave, each in its own worktree on its own branch. Come back in the morning to review the PRs. No merge conflicts to untangle — the branches never touched each other.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Task decomposition: making work parallel-friendly</h2>
+      <div class="prose">
+        <p>Not all work is naturally parallel. The skill is decomposing a large task into pieces that can be parallelized. Three structural moves that work reliably:</p>
+      </div>
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 01</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Entity fan-out</h3>
+          <p class="small muted" style="margin-top:8px;">One task per entity. "Add audit logging to Users." "…to Projects." "…to Teams." Same shape, different files. Zero conflict by construction.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 02</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Directory fan-out</h3>
+          <p class="small muted" style="margin-top:8px;">"Migrate module X to the new pattern." "…module Y." "…module Z." Each task owns one subtree. Independent because the subtrees don't overlap.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--cyan-ink);">pattern 03</div>
+          <h3 style="margin-top:6px;font-size:1rem;">Test-coverage fan-out</h3>
+          <p class="small muted" style="margin-top:8px;">"Write tests for file A." "…file B." "…file C." Test files only; doesn't touch production code. Almost always safe to run in parallel.</p>
+        </div>
+      </div>
+
+      <div class="prose" style="margin-top:18px;">
+        <p>The question to ask for every proposed parallel task: <em>which files does this touch?</em> List them. If any file appears in two tasks, those tasks are not independent. Either serialize them, or restructure so each task owns its own slice.</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>One anti-pattern that destroys it all</h2>
+      <div class="prose"><p>The move to avoid: parallel tasks that each "do X, and refactor shared helpers as needed." Each one will refactor the helpers in its own direction. You'll get three PRs with conflicting rewrites of <code>utils.py</code>. Pick one, resolve the others by hand, lose the day.</p></div>
+
+      <div id="w-compare"></div>
+
+      <div class="callout" style="margin-top:18px;">
+        <span class="icon">&#9658;</span>
+        <div><b>The fix:</b> if tasks share infrastructure, land the infrastructure change first as its own task. Then fan out the follow-ups. Serial-then-parallel beats parallel-then-merge-hell every time.</div>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Independent vs. dependent tasks</h2>
+      <div class="prose">
+        <p>Before launching a batch of parallel tasks, classify each one:</p>
+        <ul>
+          <li><strong>Independent:</strong> touches files no other task touches. Safe to parallelize immediately.</li>
+          <li><strong>Sequentially dependent:</strong> task B requires task A's output. Run A first, then fan out B, C, D in parallel once A is merged.</li>
+          <li><strong>Conflict-prone:</strong> two tasks that both need to touch a shared file. Restructure or serialize. Do not parallelize hoping for the best.</li>
+        </ul>
+        <p>A useful heuristic: tasks are independent if their <em>diff sets are disjoint</em>. Before launching, mentally walk through what each task will change. If the sets don't intersect, run them in parallel.</p>
+      </div>
+
+      <div class="callout">
+        <span class="icon">&#9658;</span>
+        <div><b>Scheduling pattern:</b>
+          <ol style="margin-top:8px;">
+            <li>Identify shared infrastructure changes — run these first, alone.</li>
+            <li>After those merge, identify all independent leaf tasks — run these in parallel.</li>
+            <li>Review in a batch. Merge the clean ones. Revise the others.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Team flow: who does what</h2>
+      <div class="prose">
+        <p>The team shape that makes parallel AI workflows sing:</p>
+        <ul>
+          <li><strong>One human "scout" per feature area</strong> — writes specs, reviews PRs, owns the agent instructions for that area.</li>
+          <li><strong>Agents run the specs in parallel;</strong> the scout triages the resulting PRs.</li>
+          <li><strong>The rest of the team</strong> does the work that <em>shouldn't</em> be automated — design calls, customer conversations, architectural decisions, anything that requires judgment calls about what to build.</li>
+        </ul>
+        <p>The bottleneck shifts from "who has time to type this out" to "who has time to review." That's a fundamentally different bottleneck, and the solutions are different: better acceptance criteria, tests-first specs, cleaner scope. Most of this course.</p>
+        <p>One practical tip: keep your review queue bounded. It's tempting to launch ten parallel tasks, but reviewing ten PRs at once is cognitively taxing and you'll miss things. Four or five in parallel is a sweet spot for one reviewer. Batch in waves.</p>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1"></div>
+      <div id="q2"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+
+<section class="reveal" style="margin-top:3rem">
+  <h2 style="margin-bottom:.5rem">Try it: bespoke interactive</h2>
+  <p style="color:var(--ink-3);font-size:.95rem;margin-bottom:1.25rem">A hands-on simulation for this lesson. Click around, drag things, and feel the shape of the concept.</p>
+  <div data-bespoke="L10"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script src="../js/progress.js"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/topbar.js"></script>
+<script src="../js/motion.js"></script>
+<script src="../js/prod.js?v=1"></script>
+<script src="../js/widgets.js"></script>
+<script src="../js/lesson-init.js"></script>
+<script>
+  initLesson('parallel', [
+    {id:'s1', label:'Ten tasks at once'},
+    {id:'s2', label:'Git worktrees'},
+    {id:'s3', label:'Task decomposition'},
+    {id:'s4', label:'The anti-pattern'},
+    {id:'s5', label:'Independent vs. dependent'},
+    {id:'s6', label:'Team flow'},
+    {id:'s7', label:'Quick check'},
+  ]);
+
+  W.Compare(document.getElementById('w-compare'), {
+    title: 'Same work, two structures',
+    badLabel: 'Parallel-hostile',
+    goodLabel: 'Parallel-friendly',
+    bad: '<b>Three tasks running concurrently:</b>\n\n· "Add validation to signup, refactor shared validators as needed."\n· "Add validation to checkout, refactor shared validators as needed."\n· "Add validation to profile update, refactor shared validators as needed."\n\nAll three touch validators.py. All three will rewrite it differently.',
+    good: '<b>Task A (runs first, alone):</b>\n"Restructure validators.py: one validator per field, composable, typed."\n\n<b>Tasks B, C, D (run after A merges, in parallel):</b>\n"Use the new validators for signup."\n"...for checkout."\n"...for profile update."\n\nShared work lands once. Feature work parallelizes cleanly.',
+    note: 'This is the single highest-leverage scheduling move in agentic workflows. Serialize the shared stuff. Parallelize the leaves.'
+  });
+
+  W.Quiz(document.getElementById('q1'), {
+    lessonId: 'parallel', cpId: 'q1',
+    question: 'You have five services that each need the same new logging middleware added. What\'s the right parallelization strategy?',
+    options: [
+      'Five parallel tasks — one per service. Each also writes the middleware itself.',
+      'One task to write the middleware and land it in a shared library. Then five parallel tasks — one per service — to adopt it.',
+      'One sequential task that adds it to all five services.',
+      'Let each team member do their own service by hand.',
+    ],
+    correct: 1,
+    explanation: 'Write the middleware once, land it, then fan out the adoptions. Each adoption task touches only its own service — no conflicts. You also get one canonical implementation instead of five drift-prone copies.'
+  });
+
+  W.Quiz(document.getElementById('q2'), {
+    lessonId: 'parallel', cpId: 'q2',
+    question: 'You want to run two local AI agent sessions on the same repository simultaneously without them interfering with each other\'s edits. What\'s the right setup?',
+    options: [
+      'Open two terminal tabs in the same directory. Agents won\'t conflict if they\'re careful.',
+      'Use git worktrees — check out each branch into a separate directory so each agent has its own isolated working tree.',
+      'Create a full clone of the repository for each agent.',
+      'Use a single session and alternate between tasks manually.',
+    ],
+    correct: 1,
+    explanation: 'Git worktrees give each agent its own working directory on disk, all backed by the same repository object database. No file-state conflicts between sessions. A full clone works but wastes disk and makes sharing history harder. Worktrees are the precise tool for this problem.'
+  });
+</script>
+
+<script src="../js/lessons/L10.js?v=2"></script>
+  <script src="../js/final.js" defer></script>
+</body>
+</html>
