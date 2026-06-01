@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>07 · Agentic Workflows & Tool Use — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 07 · advanced</div>
+    <h1>Agentic Workflows<br/>& Tool Use.</h1>
+    <p class="subtitle">When Claude stops answering and starts doing. Agents are loops. Loops need guardrails.</p>
+    <div class="meta"><span>⏱ 11 min</span><span>◆ 2 interactives</span><span>✦ +55 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>A chat is one turn in, one turn out. An <strong>agent</strong> is Claude in a loop: <code>gather context → take action → verify work → repeat</code>. That's the phrase Anthropic's engineering team uses to describe the shape of every agent they build — from Claude Code to research agents to email assistants. The "action" step is a tool call: reading a file, running a search, writing code, hitting an API.</p>
+        <p>Under the hood, Claude Code itself is this exact pattern, deliberately kept simple: <code>while(tool_call) → execute → feed results → repeat</code>. A single-threaded loop. No swarms. When Claude produces a response without a tool call, the loop ends.</p>
+      </div>
+      <div class="pull-quote">An agent is Claude with hands — and a loop telling it when to put them down.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The loop, explicitly</h2>
+      <div id="loop" style="margin-bottom:18px;"></div>
+      <div class="card">
+        <pre class="code" style="background:transparent;border:none;color:var(--ink);padding:0;">
+<span class="tok-c">// one agent turn</span>
+<span class="tok-k">plan</span>      ← claude reads goal + state, writes next step
+<span class="tok-k">act</span>       ← claude calls a tool (readFile, bash, search, …)
+<span class="tok-k">observe</span>   ← tool result appended to the window
+<span class="tok-k">update</span>    ← claude integrates the observation
+<span class="tok-k">decide</span>    ← continue the loop, or stop
+
+<span class="tok-c">// until</span>
+  goal met  <span class="tok-c">|  max steps reached  |  human intervenes</span></pre>
+      </div>
+      <p class="prose" style="margin-top:14px;">Every part of that loop is a choice you make when designing the agent. Get them wrong and you have an infinite loop with a credit card.</p>
+    </section>
+
+    <section id="s3">
+      <h2>The four guardrails</h2>
+      <div class="grid-2" style="margin-top:18px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">01 · scope</div>
+          <p class="small" style="margin-top:6px;">Give the agent the <em>smallest</em> set of tools it needs. Every tool is a footgun for something.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">02 · budget</div>
+          <p class="small" style="margin-top:6px;">Max steps. Max tokens. Max wall-clock. Always set all three. An agent without a budget is a bug.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">03 · confirmation</div>
+          <p class="small" style="margin-top:6px;">Destructive actions (delete, deploy, send) should require explicit user confirmation. Claude Code's default is to ask before modifying files or running commands — match that for your own agents.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">04 · verification</div>
+          <p class="small" style="margin-top:6px;">Give the agent a way to check its own work. Linters, type checks, tests, screenshots — concrete rules-based feedback. Agents that can evaluate their output are fundamentally more reliable than ones that can't.</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:16px;">
+        <span class="icon">★</span>
+        <div><b>Why verification matters most.</b> Anthropic's engineering team is blunt: the best form of feedback is <em>clearly defined rules for an output, then explaining which rules failed and why</em>. This is why generating TypeScript and linting it beats generating plain JavaScript — more layers of automatic feedback. Design the verification step before you design the action step.</div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>When to reach for an agent</h2>
+      <div class="do-dont">
+        <div class="do">
+          <span class="label">agent fits</span>
+          <div>Multi-step investigation (trace a bug across files).<br>Research + synthesis (gather data, summarize).<br>Repetitive work with clear stopping criteria.</div>
+        </div>
+        <div class="dont">
+          <span class="label">agent overkill</span>
+          <div>One-shot writing tasks.<br>Anything where a single structured prompt + paste of context would work.<br>Tasks without a crisp "done" condition.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Think it through</h2>
+      <div id="tutor" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:12px;"></div>
+      <div id="q2" style="margin-top:12px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('agents', [
+    {id:'s1', label:'Agents vs chat'},
+    {id:'s2', label:'The loop'},
+    {id:'s3', label:'Guardrails'},
+    {id:'s4', label:'When to use'},
+    {id:'s5', label:'Tutor'},
+    {id:'s6', label:'Quick check'},
+  ]);
+
+  mountWidget('tutor', SocraticTutor, {
+    lessonId:'agents', cpId:'tutor',
+    topic: 'designing agentic workflows safely',
+    persona: 'Push on guardrails, budgets, and what "done" looks like.'
+  });
+  mountWidget('loop', AgentLoop, { lessonId:'agents', cpId:'loop' });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'agents', cpId:'q1',
+    question: 'An agent has no max-step budget. What\'s the most likely failure mode?',
+    options: [
+      'The agent refuses to start.',
+      'The agent runs until tokens/budget are exhausted, often without converging.',
+      'The agent produces zero output.',
+      'Nothing — budgets are optional.'
+    ],
+    correct: 1,
+    explanation: 'Agents loop. Without a step or token budget, they can churn indefinitely. Always cap.'
+  });
+
+  mountWidget('q2', Quiz, {
+    lessonId:'agents', cpId:'q2',
+    question: 'Which task is an agent overkill?',
+    options: [
+      'Summarize a meeting transcript into 5 bullets.',
+      'Investigate a flaky test across 4 files.',
+      'Gather data from 3 dashboards and draft a weekly update.',
+      'Repeatedly fix lint errors across a monorepo until clean.'
+    ],
+    correct: 0,
+    explanation: 'A single prompt + the transcript is enough. Agents earn their complexity when the task needs multiple tool calls.'
+  });
+</script>
+</body>
+</html>

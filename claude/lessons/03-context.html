@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>03 · Context Windows & Semantic Models — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 03 · foundations</div>
+    <h1>Context Is<br/>The Product.</h1>
+    <p class="subtitle">"Prompt engineering" is mostly context engineering. Meaning is geometry, and the window is a budget.</p>
+    <div class="meta">
+      <span>⏱ 10 min</span>
+      <span>◆ 4 interactives</span>
+      <span>✦ +70 XP</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Here's a reframe that will make you better almost immediately: <strong>stop calling it prompt engineering. Call it context engineering.</strong> The phrase comes out of Anthropic's own engineering team, and it captures something real — on almost every prompt you'll ever write, the words you labor over matter less than the <em>stuff you put around them</em>: the system prompt, the pasted docs, the examples, the prior turns, the tool results. Get the context right and mediocre wording still works. Get the context wrong and no amount of wordsmithing will save you.</p>
+        <p>Two ideas power this. Both are worth internalizing.</p>
+        <p><strong>First:</strong> to Claude, words aren't just symbols — they're <em>positions in space</em>. "Espresso" and "latte" live next door. "Espresso" and "kubernetes" live on different continents. This is what "semantic model" means, and it's the reason prompt words behave like coordinates, not incantations.</p>
+        <p><strong>Second:</strong> Claude can only think about what fits in its current window. That window is large — hundreds of thousands of tokens on modern Claudes — but it's finite, and attention across it is <em>not uniform</em>. What you put near the start and near the end matters more than what's buried in the middle.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Meaning lives in space</h2>
+      <div class="prose"><p>Try it. The canvas below is a 2D projection of semantic space. The real thing has thousands of dimensions, but two is enough to see the shape. Drop a word; Claude places it near its neighbors.</p></div>
+      <div id="sem" style="margin-top:18px;"></div>
+      <div class="callout" style="margin-top:18px;">
+        <span class="icon">★</span>
+        <div><b>Why you care.</b> When you write "summarize this like a concise executive brief," every word pulls the output toward a region of space. Swap "concise" for "exhaustive" and the whole galaxy shifts. This is why specificity beats vagueness — specific words have sharper coordinates.</div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>The window is a budget — spend it well</h2>
+      <div class="prose">
+        <p>The context window is everything Claude can see at once: system prompt, user message, pasted docs, prior turns, tool results, the response being generated. Every token you spend on one thing is a token you can't spend on another. Treat it like a budget.</p>
+        <p>Three principles Anthropic's team uses internally:</p>
+        <ul class="prose" style="padding-left:18px;">
+          <li><strong>Place long documents at the top.</strong> Their docs recommend putting big docs above your instructions and question. Queries placed at the <em>end</em> of a long context can improve response quality by up to 30%.</li>
+          <li><strong>Delimit ruthlessly.</strong> Wrap each doc in <code>&lt;document index="1" source="…"&gt;</code> tags. This lets Claude cite cleanly and avoids confusion about which source is which.</li>
+          <li><strong>Restate the key constraint near the question.</strong> If the critical rule is "don't invent facts," say it again right before the ask. Positional attention is real; use it.</li>
+        </ul>
+      </div>
+
+      <div class="do-dont">
+        <div class="do">
+          <span class="label">do</span>
+          <div><b>Structure the window.</b> System prompt up top. Docs in the middle with delimiters. Examples near the end. Question last. Critical rules restated right before the ask.</div>
+        </div>
+        <div class="dont">
+          <span class="label">don't</span>
+          <div><b>Dump and hope.</b> Pasting 40 PDFs and asking "what's important?" with no guidance leaves Claude to guess which slice you care about — and guess it will.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>The long-context template</h2>
+      <div class="prose"><p>Here's the shape Anthropic recommends when you have real documents to ground on. Memorize this structure.</p></div>
+      <pre class="code" style="margin-top:12px;"><span class="tok-k">&lt;documents&gt;</span>
+  <span class="tok-k">&lt;document index="1" source="rollout-plan.md"&gt;</span>
+  [full text of doc 1]
+  <span class="tok-k">&lt;/document&gt;</span>
+  <span class="tok-k">&lt;document index="2" source="oncall-runbook.md"&gt;</span>
+  [full text of doc 2]
+  <span class="tok-k">&lt;/document&gt;</span>
+<span class="tok-k">&lt;/documents&gt;</span>
+
+<span class="tok-k">&lt;instructions&gt;</span>
+Answer using ONLY the documents above. If the answer isn't there, say so.
+Cite sources as [doc-1] or [doc-2] inline.
+<span class="tok-k">&lt;/instructions&gt;</span>
+
+<span class="tok-k">&lt;question&gt;</span>
+What's our rollback procedure if the forced cutover fails?
+<span class="tok-k">&lt;/question&gt;</span></pre>
+      <div class="prose" style="margin-top:12px;">
+        <p>Three things this does: grounds the answer in real sources, gives Claude permission to say "not in the docs" (which drops hallucinations), and makes the output auditable.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Tokens, briefly</h2>
+      <div class="prose">
+        <p>Claude doesn't read characters or words — it reads <strong>tokens</strong>. Rough rule: 1 token ≈ 4 English characters ≈ ¾ of a word. "Kubernetes" is one token. "Antidisestablishmentarianism" is several.</p>
+        <p>Why it matters: context limits and pricing are in tokens, and the difference between a prompt that fits and one that doesn't is often tokenization, not words.</p>
+      </div>
+      <div id="tok" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>When your docs are too big</h2>
+      <div class="prose">
+        <p>Sooner or later you'll have more context than the window holds. Three patterns Anthropic's teams use:</p>
+        <ul class="prose" style="padding-left:18px;">
+          <li><strong>Summarize first, ground second.</strong> Use a first pass to extract the relevant slice. Feed only the slice to the second pass with the real question.</li>
+          <li><strong>Chain, don't cram.</strong> Break one giant prompt into several: extract → classify → draft → review. Each stage has a cleaner, smaller window.</li>
+          <li><strong>Retrieval, if you have it.</strong> If you're in an agentic surface (Claude Code, a custom app), give Claude tools to <code>grep</code> or search — let it pull only what it needs. Anthropic's own Claude Code uses regex + grep for this rather than vector search, because the model is good at crafting queries.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick checks</h2>
+      <div id="q1" style="margin-top:14px;"></div>
+      <div id="q2" style="margin-top:12px;"></div>
+      <div id="q3" style="margin-top:12px;"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Try it yourself</h2>
+      <div class="prose"><p>Paste a short doc (Slack thread, PR description, anything). Ask Claude something that requires it. Now remove the doc and ask again. Feel the difference.</p></div>
+      <div id="sb" style="margin-top:18px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('context', [
+    {id:'s1', label:'Context is the product'},
+    {id:'s2', label:'Semantic space'},
+    {id:'s3', label:'Window as budget'},
+    {id:'s4', label:'Long-context template'},
+    {id:'s5', label:'Tokens'},
+    {id:'s6', label:'Too-big docs'},
+    {id:'s7', label:'Quick checks'},
+    {id:'s8', label:'Try it'},
+  ]);
+
+  mountWidget('sem', SemanticSpace, { lessonId:'context', cpId:'drop' });
+  mountWidget('tok', Tokenizer, { lessonId:'context', cpId:'tok' });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'context', cpId:'q1',
+    question: 'You paste a 200-page doc and ask a question. Why might Claude miss a fact buried on page 103?',
+    options: [
+      'It ran out of memory.',
+      'Positional bias — content in the middle of a long window gets less attention than content near the ends.',
+      'Claude can only read PDFs.',
+      'Large windows trigger safety blocks.'
+    ],
+    correct: 1,
+    explanation: 'Place critical facts near the start or end. For very long docs, summarize key points and restate them close to your question.'
+  });
+
+  mountWidget('q2', Quiz, {
+    lessonId:'context', cpId:'q2',
+    question: 'Roughly how many tokens is a 10,000-word document?',
+    options: ['~1,000', '~5,000', '~13,000', '~100,000'],
+    correct: 2,
+    explanation: '1 word ≈ 1.3 tokens. So 10,000 words is ~13,000 tokens. Useful when estimating whether a set of docs will fit.'
+  });
+
+  mountWidget('q3', Quiz, {
+    lessonId:'context', cpId:'q3',
+    question: 'You have three source docs and a question. Where does Anthropic recommend putting the question?',
+    options: [
+      'At the very top — Claude reads top to bottom.',
+      'After the docs, near the end of the prompt.',
+      'Interleaved with the docs.',
+      'Order doesn\'t matter.'
+    ],
+    correct: 1,
+    explanation: 'Long documents go at the top, question near the end. Queries placed at the end of a long context can improve response quality by up to 30%.'
+  });
+
+  mountWidget('sb', PromptSandbox, {
+    lessonId:'context', cpId:'feel',
+    title:'Context in, context out',
+    hint:'Paste something — a thread, a PR description — then ask something that depends on it.',
+    placeholder:'<documents>\n<document index="1">\n[paste a short doc here]\n</document>\n</documents>\n\n<question>\nAsk something only answerable from the doc\n</question>'
+  });
+</script>
+</body>
+</html>

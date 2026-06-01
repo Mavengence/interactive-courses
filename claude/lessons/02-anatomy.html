@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>02 · Anatomy of a Great Prompt — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 02 · foundations</div>
+    <h1>Anatomy of a<br/>Great Prompt.</h1>
+    <p class="subtitle">Great prompts are not clever. They are <em>structured</em>. Six parts, in order, every time.</p>
+    <div class="meta">
+      <span>⏱ 12 min</span>
+      <span>◆ 6 interactives</span>
+      <span>✦ +100 XP</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Here's the single highest-leverage idea in this course: the best prompters don't write cleverer English. They write <em>more structured</em> English. A good prompt is a <strong>contract</strong>, not an incantation — it specifies the job precisely enough that Claude has nothing left to guess about.</p>
+        <p>Anthropic's own internal playbook (the one they publish in their docs and teach their customers) converges on a simple template. Role, context, task, constraints, examples, format — in that order. Miss a piece and you're asking Claude to improvise it. Include all of them and most "prompt engineering" disappears into just writing a clear brief.</p>
+      </div>
+      <div class="pull-quote">Prompts are contracts, not incantations.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The six parts</h2>
+      <div class="grid-2" style="margin-top:18px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">01 · role</div>
+          <h3 style="margin-top:4px;font-size:1.1rem;">Who is Claude right now?</h3>
+          <p class="small muted" style="margin-top:6px;">Sets tone, vocabulary, depth. "Senior staff engineer" and "executive coach" produce completely different outputs for the same task.</p>
+          <pre class="code" style="margin-top:10px;font-size:.78rem;">You are a senior
+technical editor for
+internal docs.</pre>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">02 · context</div>
+          <h3 style="margin-top:4px;font-size:1.1rem;">What do they need to know?</h3>
+          <p class="small muted" style="margin-top:6px;">Background, source docs, audience, constraints you live with. The onboarding you'd give a new hire. Paste generously — context is the product.</p>
+          <pre class="code" style="margin-top:10px;font-size:.78rem;">Audience: SREs.
+We ship weekly.
+Migrating from v1
+to v2 of the auth
+library in Q2.</pre>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">03 · task</div>
+          <h3 style="margin-top:4px;font-size:1.1rem;">What, exactly, do you want?</h3>
+          <p class="small muted" style="margin-top:6px;">One verb. One clear ask. If you find yourself writing "and also" — split into a second prompt or number the asks.</p>
+          <pre class="code" style="margin-top:10px;font-size:.78rem;">Draft a rollout doc
+with sections:
+overview, risks,
+on-call runbook.</pre>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">04 · constraints</div>
+          <h3 style="margin-top:4px;font-size:1.1rem;">What must be true?</h3>
+          <p class="small muted" style="margin-top:6px;">Length, tone, things to avoid, must-include facts. State them as rules — Claude respects rules better than vibes.</p>
+          <pre class="code" style="margin-top:10px;font-size:.78rem;">&lt;600 words. No
+marketing language.
+Must mention the
+kill-switch.</pre>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">05 · examples</div>
+          <h3 style="margin-top:4px;font-size:1.1rem;">Show, don't just tell</h3>
+          <p class="small muted" style="margin-top:6px;">One or two concrete examples of what "good" looks like. Few-shot examples beat abstract instructions — this is the single biggest quality lever most people skip.</p>
+          <pre class="code" style="margin-top:10px;font-size:.78rem;">&lt;example&gt;
+Input: …
+Output: …
+&lt;/example&gt;</pre>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">06 · format</div>
+          <h3 style="margin-top:4px;font-size:1.1rem;">How should the answer look?</h3>
+          <p class="small muted" style="margin-top:6px;">Markdown? JSON? A table? Paste-ready Gdoc? Be explicit. The difference between "I'll reformat this later" and "paste, done" is one sentence.</p>
+          <pre class="code" style="margin-top:10px;font-size:.78rem;">Output as markdown
+with H2 sections.
+Bullet lists, not
+prose paragraphs.</pre>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:18px;">
+        <span class="icon">★</span>
+        <div><b>Why this order?</b> Claude reads top to bottom. <b>Role</b> first sets the voice before the task arrives. <b>Context</b> grounds it. <b>Task</b> states the ask. <b>Constraints and examples</b> shape the output. <b>Format</b> last so it's freshest in the model's working memory when generation starts. Anthropic's research on positional attention backs this up — what you put near the start and near the end gets weighted more than what's in the middle.</div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>XML tags: the reliability multiplier</h2>
+      <div class="prose">
+        <p>Here's a detail Anthropic's docs emphasize and most people miss: <strong>Claude was trained with XML-style tags as structural markers</strong>. Wrapping your sections in tags like <code>&lt;context&gt;</code>, <code>&lt;task&gt;</code>, <code>&lt;example&gt;</code> isn't decorative — it measurably improves how reliably Claude respects your structure. Especially on long prompts.</p>
+        <p>The pattern:</p>
+      </div>
+      <pre class="code" style="margin-top:14px;"><span class="tok-k">&lt;context&gt;</span>
+We're migrating the auth service from cookies to OAuth 2.1 over Q2.
+Audience for this doc: SREs on the infra team.
+<span class="tok-k">&lt;/context&gt;</span>
+
+<span class="tok-k">&lt;task&gt;</span>
+Draft a rollout doc with four sections: overview, risks, on-call runbook, rollback plan.
+<span class="tok-k">&lt;/task&gt;</span>
+
+<span class="tok-k">&lt;constraints&gt;</span>
+- Under 600 words.
+- No marketing language.
+- Must mention the kill-switch procedure.
+<span class="tok-k">&lt;/constraints&gt;</span>
+
+<span class="tok-k">&lt;example&gt;</span>
+[paste a prior rollout doc here that matches the voice you want]
+<span class="tok-k">&lt;/example&gt;</span>
+
+<span class="tok-k">&lt;format&gt;</span>
+Markdown. H2 for each section. Code blocks for shell commands.
+<span class="tok-k">&lt;/format&gt;</span></pre>
+      <div class="prose" style="margin-top:12px;">
+        <p>Tag names aren't reserved — invent ones that match your job (<code>&lt;persona&gt;</code>, <code>&lt;data&gt;</code>, <code>&lt;rubric&gt;</code>). Just be consistent. This one move upgrades almost every long prompt you'll ever write.</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>See the gap</h2>
+      <div class="prose"><p>Two prompts asking for the same thing. Run both. The difference isn't cleverness — it's structure.</p></div>
+      <div id="cmp" style="margin-top:20px;"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Put them in order</h2>
+      <div class="prose"><p>Drag the six parts into the order Anthropic recommends. Quick muscle memory.</p></div>
+      <div id="reorder" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Three pro moves the docs emphasize</h2>
+      <div class="grid-3" style="margin-top:12px;">
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--amber-ink);">Tell it to think</h3>
+          <p class="small muted" style="margin-top:6px;">Adding "think step by step in &lt;thinking&gt; tags before answering" visibly improves output on anything requiring reasoning — planning, debugging, analysis. On newer Claudes, <b>extended thinking</b> is a first-class mode you can turn on.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--amber-ink);">Prefill the response</h3>
+          <p class="small muted" style="margin-top:6px;">When using the API, starting the assistant turn with <code>{</code> or <code>&lt;doc&gt;</code> forces the shape you want without Claude narrating first ("Sure, I'd be happy to…"). In chat surfaces, use "Start your response with…" for the same effect.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--amber-ink);">Give it an out</h3>
+          <p class="small muted" style="margin-top:6px;">Add "If you don't have enough information, say so and ask for what you need." This single sentence drops hallucination rates dramatically. Claude <em>wants</em> to be honest; give it permission.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>Drill it</h2>
+      <div class="prose"><p>A real template with blanks. Fill it in for a task from <em>your</em> week, then let Claude check your work.</p></div>
+      <div id="drill" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Now beat a bad prompt</h2>
+      <div class="prose"><p>Here's a genuinely weak prompt. Rewrite it using everything above. A judge model scores both against the same rubric. Aim to beat the baseline by 30+ points.</p></div>
+      <div id="arena" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s9">
+      <h2>Your own attempt, graded</h2>
+      <div class="prose"><p>Pick a task you'd actually do this week. Write your best prompt. Let the grader mark it against the six-part rubric.</p></div>
+      <div id="grader" style="margin-top:18px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('anatomy', [
+    {id:'s1', label:'Prompts are contracts'},
+    {id:'s2', label:'The six parts'},
+    {id:'s3', label:'XML tags'},
+    {id:'s4', label:'See the gap'},
+    {id:'s5', label:'Order them'},
+    {id:'s6', label:'Three pro moves'},
+    {id:'s7', label:'Fill-in drill'},
+    {id:'s8', label:'Rewrite arena'},
+    {id:'s9', label:'Grade your own'},
+  ]);
+
+  mountWidget('cmp', PromptCompare, {
+    lessonId:'anatomy', cpId:'compare',
+    weak: 'write a launch email for our new SSO rollout',
+    strong: `You are a senior comms writer, writing for an engineering audience.
+
+<context>
+We are rolling out OAuth 2.1 SSO to replace legacy cookie auth on internal tools.
+Migration window: 6 weeks, opt-in first, then forced cutover.
+The on-call rotation is @auth-oncall.
+Audience: ~3000 engineers across the organization, mixed seniority.
+</context>
+
+<task>
+Draft a launch email announcing the rollout to engineering.
+</task>
+
+<constraints>
+- Under 250 words.
+- No marketing language. Crisp, factual.
+- Must include: the migration window, the opt-in date, the forced-cutover date, and how to get help.
+- Tone: internal voice — direct, respectful of readers' time.
+- Give readers a clear single next action.
+</constraints>
+
+<format>
+Markdown. Subject line first, then body. Sign-off from "The Identity Platform team."
+</format>`
+  });
+
+  mountWidget('reorder', DragReorder, {
+    lessonId:'anatomy', cpId:'reorder',
+    prompt: 'Drag to put the six-part template in order.',
+    blocks: [
+      { id:'role', label:'Role', sample:'"You are a senior technical editor."' },
+      { id:'context', label:'Context', sample:'"We are migrating to OAuth 2.1; audience is SRE."' },
+      { id:'task', label:'Task', sample:'"Draft a rollout doc."' },
+      { id:'constraints', label:'Constraints', sample:'"Under 600 words. No marketing language."' },
+      { id:'examples', label:'Examples', sample:'"<example>…prior rollout doc…</example>"' },
+      { id:'format', label:'Format', sample:'"Markdown with H2 sections and bullet lists."' },
+    ],
+    correctOrder: ['role','context','task','constraints','examples','format'],
+  });
+
+  mountWidget('drill', FillBlank, {
+    lessonId:'anatomy', cpId:'drill',
+    goal: 'Summarize a 30-page PRD into an executive brief.',
+    template: `You are {{0}}.
+
+<context>
+{{1}}
+</context>
+
+<task>
+{{2}}
+</task>
+
+<constraints>
+{{3}}
+</constraints>
+
+<format>
+{{4}}
+</format>`,
+    blanks: [
+      { label:'Role', hint:'e.g. a senior PM who writes exec summaries' },
+      { label:'Context', hint:'what\'s the PRD about? who reads this brief? what decisions hang on it?' },
+      { label:'Task', hint:'one verb — "summarize", "extract", "draft"' },
+      { label:'Constraints', hint:'length, tone, must-includes, must-avoids' },
+      { label:'Format', hint:'bullets? sections? markdown? specific structure?' },
+    ]
+  });
+
+  mountWidget('arena', RewriteArena, {
+    lessonId:'anatomy', cpId:'arena',
+    task: 'Produce release notes for an internal tooling update.',
+    original: 'write release notes for our new changes this week plz, make it good',
+    criteria: 'presence of role, context, task, constraints, and format; specificity; use of XML tags; few-shot example; absence of filler'
+  });
+
+  mountWidget('grader', PromptGrader, {
+    lessonId:'anatomy', cpId:'grade',
+    task: 'Rewrite a rambling Slack message into a crisp update with tl;dr, status, blockers, and next step.',
+    rubric: 'Must include all six parts (role, context, task, constraints, examples or rubric, format). Bonus for XML tags. Penalize vagueness, reward specificity.'
+  });
+</script>
+</body>
+</html>

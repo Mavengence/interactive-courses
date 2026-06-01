@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>06 · Claude for Perfect Google Docs — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 06 · workflows</div>
+    <h1>Claude for Perfect<br/>Google Docs.</h1>
+    <p class="subtitle">From bullet dump to crisp doc in under five minutes. The doc is the artifact. The prompt is the mold.</p>
+    <div class="meta"><span>⏱ 8 min</span><span>◆ 3 interactives</span><span>✦ +55 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>The shared doc is a team's native thinking surface. Design reviews, PRDs, post-mortems, launch briefs — they all live there. A doc Claude writes well is one you can paste and polish, not one you have to rewrite.</p>
+        <p>Three moves do most of the work: give it the skeleton, show it the voice, ask for a critique before a rewrite.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Move 1 — Give it the skeleton</h2>
+      <div class="prose"><p>Gdocs have conventions. Design docs have TL;DRs. PRDs have success metrics. Post-mortems have timelines. If you don't hand Claude the skeleton, you'll get a generic "article."</p></div>
+      <pre class="code">Output structure:
+# Title
+## TL;DR (3 bullets, each &lt;15 words)
+## Context
+## Proposal
+## Risks &amp; mitigations
+## Success metrics
+## Open questions</pre>
+    </section>
+
+    <section id="s3">
+      <h2>Move 2 — Give it the voice</h2>
+      <div class="prose">
+        <p>Good internal docs have a voice: short sentences, active verbs, no marketing language, numbers before adjectives. If you want that voice, paste two paragraphs of an existing doc that has it, and say <em>"match this voice."</em></p>
+      </div>
+      <div class="callout">
+        <span class="icon">★</span>
+        <div><b>Voice transfer works.</b> Pasting 100-300 words of well-written reference text is worth more than 10 adjectives describing the voice you want.</div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Move 3 — Ask for the critique before the rewrite</h2>
+      <div class="prose">
+        <p>After the first draft, resist the urge to immediately ask for a better version. Instead ask: <em>"What are the three weakest parts of this doc, and why?"</em> You'll get a better doc by fixing specific weaknesses than by asking for a "better version" — vague corrections produce vague outputs.</p>
+        <p>This is chain-of-thought applied to your own writing. You're forcing Claude to diagnose before it prescribes.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>See the gap</h2>
+      <div id="cmp" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Drill: bullet dump → crisp TL;DR</h2>
+      <div id="drill" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:14px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('gdocs', [
+    {id:'s1', label:'Why Gdocs matter'},
+    {id:'s2', label:'Move 1 · skeleton'},
+    {id:'s3', label:'Move 2 · voice'},
+    {id:'s4', label:'Move 3 · critique'},
+    {id:'s5', label:'See the gap'},
+    {id:'s6', label:'Drill'},
+    {id:'s7', label:'Quick check'},
+  ]);
+
+  mountWidget('cmp', PromptCompare, {
+    lessonId:'gdocs', cpId:'cmp',
+    weak: 'turn these bullets into a design doc: auth migration, 4 weeks, oauth 2.1, replace legacy cookie, sre audience, kill switch exists, on-call rotation exists',
+    strong: `You are a senior engineer drafting a design doc for an SRE audience.
+
+Source material (bullet dump):
+- auth migration project, 4-week window
+- moving to OAuth 2.1, replacing legacy cookie auth
+- on-call: @auth-oncall
+- kill switch exists and tested
+
+Produce a design doc with this exact structure:
+# Title
+## TL;DR (3 bullets, <15 words each)
+## Context
+## Proposal
+## Rollout plan
+## Risks & mitigations
+## Success metrics
+## Open questions
+
+Voice rules:
+- Short sentences. Active verbs.
+- No marketing language.
+- Numbers before adjectives.
+- SRE-native vocabulary is fine; don't define p99 etc.
+
+Output as clean markdown.`
+  });
+
+  mountWidget('drill', FillBlank, {
+    lessonId:'gdocs', cpId:'drill',
+    goal: 'Turn a bullet dump into a crisp 3-bullet TL;DR.',
+    template: `Turn these bullets into a TL;DR for a {{0}} audience.
+
+BULLETS
+{{1}}
+
+STYLE
+- Exactly 3 bullets
+- {{2}}
+
+FORMAT
+Markdown, no preamble.`,
+    blanks: [
+      { label:'Audience', hint:'e.g. SRE, exec, design-review' },
+      { label:'Bullets', hint:'paste your raw notes' },
+      { label:'Style rules', hint:'e.g. <15 words each, numbers before adjectives' }
+    ]
+  });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'gdocs', cpId:'q1',
+    question: 'Your first-draft Gdoc is close, but the voice is off. What\'s the strongest next move?',
+    options: [
+      'Ask for "a more professional tone."',
+      'Start over with a new prompt.',
+      'Paste 2-3 paragraphs of a reference doc with the voice you want and say "rewrite matching this voice."',
+      'Ask Claude to "be less AI."'
+    ],
+    correct: 2,
+    explanation: 'Voice transfer via example is far more effective than describing the voice. Show, don\'t tell.'
+  });
+</script>
+</body>
+</html>

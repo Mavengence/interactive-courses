@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>10 · Team Workflows — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 10 · team</div>
+    <h1>Team Workflows.</h1>
+    <p class="subtitle">One person's breakthrough is everybody's baseline. Shared prompts. Shared CLAUDE.md. Shared gains.</p>
+    <div class="meta"><span>⏱ 10 min</span><span>◆ 3 interactives</span><span>✦ +65 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>The biggest team-wide Claude wins don't come from finding a better model. They come from <strong>circulating prompts that work</strong>. If one person figured out the perfect PR-review prompt, the other 40 on the team shouldn't have to rediscover it.</p>
+        <p>At Anthropic itself — where much of the codebase is now written with Claude Code — the pattern is the same: engineers focus on architecture, product thinking, and orchestrating multiple agents. The compounding advantage isn't the model, it's the <em>shared scaffolding around it</em>.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>Three team artifacts worth maintaining</h2>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <div class="tiny">01 · prompt library</div>
+          <p class="small" style="margin-top:6px;">A repo or Gdoc with named, tested prompts for recurring tasks: PR review, standup summary, post-mortem draft, release notes.</p>
+        </div>
+        <div class="card">
+          <div class="tiny">02 · CLAUDE.md</div>
+          <p class="small" style="margin-top:6px;">Checked into the repo. Reviewed like code. Updated when conventions drift.</p>
+        </div>
+        <div class="card">
+          <div class="tiny">03 · eval set</div>
+          <p class="small" style="margin-top:6px;">A handful of realistic examples — input + expected flavor of output. Use it to check a prompt change didn't regress.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>How to share a prompt well</h2>
+      <div class="prose">
+        <p>A prompt that works on your laptop is not the same as a prompt your team can use. Before you send it:</p>
+        <ul>
+          <li><strong>Strip your specifics.</strong> Replace hardcoded project names with placeholders like <code>&lt;PROJECT&gt;</code>.</li>
+          <li><strong>Add a one-line "when to use."</strong> Future-you will forget.</li>
+          <li><strong>Show a sample output.</strong> Sets expectations in a way words can't.</li>
+          <li><strong>Note failure modes.</strong> "Tends to over-explain; add 'no preamble'."</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Rituals that compound</h2>
+      <div class="callout ink">
+        <span class="icon">▸</span>
+        <div><b>15 minutes on Fridays.</b> One teammate demos a prompt they found useful this week. Over a quarter, that's 12 new team-level capabilities.</div>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Drill: shape it for sharing</h2>
+      <div class="prose"><p>Here's a prompt that works on <em>one</em> person's laptop. Your job: turn it into something a teammate can actually pick up and use. The shareability checks on the right update as you edit.</p></div>
+      <div id="shaper" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Tutor</h2>
+      <div id="tutor" style="margin-top:12px;"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:12px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('team', [
+    {id:'s1', label:'Why share'},
+    {id:'s2', label:'Three artifacts'},
+    {id:'s3', label:'Sharing well'},
+    {id:'s4', label:'Rituals'},
+    {id:'s5', label:'Shape for sharing'},
+    {id:'s6', label:'Tutor'},
+    {id:'s7', label:'Quick check'},
+  ]);
+  mountWidget('shaper', PromptLibraryShaper, { lessonId:'team', cpId:'shaper' });
+  mountWidget('tutor', SocraticTutor, {
+    lessonId:'team', cpId:'tutor',
+    topic:'building a team-wide Claude practice',
+    persona:'Push on ownership, staleness, and how to avoid "one person owns all the prompts."'
+  });
+  mountWidget('q1', Quiz, {
+    lessonId:'team', cpId:'q1',
+    question:'Your team-shared prompt works for you but falls flat for others. The most common cause?',
+    options:[
+      'Different Claude models.',
+      'Hardcoded specifics (project names, paths) and missing "when to use" notes.',
+      'Time of day.',
+      'Not enough adjectives.'
+    ],
+    correct:1,
+    explanation:'Shareable prompts are parameterized and documented. Strip specifics, state when to use, and show a sample output.'
+  });
+</script>
+</body>
+</html>

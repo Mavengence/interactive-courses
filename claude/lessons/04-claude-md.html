@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>04 · The CLAUDE.md File — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 04 · workflows</div>
+    <h1>The CLAUDE.md<br/>File.</h1>
+    <p class="subtitle">Write it once. Never re-explain your stack, your conventions, or your anti-patterns again. This is how Anthropic's own engineers work.</p>
+    <div class="meta"><span>⏱ 9 min</span><span>◆ 4 interactives</span><span>✦ +85 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>A <code>CLAUDE.md</code> is a plain markdown file at the root of your project. Claude Code reads it automatically at the start of every session and injects it into context before it sees your first message. Think of it as a <strong>standing brief</strong> — the stuff you'd otherwise retype into every prompt.</p>
+        <p>Anthropic's own engineering team treats CLAUDE.md as the single most impactful lever for improving Claude's output in a repo. The reason is simple: if Claude is a brilliant new hire, CLAUDE.md is the onboarding doc they re-read every morning.</p>
+      </div>
+      <div class="pull-quote">Stop teaching Claude your project once per conversation. Teach it once, in a file, forever.</div>
+    </section>
+
+    <section id="s2">
+      <h2>How the hierarchy actually loads</h2>
+      <div class="prose"><p>CLAUDE.md files cascade. Understanding the cascade saves you hours of confusion.</p></div>
+      <pre class="code" style="margin-top:12px;"><span class="tok-c"># Loaded into every session, in this order:</span>
+~/.claude/CLAUDE.md              <span class="tok-c"># Your global preferences</span>
+&lt;repo&gt;/CLAUDE.md                 <span class="tok-c"># Team-shared project rules (commit this)</span>
+&lt;repo&gt;/CLAUDE.local.md            <span class="tok-c"># Your personal overrides (gitignore this)</span>
+
+<span class="tok-c"># Loaded lazily, only when Claude touches files in that folder:</span>
+&lt;repo&gt;/frontend/CLAUDE.md
+&lt;repo&gt;/services/auth/CLAUDE.md</pre>
+      <div class="prose" style="margin-top:12px;">
+        <p>Rules <em>combine</em>, they don't replace. All levels apply at once; more-specific levels win on conflicts. Descendant CLAUDE.md files are <strong>lazy-loaded</strong> — Claude only pulls them into context when it actually reads files in that directory. This is a big deal in monorepos: you can document each service's conventions next to its code without paying the token cost on every session.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>What goes in it</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="font-size:1.05rem;color:var(--amber-ink);">Keep in</h3>
+          <ul class="prose" style="margin-top:6px;padding-left:18px;">
+            <li>What the project is, in one sentence</li>
+            <li>Stack, tooling, notable libs</li>
+            <li>Coding conventions the team enforces</li>
+            <li>Commands (<code>build</code>, <code>test</code>, <code>lint</code>)</li>
+            <li>Things <em>never</em> to do (anti-patterns)</li>
+            <li>Where the important docs live (<code>docs/architecture.md</code>, etc.)</li>
+            <li>Terminology that has project-specific meaning</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1.05rem;color:var(--amber-ink);">Leave out</h3>
+          <ul class="prose" style="margin-top:6px;padding-left:18px;">
+            <li>Secrets, tokens, keys — ever</li>
+            <li>Full files — link or reference with <code>@path/to/file.md</code></li>
+            <li>Historical context nobody needs</li>
+            <li>Vibes ("write good code"). Be specific or delete.</li>
+            <li>Ad-hoc knowledge that belongs in <code>docs/</code> and gets pulled in on demand</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:16px;">
+        <span class="icon">★</span>
+        <div><b>The size rule.</b> Every byte of CLAUDE.md burns tokens on <em>every</em> session. Keep it lean. If something is only needed sometimes, put it in <code>docs/</code> and reference it (<code>@docs/architecture.md</code>) when relevant.</div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>A battle-tested template</h2>
+      <pre class="code"><span class="tok-k"># &lt;Project name&gt;</span>
+
+<span class="tok-c">## What this is</span>
+One or two sentences. Who uses it, what it does. Link to the README for more.
+
+<span class="tok-c">## Stack</span>
+- Language / framework / versions
+- Build + test tools
+- Notable libs Claude should know about
+
+<span class="tok-c">## Conventions</span>
+- File layout rules (e.g. "colocate tests as `*.test.ts`")
+- Style rules the team enforces
+- Naming conventions
+- Error-handling pattern
+
+<span class="tok-c">## Commands</span>
+- `yarn build` — production build
+- `yarn test` — unit tests (run before committing)
+- `yarn test:e2e` — e2e suite (slow, only on CI)
+- `arc lint` — linter + formatter
+
+<span class="tok-c">## Don't</span>
+- Add new npm deps without asking
+- Use `any` in TypeScript
+- Edit files in `generated/`
+- Ship code without a matching test
+
+<span class="tok-c">## Terminology</span>
+- "Workspace" (not "project") — our product uses this term consistently
+- "Member" (not "user") in customer-facing copy
+
+<span class="tok-c">## Where things live</span>
+- Source: `src/`
+- Tests: colocated (`*.test.ts`)
+- Architecture notes: `@docs/architecture.md`
+- Deployment: `@docs/deploy.md`</pre>
+    </section>
+
+    <section id="s5">
+      <h2>Auto memory: the new half of the system</h2>
+      <div class="prose">
+        <p>Recent Claude Code versions add <strong>auto memory</strong> — Claude writes its own notes to a separate memory file as it learns your preferences, without you typing anything. Correct it once ("we prefix debug logs with <code>[DEBUG]</code>"), and it'll remember next session.</p>
+        <p>Two things carry knowledge across sessions now:</p>
+        <ul class="prose" style="padding-left:18px;">
+          <li><strong>CLAUDE.md</strong> — instructions <em>you</em> write, to steer behavior deliberately.</li>
+          <li><strong>Auto memory</strong> — notes <em>Claude</em> writes, accumulating from your corrections.</li>
+        </ul>
+        <p>Use CLAUDE.md for things you want a team to share and version-control. Let auto memory pick up personal habits. Don't try to hand-maintain both.</p>
+      </div>
+    </section>
+
+    <section id="s6">
+      <h2>Build yours, right now</h2>
+      <div class="prose"><p>Fill the form. Claude drafts your file. Copy, paste, commit. You'll iterate — but you'll iterate from something.</p></div>
+      <div id="builder" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:14px;"></div>
+      <div id="q2" style="margin-top:12px;"></div>
+    </section>
+
+    <section id="s8">
+      <h2>Tutor</h2>
+      <div id="tutor" style="margin-top:14px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('claude-md', [
+    {id:'s1', label:'What it is'},
+    {id:'s2', label:'How the hierarchy loads'},
+    {id:'s3', label:'Keep in / leave out'},
+    {id:'s4', label:'Template'},
+    {id:'s5', label:'Auto memory'},
+    {id:'s6', label:'Build yours'},
+    {id:'s7', label:'Quick check'},
+    {id:'s8', label:'Tutor'},
+  ]);
+
+  mountWidget('builder', ClaudeMdBuilder, { lessonId:'claude-md', cpId:'built' });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'claude-md', cpId:'q1',
+    question: 'Which belongs in your root CLAUDE.md?',
+    options: [
+      'A list of API keys so Claude can help you test.',
+      'A paste of your whole monorepo for reference.',
+      'A short, specific list of conventions, commands, and anti-patterns the team enforces.',
+      'A changelog of what your team shipped last quarter.'
+    ],
+    correct: 2,
+    explanation: 'CLAUDE.md is standing context. Keep it crisp and specific — conventions, commands, anti-patterns. Never secrets.'
+  });
+
+  mountWidget('q2', Quiz, {
+    lessonId:'claude-md', cpId:'q2',
+    question: 'In a monorepo with CLAUDE.md files in `frontend/` and `services/auth/`, when do those sub-folder files get loaded?',
+    options: [
+      'At every session start, always.',
+      'Only when Claude reads files inside that sub-folder — they\'re lazy-loaded.',
+      'Never — only the root CLAUDE.md loads.',
+      'Randomly, based on file size.'
+    ],
+    correct: 1,
+    explanation: 'Descendant CLAUDE.md files are lazy-loaded only when Claude touches files in that directory. This is how you scale CLAUDE.md across a big repo without blowing your context budget.'
+  });
+
+  mountWidget('tutor', SocraticTutor, {
+    lessonId:'claude-md', cpId:'tutor',
+    topic: 'using CLAUDE.md effectively in a team',
+    persona: 'Push the learner to think about staleness, review cadence, what belongs at root vs. sub-folder, and where CLAUDE.md ends and docs/ begins.'
+  });
+</script>
+</body>
+</html>

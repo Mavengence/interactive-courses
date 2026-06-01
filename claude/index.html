@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Claude Course</title>
+<link rel="stylesheet" href="styles/core.css?v=23"/>
+<link rel="stylesheet" href="styles/home.css?v=8"/>
+</head>
+<body class="grain">
+
+<div id="topbar-slot"></div>
+
+<section class="hero">
+  <canvas id="galaxy" class="galaxy-bg" aria-hidden="true"></canvas>
+  <div class="hero-fade"></div>
+  <div class="container hero-inner">
+    <div class="stamp">draft v1 · living doc</div>
+
+    <div class="eyebrow amber">the claude best-practices course</div>
+    <h1 class="hero-title anim">
+      <span class="l1">Prompt</span>
+      <span class="l2"><em>like</em> you</span>
+      <span class="l3">mean it.</span>
+    </h1>
+    <p class="lede">The difference between people who love Claude and people who bounce off it isn't talent — it's a handful of habits. Twelve lessons. Every one hands-on, with interactive widgets from the first click.</p>
+
+    <div class="hero-cta">
+      <a href="lessons/01-mental-model.html" class="btn primary lg">Start lesson 01 →</a>
+      <a href="#lessons" class="btn ghost lg">Jump to course map</a>
+    </div>
+
+    <div class="hero-chips">
+      <span class="chip">12 lessons</span>
+      <span class="chip">~2 hours</span>
+      <span class="chip amber">◆ fully interactive</span>
+      <span class="chip">✦ hands-on widget in every lesson</span>
+    </div>
+
+    <div class="hero-demo-anchor" id="demo"></div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="container">
+    <div class="demo-eyebrow">
+      <span class="eyebrow amber">the orrery</span>
+      <span class="small muted">toggle the parts. watch the quality shift. run it live.</span>
+    </div>
+    <div id="hero-orrery-slot"></div>
+    <div style="margin-top:48px" id="hero-demo-slot"></div>
+  </div>
+</section>
+
+<section class="stats-band">
+  <div class="container">
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat"><div class="n" id="s-xp">0</div><div class="l">XP earned</div></div>
+      <div class="stat"><div class="n" id="s-done">0<span style="color:var(--ink-3);">/12</span></div><div class="l">Lessons complete</div></div>
+      <div class="stat"><div class="n" id="s-streak">0</div><div class="l">Day streak</div></div>
+      <div class="stat"><div class="n" id="s-badges">0<span style="color:var(--ink-3);">/9</span></div><div class="l">Badges earned</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="tracks" id="lessons">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">the course</div>
+      <h2 class="section-title">Four tracks. Twelve lessons. One arc.</h2>
+      <p class="section-sub">Start with the mental model. End with a team that ships better work, faster. Everything in between is practice.</p>
+    </div>
+    <div id="tracks-out"></div>
+  </div>
+</section>
+
+<section id="progress" class="progress-section">
+  <div class="container">
+    <div class="badges-panel">
+      <div class="badges-intro">
+        <div class="eyebrow">your collection</div>
+        <h2>Nine badges.<br/>Collect the set.</h2>
+        <p class="small" style="margin-top:14px;max-width:320px;">Complete lessons, crush the challenges, keep the streak alive. The badges are a nudge — the real prize is a team that prompts better.</p>
+        <button class="btn sm" id="reset-btn" style="margin-top:18px;">Reset progress</button>
+      </div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div>
+      <div class="eyebrow amber">start now</div>
+      <h2 style="font-size:clamp(1.8rem,3vw,2.6rem);margin-top:8px;">Ready for lesson 01?</h2>
+      <p style="margin-top:10px;color:var(--ink-2);max-width:480px;">Eight minutes. A handful of interactives. The only lesson where you're allowed to be wrong about what Claude actually is.</p>
+    </div>
+    <a href="lessons/01-mental-model.html" class="btn primary lg">Begin →</a>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="container" style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+    <div>Claude Course · draft v1</div>
+    <div>A practical course on prompting Claude.</div>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="js/claude-demo.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/toast.js?v=2"></script>
+<script src="js/lessons.js"></script>
+<script src="js/topbar.js?v=8"></script>
+<script src="js/galaxy.js"></script>
+<script>
+  document.getElementById('topbar-slot').replaceWith(window.renderTopbar(null));
+
+  function renderStats() {
+    const s = window.CourseProgress.get();
+    const animN = (el, to) => {
+      const from = parseInt(el.dataset.v || '0'); el.dataset.v = to;
+      const dur = 500; const start = performance.now();
+      (function tick(t){ const p = Math.min(1, (t-start)/dur); const v = Math.round(from+(to-from)*p); el.firstChild.nodeValue = v; if (p<1) requestAnimationFrame(tick); })(start);
+    };
+    const xpEl = document.getElementById('s-xp');
+    if (!xpEl.firstChild) xpEl.appendChild(document.createTextNode('0'));
+    animN(xpEl, s.xp);
+    document.getElementById('s-done').innerHTML = `${Object.keys(s.completed).length}<span style="color:var(--ink-3);">/12</span>`;
+    document.getElementById('s-streak').textContent = s.streak.days || 0;
+    document.getElementById('s-badges').innerHTML = `${Object.keys(s.badges).length}<span style="color:var(--ink-3);">/9</span>`;
+  }
+
+  const BADGES = [
+    { id: 'first-light', icon: '✦', name: 'First Light', hint: 'Finish lesson 1' },
+    { id: 'apprentice', icon: '◐', name: 'Apprentice', hint: '3 lessons done' },
+    { id: 'journeyman', icon: '◑', name: 'Journeyman', hint: '6 lessons done' },
+    { id: 'maestro', icon: '●', name: 'Maestro', hint: 'All 12 lessons' },
+    { id: 'streak-3', icon: '🔥', name: 'Warm Streak', hint: '3 days in a row' },
+    { id: 'streak-7', icon: '⚡', name: 'Hot Streak', hint: '7 days in a row' },
+    { id: 'good-prompter', icon: '✎', name: 'Prompt Craft', hint: 'Score 80+ on grader' },
+    { id: 'debugger', icon: '◈', name: 'Debugger', hint: 'Fix a broken prompt' },
+    { id: 'architect', icon: '▦', name: 'Architect', hint: 'Build a CLAUDE.md' },
+  ];
+  function renderBadges() {
+    const earned = window.CourseProgress.get().badges || {};
+    document.getElementById('badges-grid').innerHTML = BADGES.map(b => `
+      <div class="badge ${earned[b.id] ? 'earned' : 'locked'}">
+        <div class="icon">${b.icon}</div>
+        <div class="name">${b.name}</div>
+        <div class="hint">${b.hint}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderTracks() {
+    const s = window.CourseProgress.get();
+    const out = document.getElementById('tracks-out');
+    out.innerHTML = window.TRACKS.map((t,ti) => {
+      const ls = window.LESSONS.filter(l => l.track === t.id);
+      const doneCount = ls.filter(l => s.completed[l.id]).length;
+      const pct = Math.round(100 * doneCount / ls.length);
+      return `
+        <div class="track">
+          <div class="track-head">
+            <div>
+              <div class="track-num">track 0${ti+1}</div>
+              <h2>${t.label}</h2>
+              <div class="hint">${t.hint}</div>
+            </div>
+            <div class="track-prog">
+              <div class="track-prog-bar"><div style="width:${pct}%"></div></div>
+              <div class="track-prog-num">${doneCount}<span class="muted">/${ls.length}</span></div>
+            </div>
+          </div>
+          <div class="lesson-grid">
+            ${ls.map(l => `
+              <a class="lesson-card ${s.completed[l.id] ? 'done' : ''}" href="${l.file}">
+                <div class="num">lesson ${l.num}</div>
+                <h3>${l.title}</h3>
+                <div class="sub">${l.subtitle}</div>
+                <div class="hook">${l.hook}</div>
+                <div class="foot">
+                  <span>${l.minutes} min read</span>
+                  <span class="arrow">${s.completed[l.id] ? '✓ revisit' : 'start →'}</span>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderStats(); renderBadges(); renderTracks();
+  window.CourseProgress.subscribe(() => { renderStats(); renderBadges(); renderTracks(); });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => {
+    if (confirm('Reset all progress and XP? This cannot be undone.')) {
+      window.CourseProgress.reset();
+      renderStats(); renderBadges(); renderTracks();
+    }
+  });
+
+  // Galaxy background
+  window.startGalaxy?.(document.getElementById('galaxy'));
+</script>
+
+<script src="js/widgets.js?v=11"></script>
+<script>
+  mountWidget('hero-orrery-slot', PromptOrrery);
+  mountWidget('hero-demo-slot', PromptTransform);
+</script>
+
+</body>
+</html>

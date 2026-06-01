@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>01 · What Claude Actually Is — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 01 · foundations</div>
+    <h1>What Claude<br/>Actually Is.</h1>
+    <p class="subtitle">A working mental model for the thing you're about to prompt. Get this wrong and every prompt after is a guess.</p>
+    <div class="meta">
+      <span>⏱ 8 min read</span>
+      <span>◆ 5 interactives</span>
+      <span>✦ +80 XP available</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>The fastest way to get better at prompting is to stop thinking of Claude as a thing that <em>knows</em>, and start thinking of it as a thing that <em>continues</em>. Given everything in front of it — system prompt, your message, pasted docs, prior turns — it produces the most likely helpful continuation. That's the whole job. Everything else downstream (why some prompts sing, why others flop, why CLAUDE.md matters, why grounding matters) is a consequence of that one fact.</p>
+        <p>So before we get to techniques, three things Claude <strong>isn't</strong>:</p>
+        <p><strong>Claude is not a search engine.</strong> It doesn't retrieve from an index. It doesn't look anything up unless you wire a tool to it. Ask "which of our services has the worst p99?" with nothing attached and it won't say "I don't have data." It will give you a plausible answer. Confidently. That's not a bug — it's Claude doing exactly what it's trained to do.</p>
+        <p><strong>Claude is not a database.</strong> It has no standing memory of your team, your codebase, your last conversation, or you. Some surfaces (Projects, Claude Code's CLAUDE.md, auto-memory in newer versions) graft persistence on top. But the base model is stateless. Default assumption: every new chat is a blank window.</p>
+        <p><strong>Claude is not a colleague.</strong> It has no stake in being right, no pride in being wrong, no long-run model of what you care about. It won't push back on a bad framing unless you invite it to. Great news if you want a tireless collaborator; a real risk if you want a second opinion.</p>
+      </div>
+
+      <div class="pull-quote">It is a very, very good completion of the most likely next few thousand tokens — given everything you put in the window.</div>
+
+      <div class="prose">
+        <p>Anthropic's own guidance puts it more usefully: <em>treat Claude like a brilliant new hire on their first day</em>. They have world-class general skills. They have zero context on your project, your team, or what "good" looks like at your company. Every great prompting technique in this course is, at heart, a way to onboard that new hire faster.</p>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The three things in every exchange</h2>
+      <div class="prose"><p>Every time you hit send, three things are in play. Keep this map in your head.</p></div>
+
+      <div class="grid-3" style="margin-top:20px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">01 · the window</div>
+          <h3 style="margin-top:6px;font-size:1.05rem;">What Claude sees</h3>
+          <p class="small muted" style="margin-top:8px;">System prompt + your message + pasted docs + prior turns + tool results. This is the <em>only</em> situational information Claude has. If it's not here, it doesn't exist.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">02 · the priors</div>
+          <h3 style="margin-top:6px;font-size:1.05rem;">What it was trained on</h3>
+          <p class="small muted" style="margin-top:8px;">Broad world knowledge, code idioms, writing conventions, reasoning patterns. Zero company-internal anything. Frozen at training time — no live web, no live data.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">03 · the objective</div>
+          <h3 style="margin-top:6px;font-size:1.05rem;">What it's trying to do</h3>
+          <p class="small muted" style="margin-top:8px;">Produce a response that's <b>helpful, harmless, honest</b> — the <i>HHH</i> frame from Constitutional AI. Not "be right." "Be the likely-best helpful continuation."</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <span class="icon">★</span>
+        <div><b>The grounding rule.</b> If a fact isn't in the window, it isn't knowledge — it's a guess. Good prompting is the discipline of putting real facts in the window before asking for answers that depend on them. The rest of this course is a toolkit for doing that well.</div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Constitutional AI, in 90 seconds</h2>
+      <div class="prose">
+        <p>Claude is trained with a technique Anthropic calls <strong>Constitutional AI (CAI)</strong>. In plain English: instead of humans rating every response for safety, Anthropic writes down a "constitution" — a set of principles — and trains Claude to critique and revise its own outputs against those principles. The model learns to be <b>helpful, harmless, and honest</b> from the principles themselves.</p>
+        <p>Three practical consequences you'll feel in your prompts:</p>
+        <ul class="prose" style="padding-left:18px;">
+          <li><strong>Claude will push back on clearly harmful asks</strong> — but it's calibrated to be helpful first. If it refuses something reasonable, the refusal is usually a misread of intent. Re-frame the ask with context and it often works.</li>
+          <li><strong>Claude will caveat and hedge when uncertain</strong> — unless you tell it not to. "Just answer, no hedging" is a legitimate instruction in many cases.</li>
+          <li><strong>Claude has a bias toward honest uncertainty</strong> — if you give it room to say "I don't know," it will take that room. Most hallucinations happen when the prompt doesn't leave that door open.</li>
+        </ul>
+        <p>None of this is mystical. It's a training choice, and you can steer against it or with it depending on the job.</p>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Quick check</h2>
+      <div class="prose"><p>Three thirty-second questions before we go on.</p></div>
+      <div id="q1" style="margin-top:20px;"></div>
+      <div id="q2" style="margin-top:16px;"></div>
+      <div id="q3" style="margin-top:16px;"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Feel it: the "unknown knowns" test</h2>
+      <div class="prose">
+        <p>Below is a live Claude box. Ask it something <em>specific</em> about your team, your project, or a file you didn't paste. Watch what happens. (Spoiler: it will answer. Confidently. Probably wrong.)</p>
+        <p>This isn't Claude being broken. It's Claude doing exactly what it's designed to do — completing the most likely helpful next tokens — with nothing real to complete from. The fix is always the same:</p>
+      </div>
+      <div class="pull-quote" style="font-size:1.2rem;">Put. The facts. In the window.</div>
+      <div id="sb1" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>The three failure modes, named</h2>
+      <div class="prose"><p>Most bad Claude outputs trace back to one of three failures. Once you can name them, you can fix them. Skim once; you'll reference this list forever.</p></div>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--amber-ink);">Hallucination</h3>
+          <p class="small muted" style="margin-top:6px;">Claude invents a plausible fact. Almost always a <b>grounding</b> failure — the fact wasn't in the window, so the model generated a shaped-right guess. Fix: paste the real source, or give it a tool to look it up.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--amber-ink);">Drift</h3>
+          <p class="small muted" style="margin-top:6px;">Output starts strong, slowly wanders off-spec. Usually a <b>constraint</b> failure — the format or rules weren't strong enough to hold across a long generation. Fix: tighten constraints, ask for structured output, or break the task into steps.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-size:1rem;color:var(--amber-ink);">Generic slop</h3>
+          <p class="small muted" style="margin-top:6px;">Output is technically on-topic but reads like a LinkedIn post. A <b>specificity</b> failure — not enough context, not enough role, not enough concrete examples. Fix: add a few-shot example of what "good" looks like.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s7">
+      <h2>A tutor, if you want one</h2>
+      <div class="prose"><p>Still feels fuzzy? The topic tutor won't hand you the answer — it'll ask you one back. Three exchanges and the model clicks.</p></div>
+      <div id="tutor" style="margin-top:18px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('mental-model', [
+    {id:'s1', label:'What it is (and isn\'t)'},
+    {id:'s2', label:'The three things'},
+    {id:'s3', label:'Constitutional AI'},
+    {id:'s4', label:'Quick check'},
+    {id:'s5', label:'Feel it'},
+    {id:'s6', label:'Three failure modes'},
+    {id:'s7', label:'Tutor'},
+  ]);
+
+  mountWidget('q1', Quiz, {
+    lessonId:'mental-model', cpId:'q1',
+    question: 'You ask Claude, "which of our microservices has the highest p99 latency?" — and you\'ve pasted no data. What happens?',
+    options: [
+      'Claude queries your observability stack and answers accurately.',
+      'Claude refuses to answer without data.',
+      'Claude invents a plausible answer that sounds right but isn\'t grounded.',
+      'Claude returns the string "unknown".'
+    ],
+    correct: 2,
+    explanation: 'Claude doesn\'t refuse by default and doesn\'t know your systems. Without data in the window, it generates a plausible-sounding completion. That\'s a grounding failure — the textbook hallucination pattern.'
+  });
+
+  mountWidget('q2', Quiz, {
+    lessonId:'mental-model', cpId:'q2',
+    question: 'Across two separate chats, does Claude remember what you told it last week?',
+    options: [
+      'Yes — it has a personal memory of you.',
+      'No — unless the product surface explicitly adds memory, each chat is a blank window.',
+      'Yes, but only within the same calendar day.',
+      'Only if you paid extra.',
+    ],
+    correct: 1,
+    explanation: 'The base model is stateless. Some surfaces (Projects, CLAUDE.md, auto-memory) graft persistence on top, but the safe default assumption is "no memory."'
+  });
+
+  mountWidget('q3', Quiz, {
+    lessonId:'mental-model', cpId:'q3',
+    question: 'Which is the single best summary of Claude\'s job during a generation?',
+    options: [
+      'Retrieve the correct answer from its training data.',
+      'Predict the most likely helpful continuation given everything in the window.',
+      'Refuse when uncertain.',
+      'Reason from first principles independently of input.'
+    ],
+    correct: 1,
+    explanation: 'It\'s a completion engine, trained to be helpful, harmless, and honest. That framing explains both its strengths (creative drafting, structured transformation) and its failure modes (confident wrongness without grounding).'
+  });
+
+  mountWidget('sb1', PromptSandbox, {
+    lessonId:'mental-model', cpId:'feel-it',
+    title:'Ask about something it can\'t know',
+    hint:'Try: "Which oncall rotation owns the auth service in my team?" — then watch it answer.',
+    placeholder:'Ask Claude something that depends on context you haven\'t given it…'
+  });
+
+  mountWidget('tutor', SocraticTutor, {
+    lessonId:'mental-model', cpId:'tutor',
+    topic: 'the mental model for what Claude is',
+    persona: 'Keep the learner honest. If they gesture vaguely, press them. Use concrete, real-world examples.'
+  });
+</script>
+</body>
+</html>

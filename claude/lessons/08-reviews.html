@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>08 · Code Review & PRs — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 08 · advanced</div>
+    <h1>Claude for<br/>Code Review & PRs.</h1>
+    <p class="subtitle">Your tireless, slightly-pedantic reviewer. Use it before humans, not instead of them.</p>
+    <div class="meta"><span>⏱ 9 min</span><span>◆ 3 interactives</span><span>✦ +55 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Claude reads diffs. It notices naming inconsistencies, missing null checks, tests that don't actually test the thing. It also notices <em>subtext</em> — the "this PR claims to be a refactor but changes behavior" kind of notice.</p>
+        <p>The trick is prompting it like a teammate, not a linter. That means: give it the author's stated goal, the team's conventions, and a clear bar for what counts as a finding.</p>
+      </div>
+      <div class="callout" style="margin-top:14px;">
+        <span class="icon">◆</span>
+        <div><b>Heads up on newer Claudes.</b> If your review prompt says "only report high-severity issues" or "don't nitpick," recent Claude models follow that instruction <em>more faithfully</em> than older ones did. They may investigate just as deeply, find the same bugs, and then — by your own rule — not report the ones below your bar. If your review volume drops suddenly after a model upgrade, loosen the filter before assuming a regression.</div>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h2>The review prompt template</h2>
+      <pre class="code">You are reviewing a PR as a staff engineer on the team.
+
+CONTEXT
+- Repo: &lt;what the project does, one line&gt;
+- Conventions: &lt;link CLAUDE.md or paste summary&gt;
+- Author's stated goal of this PR: &lt;paste their description&gt;
+
+DIFF
+&lt;paste the diff&gt;
+
+TASK
+Review the diff. For each issue, emit:
+- severity (blocker | nit | question)
+- file:line
+- what you'd change and why, in one sentence
+
+Focus on:
+1. Does the code do what the description claims?
+2. Correctness, especially edge cases and error paths.
+3. Tests: are they exercising the change or just present?
+4. Consistency with existing conventions in the repo.
+
+Do NOT:
+- Rewrite the code.
+- Comment on style unless it breaks a convention.
+- Pad the review with praise.</pre>
+    </section>
+
+    <section id="s3">
+      <h2>Three times it earns its keep</h2>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <div class="tiny">before you push</div>
+          <p class="small muted" style="margin-top:6px;">Paste your own diff, ask for a staff-level review. Catches things you'll be embarrassed by later.</p>
+        </div>
+        <div class="card">
+          <div class="tiny">on a big diff</div>
+          <p class="small muted" style="margin-top:6px;">Before reading 2,000 lines yourself, ask Claude for a call-graph summary and a list of behavioral changes.</p>
+        </div>
+        <div class="card">
+          <div class="tiny">across the repo</div>
+          <p class="small muted" style="margin-top:6px;">"Are there other callers of this function I missed?" — paste the call sites, let Claude reason about ripple.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Try it</h2>
+      <div class="prose"><p>Paste a small diff (real or made-up) and ask Claude to review it using the template.</p></div>
+      <div id="sb" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:12px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Rewrite arena</h2>
+      <div id="arena" style="margin-top:14px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('reviews', [
+    {id:'s1', label:'Why it works'},
+    {id:'s2', label:'The template'},
+    {id:'s3', label:'When to use'},
+    {id:'s4', label:'Try it'},
+    {id:'s5', label:'Quick check'},
+    {id:'s6', label:'Arena'},
+  ]);
+
+  mountWidget('sb', PromptSandbox, {
+    lessonId:'reviews', cpId:'review',
+    title:'Review a diff',
+    hint:'Paste a small diff. Ask for a staff-level review using the template above.',
+    placeholder:'You are reviewing a PR as a staff engineer…\n\nDIFF:\n<paste diff>'
+  });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'reviews', cpId:'q1',
+    question: 'Your review prompt produces 40 style nits and misses a real correctness bug. What\'s the fix?',
+    options: [
+      'Use a larger model.',
+      'Tell Claude explicitly to ignore style and focus on correctness + behavior changes.',
+      'Shorten the diff randomly.',
+      'Ask twice in different wording.'
+    ],
+    correct: 1,
+    explanation: 'Prompts control focus. Tell the reviewer what to prioritize and what to ignore.'
+  });
+
+  mountWidget('arena', RewriteArena, {
+    lessonId:'reviews', cpId:'arena',
+    task: 'Write a review prompt for a PR that claims to be a refactor.',
+    original: 'review this PR and tell me if its good',
+    criteria: 'names reviewer role, sets focus, excludes style, asks for severity tagging, prevents praise padding'
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>05 · Iterative Prompting — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 05 · workflows</div>
+    <h1>Iterative Prompting.</h1>
+    <p class="subtitle">First drafts are for calibration, not delivery. The second prompt is always better — if you know what to change.</p>
+    <div class="meta"><span>⏱ 10 min</span><span>◆ 3 interactives</span><span>✦ +60 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Beginners write one prompt and judge Claude on the output. Experienced users write a prompt, read the output, and use what they learned to refine the prompt. The model doesn't change. Your prompt does.</p>
+        <p>Anthropic's own engineers say it flatly: <strong>prompt engineering is a science — approach it like a scientist.</strong> Test, iterate, compare. The best first prompt you'll ever write is the one you wrote yesterday and are improving today.</p>
+      </div>
+      <div class="pull-quote">Prompting is a loop, not a shot.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The three-turn loop</h2>
+      <div class="grid-3" style="margin-top:18px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">turn 1 · calibrate</div>
+          <p class="small" style="margin-top:6px;">Write a reasonable prompt. Read the output. Don't judge — <em>diagnose</em>. What did it misunderstand? What did it over-explain? What tone did it default to?</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">turn 2 · correct</div>
+          <p class="small" style="margin-top:6px;">Name the specific thing to fix. "Shorter." "Drop the intro paragraph." "Use the voice from the attached doc." Keep the rest of the prompt stable — change one variable at a time.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">turn 3 · lock</div>
+          <p class="small" style="margin-top:6px;">When it's good: capture the full, working prompt somewhere (CLAUDE.md, a snippet file, Notion). That's now a template. Next time, start from there.</p>
+        </div>
+      </div>
+
+      <div class="callout ink">
+        <span class="icon">▸</span>
+        <div><b>Pro move Anthropic uses.</b> After an output you liked, ask Claude: <em>"Write the prompt you would have given yourself to produce this output."</em> You now have a distilled, reusable prompt — often better than the one you started with.</div>
+      </div>
+    </section>
+
+    <section id="s2b">
+      <h2>Show, don't tell</h2>
+      <div class="prose">
+        <p>The single highest-leverage iteration move: <strong>replace descriptions with examples</strong>. Saying "use a professional tone" gives Claude a fuzzy target. Pasting three sentences in the exact tone you want gives it coordinates.</p>
+        <p>Anthropic's prompt-improver workflow does this automatically — it takes your prompt and looks for places to inject 2–5 input/output examples. In their experience, examples are the single most reliable way to drive accuracy and consistency, especially for structured outputs. When your turn-2 correction is "make it feel more like X," paste X.</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>What to say in turn 2</h2>
+      <div class="prose"><p>Most failed iterations come from vague corrections. Here's the vocabulary that actually works:</p></div>
+      <div class="do-dont">
+        <div class="do">
+          <span class="label">do</span>
+          <div>"Cut the first paragraph."<br>"Use the voice from this example: …"<br>"Make the bullets parallel — each should start with a verb."<br>"Assume the reader already knows X; skip the intro."</div>
+        </div>
+        <div class="dont">
+          <span class="label">don't</span>
+          <div>"Make it better."<br>"Less AI-sounding."<br>"Sharper."<br>"You know what I mean."</div>
+        </div>
+      </div>
+      <div id="diff" style="margin-top:22px;"></div>
+    </section>
+
+    <section id="s4">
+      <h2>Try the loop</h2>
+      <div class="prose"><p>Ask for something. Read what comes back. Then — without starting a new prompt — iterate. The turn-2 correction is the muscle we're training.</p></div>
+      <div id="sb" style="margin-top:18px;"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Rewrite arena</h2>
+      <div class="prose"><p>Here's a vague turn-2 correction. Rewrite it into something that will actually change the output.</p></div>
+      <div id="arena" style="margin-top:14px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('iteration', [
+    {id:'s1', label:'The loop'},
+    {id:'s2', label:'Three turns'},
+    {id:'s2b', label:'Show, don\'t tell'},
+    {id:'s3', label:'Vocabulary'},
+    {id:'s4', label:'Try it'},
+    {id:'s5', label:'Quick check'},
+    {id:'s6', label:'Rewrite arena'},
+  ]);
+
+  mountWidget('sb', PromptSandbox, {
+    lessonId:'iteration', cpId:'loop',
+    title:'Run a turn-1, then iterate',
+    hint:'Ask for a quick draft. Then paste the output back with a specific correction and ask again.',
+    placeholder:'Turn 1 prompt goes here. Then update this box and re-run for turn 2.'
+  });
+
+  mountWidget('diff', PromptDiff, {
+    weak: 'make it better and shorter please',
+    strong: 'Cut the opening paragraph. Start with the status in one sentence, then three bullets in the voice of the attached example. No closing pleasantries.',
+    takeaway: 'The strong correction is actionable, testable, and uses concrete reference (the attached example). Claude can do something with it.'
+  });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'iteration', cpId:'q1',
+    question: 'Which turn-2 correction is most likely to actually change the output?',
+    options: [
+      '"Make it better."',
+      '"Less AI sounding."',
+      '"Cut the opening paragraph and start with the status in one sentence."',
+      '"Try again."'
+    ],
+    correct: 2,
+    explanation: 'Specific, actionable, testable. The others are vibes — Claude can\'t act on them.'
+  });
+
+  mountWidget('arena', RewriteArena, {
+    lessonId:'iteration', cpId:'arena',
+    task: 'Correct a first-draft status update that opened with too much throat-clearing.',
+    original: 'make it sound better and shorter',
+    criteria: 'specificity, testability, actionable instruction, avoids vibes'
+  });
+</script>
+</body>
+</html>

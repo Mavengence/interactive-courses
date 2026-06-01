@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>11 · Prompt Debugging & Evals — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 11 · team</div>
+    <h1>Prompt Debugging<br/>& Evals.</h1>
+    <p class="subtitle">Vibes are not a measurement. How to know a prompt is actually better.</p>
+    <div class="meta"><span>⏱ 12 min</span><span>◆ 4 interactives</span><span>✦ +85 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>You tweak a prompt. The next response "feels better." Is it? You don't know. That's the problem.</p>
+        <p>Anthropic's prompt engineers say it plainly: <em>approach prompting like a scientist — test and iterate</em>. Evals are the test suite. They don't need to be fancy; they need to exist. Five realistic examples beat a thousand gut checks.</p>
+      </div>
+      <div class="pull-quote">No eval, no improvement — just drift.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The minimum viable eval</h2>
+      <div class="prose">
+        <p>You don't need a platform. You need five examples.</p>
+      </div>
+      <pre class="code">eval_v1:
+  - input:    &lt;realistic example 1&gt;
+    expects:  &lt;what a good output looks like&gt;
+  - input:    &lt;realistic example 2, including a hard edge case&gt;
+    expects:  &lt;…&gt;
+  - input:    &lt;example 3, a known failure mode&gt;
+    expects:  &lt;…&gt;
+  - input:    &lt;example 4&gt;
+    expects:  &lt;…&gt;
+  - input:    &lt;example 5, adversarial — empty input, ambiguous input&gt;
+    expects:  &lt;…&gt;</pre>
+      <p class="prose" style="margin-top:10px;">Before you change the prompt, run all five. Save the outputs. After you change the prompt, run all five again. Diff.</p>
+    </section>
+
+    <section id="s3">
+      <h2>Debugging a broken prompt</h2>
+      <div class="prose">
+        <p>When a prompt misbehaves, resist the urge to add instructions. First, <strong>remove</strong>. Prompts rot when people pile on. Start with the minimum that should work. If it works, reintroduce constraints one at a time until it breaks. That's your culprit.</p>
+      </div>
+      <div class="callout">
+        <span class="icon">★</span>
+        <div><b>Binary search your prompt.</b> Delete half. Works? The problem was in the deleted half. Doesn't work? The problem's in the kept half. Repeat.</div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Judging quality with a second model</h2>
+      <div class="prose">
+        <p>For harder-to-grade outputs ("is this a good review?"), use Claude itself as a judge. Give it a clear rubric, the output to judge, and ask for a score + justification. It's noisy but cheap, and it scales.</p>
+      </div>
+    </section>
+
+    <section id="s5">
+      <h2>Drill: name the failure mode</h2>
+      <div class="prose"><p>Before you can judge outputs, you have to be able to <em>name</em> what's wrong with them. Here are five broken outputs. Tag each.</p></div>
+      <div id="tagger" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Now try the judge</h2>
+      <div class="prose"><p>Write a prompt that produces consistently-judgable output. Claude will grade it against a rubric.</p></div>
+      <div id="grader" style="margin-top:12px;"></div>
+    </section>
+
+    <section id="s7">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:12px;"></div>
+      <div id="q2" style="margin-top:12px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('evals', [
+    {id:'s1', label:'Why evals'},
+    {id:'s2', label:'MVP eval'},
+    {id:'s3', label:'Debugging'},
+    {id:'s4', label:'LLM as judge'},
+    {id:'s5', label:'Name the failure'},
+    {id:'s6', label:'Try the judge'},
+    {id:'s7', label:'Quick check'},
+  ]);
+  mountWidget('tagger', FailureTagger, { lessonId:'evals', cpId:'tagger' });
+  mountWidget('grader', PromptGrader, {
+    lessonId:'evals', cpId:'grader',
+    task:'Write a prompt for generating weekly status updates that a judge model can score.',
+    rubric:'All Boris sections present, constraints specific, format explicit, includes a way to detect missing data.'
+  });
+  mountWidget('q1', Quiz, {
+    lessonId:'evals', cpId:'q1',
+    question:'You change a prompt. The new output "feels better." The right next step?',
+    options:[
+      'Ship it.',
+      'Run both prompts against 5 realistic examples and compare.',
+      'Ask a colleague if they like it.',
+      'Ask Claude to grade itself.'
+    ],
+    correct:1, explanation:'Vibes lie. Even 5 examples beat gut feel.'
+  });
+  mountWidget('q2', Quiz, {
+    lessonId:'evals', cpId:'q2',
+    question:'A working prompt starts producing weird output after weeks of edits. The best debugging move?',
+    options:[
+      'Add more instructions to counteract the weirdness.',
+      'Delete half the prompt and see if the problem goes with it.',
+      'Switch to a different model.',
+      'Ask Claude to rewrite the prompt from scratch.'
+    ],
+    correct:1, explanation:'Binary search. Prompts rot when people only add. Subtract to isolate.'
+  });
+  window.CourseProgress.awardBadge('debugger');
+</script>
+</body>
+</html>

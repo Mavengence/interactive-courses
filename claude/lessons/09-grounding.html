@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>09 · Avoiding Hallucinations — Claude Course</title>
+<link rel="stylesheet" href="../styles/core.css?v=23"/>
+<link rel="stylesheet" href="../styles/lesson.css?v=5"/>
+</head>
+<body class="grain">
+
+<section class="lesson-hero">
+  <div class="container">
+    <div class="lesson-num">lesson 09 · advanced</div>
+    <h1>Avoiding<br/>Hallucinations.</h1>
+    <p class="subtitle">Ground the model in your data, or prepare for fiction. If it isn't in context, it isn't knowledge.</p>
+    <div class="meta"><span>⏱ 10 min</span><span>◆ 3 interactives</span><span>✦ +60 XP</span></div>
+  </div>
+</section>
+
+<div class="container">
+<div class="lesson-body">
+  <aside class="lesson-sidebar" id="toc"></aside>
+  <main class="lesson-content">
+
+    <section id="s1">
+      <div class="prose">
+        <p>Hallucination is not a bug. It's Claude doing its job — completing plausibly — with no ground truth to complete against. The fix isn't asking nicely. The fix is structural: give it the data, require citations, and allow an honest "I don't know."</p>
+      </div>
+      <div class="pull-quote">If a fact isn't in context, treat it as fiction until proven otherwise.</div>
+    </section>
+
+    <section id="s2">
+      <h2>The three grounding moves</h2>
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">01 · paste it</div>
+          <p class="small" style="margin-top:6px;">Direct grounding. Paste the doc, the log, the PR description. Then ask about <em>that</em>. "According to the attached…"</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">02 · cite it</div>
+          <p class="small" style="margin-top:6px;">Tell Claude: "Cite the exact line or quote for every claim. If you can't cite, say so." You get citations — and honest gaps.</p>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--amber-ink);">03 · refuse mode</div>
+          <p class="small" style="margin-top:6px;">"If the answer isn't in the provided context, respond exactly: NOT_IN_CONTEXT." Gives you a clean signal instead of a guess.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h2>Smell test: how to spot a hallucination</h2>
+      <div class="do-dont">
+        <div class="do">
+          <span class="label">green flags</span>
+          <div>Quotes from context with line numbers.<br>"I can't find this in the attached docs."<br>Acknowledgements of uncertainty.</div>
+        </div>
+        <div class="dont">
+          <span class="label">red flags</span>
+          <div>Oddly specific numbers with no source.<br>Named people/projects that don't appear in context.<br>Confident plural claims ("studies show…").</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h2>Try it</h2>
+      <div id="sb" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s5">
+      <h2>Quick check</h2>
+      <div id="q1" style="margin-top:14px;"></div>
+    </section>
+
+    <section id="s6">
+      <h2>Rewrite arena — make a prompt hallucination-resistant</h2>
+      <div id="arena" style="margin-top:14px;"></div>
+    </section>
+
+    <div id="lesson-footer"></div>
+  </main>
+</div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+
+<script src="../js/claude-demo.js"></script>
+<script src="../js/progress.js"></script>
+<script src="../js/toast.js?v=2"></script>
+<script src="../js/lessons.js"></script>
+<script src="../js/topbar.js?v=8"></script>
+<script src="../js/lesson-init.js?v=2"></script>
+<script src="../js/widgets.js?v=11"></script>
+<script>
+  initLesson('grounding', [
+    {id:'s1', label:'Not a bug'},
+    {id:'s2', label:'Three moves'},
+    {id:'s3', label:'Smell test'},
+    {id:'s4', label:'Try it'},
+    {id:'s5', label:'Quick check'},
+    {id:'s6', label:'Arena'},
+  ]);
+
+  mountWidget('sb', PromptSandbox, {
+    lessonId:'grounding', cpId:'try',
+    title:'Force citations',
+    hint:'Paste a short doc. Then add: "Answer only from the doc. Quote line numbers. If not present, say NOT_IN_CONTEXT."',
+    placeholder:'DOC:\n<paste short doc>\n\nQUESTION:\n<ask>\n\nRULES:\n- Answer only from the doc.\n- Quote the exact line for every claim.\n- If not in the doc, respond exactly: NOT_IN_CONTEXT'
+  });
+
+  mountWidget('q1', Quiz, {
+    lessonId:'grounding', cpId:'q1',
+    question: 'What\'s the most reliable way to stop Claude from inventing facts?',
+    options: [
+      'Add "do not hallucinate" to every prompt.',
+      'Use a smarter model.',
+      'Provide the source data and require citations or an explicit "not in context" signal.',
+      'Ask twice and compare answers.'
+    ],
+    correct: 2,
+    explanation: 'Structural grounding beats pleading. Give the data + require citations + allow a clean "I don\'t know" signal.'
+  });
+
+  mountWidget('arena', RewriteArena, {
+    lessonId:'grounding', cpId:'arena',
+    task: 'Write a prompt for answering questions about an attached policy doc with zero hallucination tolerance.',
+    original: 'answer questions about this doc and dont make stuff up',
+    criteria: 'requires citations, provides an explicit out-of-context signal, restricts answers to attached context'
+  });
+</script>
+</body>
+</html>
