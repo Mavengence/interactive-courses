@@ -265,6 +265,7 @@
 
     <section id="s4">
       <h2>Encodings, dissected</h2>
+      <div class="table-scroll">
       <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.84rem;">
         <thead>
           <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
@@ -279,6 +280,7 @@
           <tr><td style="padding:8px; color:var(--cyan-deep);">Delta encoding</td><td style="padding:8px; color:var(--ink-2);">Sorted columns (timestamps, auto-increment IDs).</td><td style="padding:8px; color:var(--ink-3);">Store diffs from prev value, not absolute values. Unrelated to Delta Lake.</td></tr>
         </tbody>
       </table>
+      </div>
       <div class="callout"><span class="icon">▸</span><div><b>The interview move.</b> When asked to compute storage cost or query latency, separate <em>logical row count × bytes-per-row</em> from <em>physical bytes after encoding + compression</em>. They differ by 5-20× for typical analytical data. A 1TB CSV is usually 50-200GB as Parquet.</div></div>
     </section>
 

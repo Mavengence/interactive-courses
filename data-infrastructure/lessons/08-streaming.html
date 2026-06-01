@@ -68,6 +68,7 @@
 
     <section id="s5">
       <h2>Window types</h2>
+      <div class="table-scroll">
       <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.84rem;">
         <thead>
           <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
@@ -81,6 +82,7 @@
           <tr><td style="padding:8px; color:var(--cyan-deep);">Global</td><td style="padding:8px;">One window forever; uses custom triggers</td><td style="padding:8px; color:var(--ink-2);">running totals with manual flush</td></tr>
         </tbody>
       </table>
+      </div>
     </section>
 
     <section id="s5b">
@@ -101,6 +103,7 @@
       <div class="prose">
         <p>Two engines dominate production streaming in 2026. Both are mature and capable; the right choice depends on your latency target, team skillset, and existing infrastructure:</p>
       </div>
+      <div class="table-scroll">
       <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.82rem;">
         <thead>
           <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
@@ -117,6 +120,7 @@
           <tr><td style="padding:8px; color:var(--cyan-deep);">Sweet spot</td><td style="padding:8px;">Low-latency streaming, complex stateful logic, fraud detection, CEP</td><td style="padding:8px;">Spark shops wanting near-real-time without a separate streaming cluster</td></tr>
         </tbody>
       </table>
+      </div>
       <div class="callout"><span class="icon">▸</span><div><b>The IC5 decision rule.</b> If latency must be sub-second, or you need complex stateful processing (pattern matching, sessionization, joins across multiple streams), pick Flink. If your team lives in Spark/Databricks and the latency target is >5 seconds, Structured Streaming gets you streaming without paying the operational cost of a separate Flink cluster. Don't pick Flink just because it's "more real streaming" — it's operationally heavier and the micro-batch model is fine for most analytical use cases.</div></div>
     </section>
 

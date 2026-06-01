@@ -1,6 +1,6 @@
 // Progress store — XP, checkpoints, lesson completion, streak
 (function() {
-  const KEY = 'codex-course:v1';
+  const KEY = 'data-infra-course:v1';
   const XP_VALUES = { quiz: 15, terminal: 10, spec: 20, diff: 15, flash: 5 };
 
   function load() {

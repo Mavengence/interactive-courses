@@ -130,6 +130,10 @@ body::after {
   padding: 9px 10px; cursor: pointer; border-radius: 7px;
   transition: background 150ms var(--ease-out), color 150ms var(--ease-out);
   color: var(--ink-2);
+  /* reset native <button> styling */
+  width: 100%; margin: 0; border: none;
+  background: transparent; font: inherit; text-align: left;
+  -webkit-appearance: none; appearance: none;
 }
 .sb-item:hover { background: var(--bg-hov); color: var(--ink-1); }
 .sb-item.active {
@@ -464,3 +468,55 @@ body::after {
 /* ===== Utilities ======================================================== */
 .mono { font-family: var(--font-mono); }
 .serif { font-family: var(--font-serif); }
+
+/* ===== Responsive: tablet / phone ======================================= */
+@media (max-width: 860px) {
+  /* Single-column shell — sidebar becomes a top bar */
+  .app { grid-template-columns: 1fr; min-width: 0; }
+
+  .sb {
+    position: sticky; top: 0; z-index: 40;
+    height: auto; align-self: stretch;
+    min-width: 0; max-width: 100vw;
+    border-right: none; border-bottom: 1px solid var(--hair-2);
+    padding: 12px 14px 10px;
+    background: rgba(245,241,232,0.92);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    overflow: hidden;
+  }
+  .sb-brand { padding: 0 2px 10px; margin-bottom: 10px; }
+  .sb-eyebrow, .sb-foot { display: none; }
+
+  /* Chapter nav: wrapping rows of compact pills (no horizontal page push) */
+  .sb-nav {
+    flex-direction: row; flex-wrap: wrap; gap: 6px;
+    width: 100%; min-width: 0; max-width: 100%;
+    overflow: hidden;
+  }
+
+  .sb-item {
+    flex: 0 1 auto; width: auto; min-width: 0; max-width: 100%;
+    grid-template-columns: auto minmax(0, auto);
+    gap: 8px; padding: 7px 11px 7px 9px;
+    border: 1px solid var(--hair-2); background: var(--panel);
+    border-radius: 999px;
+  }
+  .sb-item.active { background: var(--ink-1); border-color: transparent; }
+  .sb-item.active::before { display: none; }   /* drop the left accent rail */
+  .sb-item .sb-sub, .sb-item .sb-time { display: none; }  /* keep pills compact */
+  .sb-num { width: 28px; height: 24px; font-size: 10.5px; flex: 0 0 auto; }
+  .sb-title { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+  /* Topbar + content take full width */
+  .tb { padding: 0 18px; gap: 10px; }
+  .crumb { font-size: 10.5px; }
+  .content { padding: 28px 20px 90px; }
+}
+
+@media (max-width: 460px) {
+  .tb { height: 52px; padding: 0 14px; }
+  .crumb .sep:first-of-type, .crumb b { display: none; }  /* trim crumb on tiny screens */
+  .content { padding: 22px 16px 80px; }
+  .btn { padding: 6px 10px; font-size: 11px; }
+}

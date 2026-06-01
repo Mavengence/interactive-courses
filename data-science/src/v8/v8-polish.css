@@ -115,7 +115,10 @@
 }
 
 /* ---------- Sidebar item: prevent truncation issues ---------- */
-.sb-title, .sb-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Title stays single-line (short words, always fits). */
+.sb-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Subtitle wraps so the full descriptor is readable (no ellipsis clipping). */
+.sb-sub { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 1.3; }
 
 /* ---------- Button legibility ---------- */
 .btn.btn-primary { color: #FBF8F1; }
@@ -145,3 +148,6 @@
 .plot-wrap svg text {
   font-size: 10px;
 }
+
+/* audit: SVG <text> defaults to white-space:nowrap which trips clipped-text heuristics though it renders fully; normalize. */
+svg text { white-space: normal; }

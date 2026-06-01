@@ -25,7 +25,8 @@
   }
   window.toast = toast;
   document.addEventListener('cc:xp', (ev) => {
-    toast('Nice — checkpoint cleared', { xp: ev.detail.xp });
+    const xp = ev.detail && ev.detail.xp;
+    toast('Nice — checkpoint cleared', xp ? { xp } : {});
   });
   document.addEventListener('cc:lesson-done', (ev) => {
     toast('Lesson complete!', { xp: 25, duration: 4000 });

@@ -126,6 +126,7 @@ from {{ ref('stg_customers') }}
 
     <section id="s5">
       <h2>Airflow vs Dagster vs Prefect</h2>
+      <div class="table-scroll">
       <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.82rem;">
         <thead>
           <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
@@ -138,6 +139,7 @@ from {{ ref('stg_customers') }}
           <tr><td style="padding:8px; color:var(--cyan-deep);">Friction</td><td style="padding:8px;">Operator-heavy boilerplate</td><td style="padding:8px;">Smaller ecosystem</td><td style="padding:8px;">Hosted-first, less mature on-prem</td></tr>
         </tbody>
       </table>
+      </div>
       <div class="prose"><p>For an interview: pick Airflow if the team is already on it. Pick Dagster if you're starting fresh and care about data quality / lineage. The orchestrator is rarely the bottleneck; the design of your jobs is.</p></div>
     </section>
 

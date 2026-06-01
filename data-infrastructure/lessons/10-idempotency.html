@@ -162,6 +162,7 @@ ON CONFLICT (event_id)
         <p>Result: a Kafka-to-Kafka pipeline can guarantee exactly-once end-to-end. As soon as the sink is anything other than another Kafka topic — a Postgres DB, an HTTP API, an S3 file — it's back on you to make the side effect idempotent. <strong>Flink's two-phase commit sink</strong> extends this: Flink checkpoints write a pre-commit to the external sink (e.g., Iceberg stage files), then the commit is triggered only after the Kafka offset commit succeeds — bridging Kafka's transactional exactly-once to external sinks that support a commit/abort protocol.</p>
         <div style="margin-top: 12px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 16px; font-family: var(--mono); font-size: 0.8rem;">
           <div style="color: var(--ink-3); margin-bottom: 6px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;">kafka exactly-once: scope table</div>
+          <div class="table-scroll">
           <table style="width:100%; border-collapse: collapse; font-size: 0.78rem;">
             <thead><tr style="border-bottom: 1px solid var(--rule); color: var(--ink-3);">
               <th style="padding:4px 8px; text-align:left;">Pipeline</th>
@@ -191,6 +192,7 @@ ON CONFLICT (event_id)
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </section>

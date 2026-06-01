@@ -188,7 +188,7 @@ window.CX.L02 = {
       </div>
       <div class="${ns}-status-panel"></div>
       <div class="${ns}-verification-panel"></div>
-      <svg class="${ns}-wires" width="100%" height="100%"></svg>
+      <svg class="${ns}-wires" width="100%" height="100%" viewBox="0 0 420 360" preserveAspectRatio="xMidYMid meet"></svg>
     `;
     root.appendChild(wrapper);
 

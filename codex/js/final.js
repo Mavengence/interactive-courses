@@ -1,14 +1,13 @@
-/* final.js — CC2 optimization round (22-agent patch layer). */
+/* final.js — final bootstrap + polish layer (loaded last). */
 
 
-/* ---- cc2:extendability_framework (no-op stub) ----
+/* ---- extendability_framework (no-op stub) ----
  * Replaced with a no-op because lessons use inline initLesson() calls and the
- * existing progress.js/topbar.js already handle crumbs + progress. If you want
- * the data-island-driven bootstrap back, see docs/EXTENDING.md. */
+ * existing progress.js/topbar.js already handle crumbs + progress. */
 
 
-/* ---- cc2:widget_api_normalization ---- */
-/* cc2 AGENT widget_api_normalization */
+/* ---- widget_api_normalization ---- */
+/* widget_api_normalization */
 (function () {
   'use strict';
 
@@ -287,8 +286,8 @@
 })();
 
 
-/* ---- cc2:l04_polish ---- */
-/* cc2 AGENT l04_polish */
+/* ---- l04_polish ---- */
+/* l04_polish */
 
 (function() {
     if (!window.CX || !window.CX.L04 || typeof window.CX.L04.mount !== 'function') return;

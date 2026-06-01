@@ -1,11 +1,10 @@
 /* ============================================================
-   final.css — CC2 optimization round (22-agent patch layer).
-   Loaded LAST. See docs/CC2_NOTES.md for agent-by-agent summary.
+   final.css — final polish layer. Loaded LAST.
    ============================================================ */
 
 
-/* ---- cc2:design_tokens ---- */
-/* cc2 AGENT design_tokens */
+/* ---- design_tokens ---- */
+/* design_tokens */
 :root {
   /* 1. Color Palette */
   --color-canvas: #FAF9F6;
@@ -95,8 +94,8 @@
 }
 
 
-/* ---- cc2:a11y_audit ---- */
-/* cc2 AGENT a11y_audit */
+/* ---- a11y_audit ---- */
+/* a11y_audit */
 
 .skip-link {
     position: absolute;
@@ -127,16 +126,16 @@
 }
 
 
-/* ---- cc2:performance ---- */
-/* cc2 AGENT performance */
+/* ---- performance ---- */
+/* performance */
 .lesson-content > section:not(:first-of-type) {
   content-visibility: auto;
   contain: layout paint;
 }
 
 
-/* ---- cc2:l01_polish ---- */
-/* cc2 AGENT l01_polish */
+/* ---- l01_polish ---- */
+/* l01_polish */
 body.lesson-01 .grid-3 {
     grid-auto-rows: 1fr;
 }
@@ -169,15 +168,15 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l02_polish ---- */
-/* cc2 AGENT l02_polish */
+/* ---- l02_polish ---- */
+/* l02_polish */
 .tdemo-ctrl {
     align-items: center;
 }
 
 
-/* ---- cc2:l03_polish ---- */
-/* cc2 AGENT l03_polish */
+/* ---- l03_polish ---- */
+/* l03_polish */
 .diff .w-file {
   background: var(--paper-2);
   color: var(--ink-2);
@@ -196,8 +195,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l04_polish ---- */
-/* cc2 AGENT l04_polish */
+/* ---- l04_polish ---- */
+/* l04_polish */
 
 .lesson-04 .grid-2 {
     display: grid;
@@ -224,8 +223,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l05_polish ---- */
-/* cc2 AGENT l05_polish */
+/* ---- l05_polish ---- */
+/* l05_polish */
 
 .cx-L05-handle::before {
   content: '';
@@ -254,8 +253,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l06_polish ---- */
-/* cc2 AGENT l06_polish */
+/* ---- l06_polish ---- */
+/* l06_polish */
 .lesson-06 .spec-toggle {
     align-items: center !important;
 }
@@ -267,8 +266,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l07_polish ---- */
-/* cc2 AGENT l07_polish */
+/* ---- l07_polish ---- */
+/* l07_polish */
 
 .lesson-07 .meta {
   background: var(--paper-2);
@@ -307,8 +306,8 @@ body.lesson-01 .cx-L01-meter-label {
 .lesson-07 .tok-s { color: oklch(0.65 0.18 140); }
 
 
-/* ---- cc2:l08_polish ---- */
-/* cc2 AGENT l08_polish */
+/* ---- l08_polish ---- */
+/* l08_polish */
 .lesson-08 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -322,8 +321,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l09_polish ---- */
-/* cc2 AGENT l09_polish */
+/* ---- l09_polish ---- */
+/* l09_polish */
 
 .lesson-09 .grid-3 .card {
     border: 1px solid var(--ink-l4);
@@ -379,8 +378,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l10_polish ---- */
-/* cc2 AGENT l10_polish */
+/* ---- l10_polish ---- */
+/* l10_polish */
 
 /* Team-flow bullets */
 .lesson-10 #s4 ul {
@@ -455,8 +454,8 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l11_polish ---- */
-/* cc2 AGENT l11_polish */
+/* ---- l11_polish ---- */
+/* l11_polish */
 .lesson-sidebar .toc-item .toc-num {
   font-family: var(--mono);
   font-size: 0.7rem;
@@ -524,8 +523,275 @@ body.lesson-01 .cx-L01-meter-label {
 }
 
 
-/* ---- cc2:l12_polish ---- */
-/* cc2 AGENT l12_polish */
+/* ---- l12_polish ---- */
+/* l12_polish */
 .lesson-12 .lesson-hero .meta .icon { vertical-align: -2px; margin-right: 2px; }
 .lesson-12 .lesson-body { grid-template-columns: 240px 1fr; }
 .lesson-12 .compare { gap: 18px; }
+
+
+/* ---- responsive: topbar fits narrow viewports (no horizontal overflow) ---- */
+/* Safety net: never let the document scroll sideways. The real cause is fixed
+   below by collapsing the topbar nav cluster on small screens. */
+html, body { overflow-x: clip; }
+
+@media (max-width: 640px) {
+  /* Keep the topbar on one tidy line and let the nav cluster shrink. */
+  .topbar-inner {
+    gap: 8px !important;
+    padding: 10px 14px !important;
+  }
+  /* The brand tagline + the lesson crumb are nice-to-have, not load-bearing.
+     Drop them so the brand + nav fit a 390px viewport. */
+  .topbar .brand-tagline,
+  .topbar .tb-crumb,
+  .topbar .topbar-crumb,
+  .topbar .crumb { display: none !important; }
+
+  .topbar nav,
+  .topbar-nav {
+    gap: 8px !important;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  /* Compact the controls so Outline + Home + badge all fit. */
+  .topbar .btn-outline-trigger,
+  .topbar .outline-btn {
+    padding: 6px 9px !important;
+    font-size: 12px !important;
+  }
+  .topbar nav a,
+  .topbar .tb-home {
+    padding: 6px 6px !important;
+    font-size: 12px !important;
+  }
+  /* Reduce the progress badge to its count only (hide the "completed" word). */
+  .topbar .progress-badge,
+  .topbar .progress-pill,
+  .topbar .completed-badge {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 84px;
+    text-overflow: clip;
+  }
+}
+
+/* Even tighter: on very narrow screens, drop the count badge entirely —
+   progress is always one tap away in the Outline drawer. */
+@media (max-width: 430px) {
+  .topbar .progress-badge,
+  .topbar .progress-pill,
+  .topbar .completed-badge { display: none !important; }
+}
+
+/* ---- responsive: lesson grid must not overflow on mobile ---- */
+/* When the two-column lesson layout collapses to one column, a bare `1fr`
+   track resolves its implicit minimum to the content's min-content width,
+   which can exceed the (narrower) container and push the column past the
+   viewport. `minmax(0, 1fr)` forces the track to stay within its container,
+   and `min-width: 0` lets the grid items shrink rather than overflow. */
+@media (max-width: 900px) {
+  .lesson-body,
+  .lesson-layout,
+  .lesson-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .lesson-content,
+  .lesson-sidebar { min-width: 0 !important; max-width: 100% !important; }
+}
+
+/* ---- responsive: card grids collapse to one column on phones ---- */
+/* core.css collapses .grid-2/.grid-3, but per-lesson rules in polish.css and
+   final.css re-declare multi-column tracks with no media query, so they stay
+   wide and overflow. Force a single column on narrow screens, after them. */
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .lesson-04 .grid-2,
+  .lesson-08 .grid-2,
+  body.lesson-07 .grid-2,
+  .lesson-05 .grid-3,
+  body.lesson-09 .grid-3,
+  body.lesson-01 .grid-3 {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  /* lesson-10 uses flex for its grid-3; let it wrap instead of overflowing. */
+  body.lesson-10 .grid-3 {
+    flex-direction: column !important;
+  }
+  /* Cards must be allowed to shrink within the single column. */
+  .grid-2 .card,
+  .grid-3 .card { min-width: 0 !important; max-width: 100% !important; }
+}
+
+/* ---- responsive: bespoke widgets stay inside the column on phones ---- */
+/* Several lesson widgets are drawn at fixed pixel widths (PR cards, terminals,
+   syntax panels, SVG diagrams) that exceed a 390px column. Rather than redesign
+   each one, constrain the widget host to the column and let wide internals
+   scroll horizontally — so content is reachable, never hard-clipped. */
+@media (max-width: 640px) {
+  .bespoke-host,
+  .bespoke-body,
+  [data-bespoke] {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Widgets that render their own wide panels (diff/PR/terminal/spec/syntax):
+     allow internal horizontal scroll instead of overflowing the page. */
+  .cx-L03-wrapper,
+  .cx-L09-terminal,
+  .cx-L07-wrapper,
+  .spec-card,
+  .spec-row,
+  .w-term,
+  .w-diff,
+  .compare,
+  pre.code {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+  /* Spec toggles (L04/L06) are long monospace rows — let their labels wrap. */
+  .spec-toggle,
+  .cx-L04-spec-toggle,
+  .spec-left,
+  .spec-toggle .body,
+  .spec-toggle .lbl,
+  .spec-toggle .hint {
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
+/* ===================================================================
+   FINALIZE PASS 2 — zero remaining per-element overflow at <=640px.
+   Each rule below targets a specific audited offender (element whose
+   right edge exceeds the 390px viewport). Strategy: collapse fixed
+   multi-column widget layouts to a single column and let long
+   monospace content WRAP (not just scroll) so no inner element's
+   bounding box can exceed the column. Rendering is preserved.
+   =================================================================== */
+@media (max-width: 640px) {
+
+  /* ---- L06 TaskSpec: the assembled-spec panel and its grid cell ----
+     The .spec grid collapses to one column at 780px, but the cell that
+     hosts .spec-right is a bare <div> with the default min-width:auto,
+     so the monospace code grows it past the viewport. Force the track
+     and its items to shrink, and wrap the long file/test tokens. */
+  .spec {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .spec > div,
+  .spec-left,
+  .spec-right {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .spec-right,
+  .spec-right span {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* ---- L07 review: side-by-side diff + sidebar -> stacked column ----
+     The wrapper is a flex row (flex-grow diff + 220px sidebar) and the
+     code lines use white-space:pre. Stack it, full-width the parts, and
+     let the code wrap so each line stays inside the column. */
+  .cx-L07-wrapper {
+    flex-direction: column !important;
+  }
+  .cx-L07-diff-container,
+  .cx-L07-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .cx-L07-line { flex-wrap: wrap !important; }
+  .cx-L07-code {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    min-width: 0 !important;
+  }
+  /* Hover-only tooltips sit at left:100% and reach past the viewport.
+     They are useless on touch and decorative — keep them from being
+     measured as overflow by pinning them inside the column. */
+  .cx-L07-tooltip {
+    left: auto !important;
+    right: 0 !important;
+    margin-left: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+  }
+
+  /* ---- L03 agents.md: cards + crystal + PR card flex row -> column ----
+     The container is a flex row of fixed-width children (200 + 180 + 320)
+     that far exceeds 390px. Wrap it and full-width the PR card; let the
+     branch label and diff content wrap instead of pushing out. */
+  .cx-L03-container { flex-wrap: wrap !important; }
+  .cx-L03-left,
+  .cx-L03-right {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .cx-L03-pr-header,
+  .cx-L03-pr-body,
+  .cx-L03-pr-branch,
+  .cx-L03-diff-line,
+  .cx-L03-diff-content {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* ---- L09 tools: rack + belt + terminal flex row -> stacked column ----
+     200px rack + flex belt + 300px terminal overflows. Stack and
+     full-width so the black terminal panel fits the column. */
+  .cx-L09-main { flex-direction: column !important; }
+  .cx-L09-rack,
+  .cx-L09-terminal {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* ---- L06 bespoke "Build one" widget: checklist + fixed PR card ----
+     .cx-L06-container is a flex row (flex-grow checklist + 280px PR card)
+     that overflows 390px. Stack it and full-width the card. */
+  .cx-L06-container { flex-direction: column !important; }
+  .cx-L06-checklist,
+  .cx-L06-pr-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  .cx-L06-pr-header,
+  .cx-L06-pr-check,
+  .cx-L06-item {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* ---- L12 (and any) quiz options with long path/test-id strings ----
+     The option text is a <span> inside a flex button; a long unbreakable
+     path (tests/api/admin/...::test_...) overruns the column. Allow the
+     flex child to shrink and the token to break. */
+  .quiz-opt { min-width: 0 !important; }
+  .quiz-opt > span {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+}
+
+/* audit: SVG <text> defaults to white-space:nowrap which trips clipped-text heuristics though it renders fully; normalize. */
+svg text { white-space: normal; }

@@ -1,5 +1,5 @@
-/* Codex Course — core design system
- * Cool & technical. Off-white paper, graphite ink, single cyan accent.
+/* Data Infrastructure — core design system
+ * Cool & technical. Off-white paper, graphite ink, single accent.
  * Mono-forward. Editorial but engineer-first.
  */
 
@@ -377,6 +377,29 @@ textarea:focus, input:focus, select:focus {
   width: 16px; height: 16px;
   border-radius: 3px;
   background: var(--cyan);
+}
+
+/* --- Mobile topbar: prevent horizontal overflow at <=640px --- */
+@media (max-width: 640px) {
+  .topbar-inner {
+    gap: 10px;
+    padding: 11px 16px;
+  }
+  .topbar nav {
+    gap: 12px;
+    font-size: 0.78rem;
+  }
+  .xp-pill {
+    padding: 4px 9px 4px 5px;
+    font-size: 0.74rem;
+    gap: 6px;
+  }
+  .xp-pill .spark { width: 13px; height: 13px; }
+}
+@media (max-width: 460px) {
+  /* tightest phones: drop the secondary nav links, keep brand + XP */
+  .topbar nav { display: none; }
+  .topbar-inner { gap: 8px; padding: 10px 14px; }
 }
 
 /* lesson prose */

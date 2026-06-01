@@ -29,8 +29,8 @@
 .sf-tools { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
 .sf-tools span { font-family: var(--mono); font-size: 0.66rem; padding: 1px 6px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--paper-2); color: var(--ink-3); }
 .sf-pulse { height: 2px; }
-.sf-controls { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
-.sf-counter { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; }
+.sf-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--rule); background: var(--paper); }
+.sf-counter { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin-left: auto; max-width: 100%; }
 .sf-counter b { color: var(--ink); font-weight: 600; }
 
 /* ============================================================
@@ -75,8 +75,13 @@
 .ps-sel { padding: 6px 10px; border: 1px solid var(--rule-2); border-radius: 6px; font-family: var(--mono); font-size: 0.8rem; background: var(--paper); }
 .ps-stat { display: grid; grid-template-columns: auto auto auto auto auto auto auto auto; gap: 6px 14px; font-family: var(--mono); font-size: 0.8rem; padding: 8px 14px; border-top: 1px dashed var(--rule); align-items: center; }
 .ps-stat span { color: var(--ink-3); font-size: 0.72rem; }
-.ps-stat b { color: var(--ink); font-weight: 600; }
+.ps-stat b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
 .ps-stat span { color: var(--ink-3); font-size: 0.74rem; }
+/* On narrow screens the 8-column stat row can't fit — collapse to label/value
+   pairs that stack vertically instead of pushing the last pair off-screen. */
+@media (max-width: 560px) {
+  .ps-stat { grid-template-columns: auto 1fr; }
+}
 
 /* ============================================================
  * 5. KAFKA TOPIC — canvas-driven

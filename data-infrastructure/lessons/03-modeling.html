@@ -83,6 +83,8 @@
       radial-gradient(ellipse 80% 70% at 50% 50%, var(--m3-paper), oklch(0.95 0.008 80));
     aspect-ratio: 760 / 540;
     overflow: hidden;
+    min-width: 0;
+    max-width: 100%;
   }
   .m3-ss-svg { width: 100%; height: 100%; display: block; }
 
@@ -141,7 +143,7 @@
   .ss-table.hot { filter: drop-shadow(0 4px 12px oklch(0.55 0.18 25 / 0.18)); }
 
   /* side: SQL + note */
-  .m3-ss-side { display: flex; flex-direction: column; gap: 14px; }
+  .m3-ss-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .m3-ss-sql {
     font-family: var(--mono); font-size: 0.8rem;
     background: oklch(0.18 0.02 250); color: oklch(0.92 0.01 250);
@@ -149,6 +151,7 @@
     line-height: 1.55; overflow-x: auto;
     white-space: pre;
     border: 1px solid oklch(0.25 0.02 250);
+    min-width: 0; max-width: 100%;
   }
   .m3-ss-sql .kw  { color: oklch(0.78 0.14 60); font-weight: 600; }
   .m3-ss-sql .agg { color: oklch(0.75 0.16 145); font-weight: 600; }

@@ -282,3 +282,16 @@ input[type="range"]::-moz-range-thumb {
 .ab-power-note .mono {
   font-family: var(--font-mono); color: var(--ink-1); font-weight: 600;
 }
+
+/* ===== Responsive: phone (placed last so it wins the cascade) ========== */
+@media (max-width: 720px) {
+  /* 6-stage loop strip collapses; drop the connector arrows */
+  .loop-mini { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .loop-mini-stage:not(:last-child)::after { content: none; }
+  .two-col { grid-template-columns: 1fr; }
+  .cm-grid { max-width: 100%; }
+  .sim-row.galton-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 460px) {
+  .loop-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -40,7 +40,8 @@
 
     document.addEventListener('cc:xp', (ev) => {
       const c = document.getElementById('xp-count');
-      if (c) c.textContent = ev.detail.total;
+      const total = ev.detail && ev.detail.total;
+      if (c && total != null) c.textContent = total;
     });
   }
   window.mountTopbar = mountTopbar;

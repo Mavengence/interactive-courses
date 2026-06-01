@@ -50,6 +50,7 @@
 
     <section id="s3">
       <h2>The four quality test families</h2>
+      <div class="table-scroll">
       <table style="width:100%; border-collapse: collapse; margin-top: 12px; font-family: var(--mono); font-size: 0.84rem;">
         <thead>
           <tr style="border-bottom: 1px solid var(--rule); text-align: left;">
@@ -63,6 +64,7 @@
           <tr><td style="padding:8px; color:var(--cyan-deep);">Reconciliation</td><td style="padding:8px;">downstream sum ≠ upstream sum, FK joins lose rows</td><td style="padding:8px; color:var(--bad);">High — runs full joins</td></tr>
         </tbody>
       </table>
+      </div>
       <div class="prose"><p>Run all four. Schema and constraint tests on every model, every run — they're cheap. Anomaly tests on the high-value tables — they catch the silent bugs. Reconciliation tests for the metrics your CFO looks at — expensive but the only thing that proves correctness end-to-end.</p></div>
     </section>
 

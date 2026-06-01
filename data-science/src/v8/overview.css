@@ -271,3 +271,20 @@
 }
 .ov-cta-sub em { color: var(--ink-1); font-style: italic; }
 .ov-cta-row { display: flex; align-items: center; gap: 22px; }
+
+/* ===== Responsive: tablet / phone ====================================== */
+@media (max-width: 860px) {
+  .ov-outcomes  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ov-curriculum { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ov-tools     { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ov-hero-stats { gap: 28px; flex-wrap: wrap; }
+  .ov-cta-band  { padding: 36px 24px; }
+  .ov-cta-title { font-size: clamp(28px, 7vw, 42px); }
+}
+@media (max-width: 520px) {
+  .ov-outcomes  { grid-template-columns: 1fr; }
+  .ov-curriculum { grid-template-columns: 1fr; }
+  .ov-outcome   { padding: 22px 20px 24px; }
+  .ov-hero      { padding: 36px 0 44px; }
+  .ov-cta-row   { flex-wrap: wrap; gap: 14px; }
+}

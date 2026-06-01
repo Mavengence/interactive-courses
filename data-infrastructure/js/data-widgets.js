@@ -1,6 +1,29 @@
 // Data Infrastructure widgets — simulations, animations, drills.
 // Mounts into a target element. Reports checkpoints to Progress for XP.
 (function () {
+  // Respect prefers-reduced-motion: when set, animation loops render a single
+  // static frame instead of running an unbounded requestAnimationFrame loop.
+  const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // RAF: drop-in for requestAnimationFrame used by the self-rescheduling loops.
+  // - prefers-reduced-motion: re-schedule at a slow ~4fps cadence instead of
+  //   60fps. The canvases stop visibly animating (idle frames look static) and
+  //   still repaint correctly after a resize, while CPU/battery cost drops ~94%.
+  // - hidden tab: pause entirely until the tab is visible again, so background
+  //   tabs don't burn CPU repainting offscreen canvases.
+  function RAF(fn) {
+    if (document.hidden) {
+      document.addEventListener('visibilitychange', function once() {
+        document.removeEventListener('visibilitychange', once);
+        RAF(fn);
+      });
+      return 0;
+    }
+    if (REDUCED_MOTION) {
+      return setTimeout(() => requestAnimationFrame(fn), 250);
+    }
+    return requestAnimationFrame(fn);
+  }
+
   const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $ = (sel, ctx=document) => ctx.querySelector(sel);
   const E = (tag, attrs={}, html='') => { const el = document.createElement(tag); for (const k in attrs) el.setAttribute(k, attrs[k]); el.innerHTML = html; return el; };
@@ -28,7 +51,7 @@
     el.innerHTML = head('Sim', 'The stack, in motion', 20, earned) + `
       <div class="sf-frame">
         <div class="sf-canvas-wrap">
-          <canvas class="sf-canvas" width="1200" height="520"></canvas>
+          <canvas class="sf-canvas" width="1200" height="520" role="img" aria-label="Animated diagram of an event flowing top-to-bottom through the data stack: source, log, process, store, serve, consume."></canvas>
           <div class="sf-overlay" id="sf-overlay"></div>
         </div>
         <div class="sf-controls">
@@ -176,9 +199,9 @@
       const cutoff = now - 2000;
       ticks = ticks.filter(t => t > cutoff);
       counters.tps.textContent = (ticks.length / 2).toFixed(1);
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     // resize canvas to wrap
     function resize() {
@@ -209,7 +232,7 @@
     el.innerHTML = head('Sim', 'CAP — pick the partition you accept', 20, earned) + `
       <div class="capx-frame">
         <div class="capx-canvas-wrap">
-          <canvas class="capx-canvas" width="1400" height="600"></canvas>
+          <canvas class="capx-canvas" width="1400" height="600" role="img" aria-label="Interactive CAP theorem triangle showing the trade-off between consistency, availability, and partition tolerance."></canvas>
         </div>
         <div class="capx-controls">
           <button class="btn sm" data-act="CP">CP — consistent + partition-tolerant</button>
@@ -414,9 +437,9 @@
         return !(pt.returning && pt.t >= 1);
       });
 
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function setPick(p){
       pick = p; picks++;
@@ -461,7 +484,7 @@
     el.innerHTML = head('Sim', "SELECT SUM(amount) WHERE country='US' — row vs column", 20, earned) + `
       <div class="rc-frame">
         <div class="rc-canvas-wrap">
-          <canvas class="rc-canvas" width="1400" height="540"></canvas>
+          <canvas class="rc-canvas" width="1400" height="540" role="img" aria-label="Diagram comparing row-oriented and column-oriented storage layouts and which columns a query reads."></canvas>
         </div>
         <div class="rc-controls">
           <button class="btn primary sm" data-act="run">▶ run query</button>
@@ -659,9 +682,9 @@
         ctx.fillStyle = 'oklch(0.62 0.14 155)'; ctx.font = '600 47px JetBrains Mono';
         ctx.fillText('SUM →', cvs.width - 130, 50);
       }
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
     function resize(){
       const wrap = el.querySelector('.rc-canvas-wrap');
       const r = wrap.getBoundingClientRect();
@@ -685,12 +708,12 @@
     el.innerHTML = head('Sim', 'Partition the orders table — pick a key', 20, earned) + `
       <div class="ps-frame">
         <div class="ps-canvas-wrap">
-          <canvas class="ps-canvas" width="1400" height="500"></canvas>
+          <canvas class="ps-canvas" width="1400" height="500" role="img" aria-label="Visualization of how a partitioning strategy prunes data files scanned for a query."></canvas>
         </div>
         <div class="ps-controls">
           <code class="ps-q">SELECT * FROM orders WHERE order_date = '2026-04-15'</code>
           <span class="ps-spacer"></span>
-          <select class="ps-sel" data-sel>
+          <select class="ps-sel" data-sel aria-label="Partition strategy">
             <option value="none">— no partition (full scan)</option>
             <option value="date" selected>order_date (daily)</option>
             <option value="user">user_id (hash 24)</option>
@@ -874,9 +897,9 @@
       ctx.fillStyle = 'rgba(91,138,143,0.6)';
       ctx.font = '47px JetBrains Mono';
       ctx.fillText('query', 44, 36);
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
     function resize(){
       const wrap = el.querySelector('.ps-canvas-wrap');
       const r = wrap.getBoundingClientRect();
@@ -901,7 +924,7 @@
     el.innerHTML = head('Sim', 'Kafka topic · 4 partitions · 3 consumers', 20, earned) + `
       <div class="kt-frame">
         <div class="kt-canvas-wrap">
-          <canvas class="kt-canvas" width="1200" height="520"></canvas>
+          <canvas class="kt-canvas" width="1200" height="520" role="img" aria-label="Animated Kafka topic showing messages routed by key into ordered, partitioned logs consumed by consumer groups."></canvas>
           <div class="kt-overlay">
             <div class="kt-band kt-band-prod">
               <span class="kt-lbl">producer</span>
@@ -1137,9 +1160,9 @@
         rebalanceFlash *= 0.93;
       }
 
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function resize(){
       const wrap = el.querySelector('.kt-canvas-wrap');
@@ -1180,7 +1203,7 @@
     el.innerHTML = head('Sim', 'Event time vs processing time · watermark', 20, earned) + `
       <div class="wm-frame">
         <div class="wm-canvas-wrap">
-          <canvas class="wm-canvas" width="1400" height="520"></canvas>
+          <canvas class="wm-canvas" width="1400" height="520" role="img" aria-label="Stream-processing watermark visualization showing event time versus processing time and which late events are dropped."></canvas>
         </div>
         <div class="wm-controls">
           <button class="btn primary sm" data-act="run">▶ run stream</button>
@@ -1387,9 +1410,9 @@
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
       });
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function resize(){
       const wrap = el.querySelector('.wm-canvas-wrap');
@@ -1424,7 +1447,7 @@
     el.innerHTML = head('Sim', 'Iceberg snapshots · git-style time travel', 20, earned) + `
       <div class="st-frame">
         <div class="st-canvas-wrap">
-          <canvas class="st-canvas" width="1400" height="320"></canvas>
+          <canvas class="st-canvas" width="1400" height="320" role="img" aria-label="Lakehouse snapshot timeline; selecting a snapshot shows the table state at that point in time."></canvas>
         </div>
         <div class="st-state-grid">
           <div class="st-cur" id="st-cur"></div>
@@ -1594,9 +1617,9 @@
         ctx.shadowBlur = 0;
         if (t >= 1) { rollbackAnim = null; cur = par; redraw(); }
       }
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function pickAt(mx, my){
       for (let i=0;i<snaps.length;i++){
@@ -1656,7 +1679,7 @@
     el.innerHTML = head('Sim', 'Bloom filter — fast "definitely no" checks', 18, earned) + `
       <div class="bfx-frame">
         <div class="bfx-canvas-wrap">
-          <canvas class="bfx-canvas" width="1400" height="440"></canvas>
+          <canvas class="bfx-canvas" width="1400" height="440" role="img" aria-label="Bloom filter visualization showing how membership tests can return false positives but never false negatives."></canvas>
         </div>
         <div class="bfx-controls">
           <input class="bfx-in" placeholder="key to add…" data-add value="user_42"/>
@@ -1825,9 +1848,9 @@
       const fpr = Math.pow(setCount/N, K);
       counters.fpr.textContent = (fpr*100).toFixed(1)+'%';
 
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function fire(key, kind){
       const hs = hashes(key);
@@ -2238,7 +2261,7 @@
     el.innerHTML = head('Sim', 'Pipeline observability · NOC dashboard', 20, earned) + `
       <div class="slax-frame">
         <div class="slax-canvas-wrap">
-          <canvas class="slax-canvas" width="1400" height="540"></canvas>
+          <canvas class="slax-canvas" width="1400" height="540" role="img" aria-label="SLA dashboard showing pipeline freshness against its service-level objective and error budget."></canvas>
         </div>
         <div class="slax-feed" id="sla-feed"></div>
         <div class="slax-controls">
@@ -2387,9 +2410,9 @@
           ctx.fillText('● OK', r.x+r.w-50, r.y+r.h-14);
         }
       });
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function tick(){
       t++;
@@ -2460,7 +2483,7 @@
     el.innerHTML = head('Walkthrough', 'IC5 design · step through the moves', 25, earned) + `
       <div class="ivx-frame">
         <div class="ivx-canvas-wrap">
-          <canvas class="ivx-canvas" width="1400" height="180"></canvas>
+          <canvas class="ivx-canvas" width="1400" height="180" role="img" aria-label="Interview-replay progress track showing the current move in a system-design walkthrough."></canvas>
         </div>
         <div class="ivx-stage" id="iv-stage"></div>
         <div class="ivx-controls">
@@ -2618,9 +2641,9 @@
         return true;
       });
 
-      requestAnimationFrame(loop);
+      RAF(loop);
     }
-    requestAnimationFrame(loop);
+    loop();
 
     function pickAt(mx, my){
       for (let i=0;i<moves.length;i++){

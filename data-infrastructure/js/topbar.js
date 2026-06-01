@@ -13,7 +13,7 @@
     el.className = 'topbar';
     el.innerHTML = `
       <div class="topbar-inner">
-        <a class="brand" href="${pathPrefix}index.html" aria-label="Codex Course — home">
+        <a class="brand" href="${pathPrefix}index.html" aria-label="data INFRA — home">
           <span class="mark" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 22 22">
               <polyline class="mk-caret" points="6,6 12,11 6,16"/>

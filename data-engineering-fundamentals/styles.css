@@ -8,9 +8,16 @@
   --mo: 1;
   --accent: var(--theme-blue);
   --accent-soft: #E7F3FF;
-  --grid-opacity: 1;
+  /* Weak accent wash — tracks --accent so it retints with the active theme. */
+  --accent-weak: color-mix(in oklab, var(--accent) 12%, var(--theme-white));
   --radius-panel: 14px;
   --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Surface + text aliases used across simulators (previously undefined). */
+  --bg-1:      var(--theme-white);     /* control chips / pills / inset cards */
+  --bg-2:      var(--theme-gray-50);   /* subtle inset panels, readouts */
+  --font-sans: var(--font-body);       /* sans alias for sim labels */
+  --ink-faint: var(--fg-3);            /* faintest text (line numbers, hints) */
 }
 .reduce-motion { --mo: 0; }
 .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
@@ -527,7 +534,7 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
   .sb { position: relative; height: auto; padding: 14px; }
-  .fmt-strip, .eng-cards { grid-template-columns: 1fr; }
+  .fmt-strip, .eng-cards, .cards-3, .cards-2 { grid-template-columns: 1fr; }
   .lh-diagram { grid-template-columns: 1fr; }
   .lh-arrow { writing-mode: horizontal-tb; transform: none; padding: 10px; }
   .sc-disk { grid-template-columns: 1fr; }
@@ -3281,37 +3288,58 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
   [data-density="compact"] .content { padding: 22px 16px 56px; }
 }
 
-/* --- App shell: collapse sidebar to a horizontal nav on narrow ---------
-   The sidebar is a 256px sticky column. Below 900px it crowds the main
-   content. Hide it cleanly so the course remains readable on tablets. */
+/* --- App shell: collapse sidebar to a wrapping chapter grid on narrow ---
+   The sidebar is a 256px sticky column. Below 900px it stacks on top of the
+   main content. Instead of a single off-screen scroll row (where chapters
+   01–10 hid to the right with no affordance), wrap every chapter into a
+   responsive grid so all 12 are visible and tappable at a glance. */
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
   .sb {
     position: relative; height: auto;
     border-right: none;
     border-bottom: 1px solid var(--theme-gray-200);
+    overflow: visible;
   }
   .sb-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 4px;
-    padding-bottom: 4px;
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    gap: 6px;
+    overflow: visible;
+    min-height: 0;
   }
   .sb-item {
-    flex: 0 0 auto;
-    grid-template-columns: 28px auto auto;
-    padding: 6px 10px;
+    grid-template-columns: 24px 1fr;
+    gap: 8px;
+    padding: 9px 10px;
+    min-height: 44px;
+    border: 1px solid var(--theme-gray-200);
+    background: var(--theme-white);
+  }
+  .sb-item.active {
+    border-color: color-mix(in oklab, var(--ch-hex) 45%, var(--theme-gray-200));
   }
   .sb-item::before { display: none; }
-  .sb-text { white-space: nowrap; }
+  .sb-text { min-width: 0; white-space: normal; }
+  .sb-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
+  }
+  /* The per-item time label is redundant in the compact grid; hide it. */
+  .sb-time { display: none; }
+}
+
+/* Very narrow phones: two columns, slightly tighter. */
+@media (max-width: 420px) {
+  .sb-nav { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ==========================================================================
    v8 polish & elevation — locks remaining surfaces, applies pro motion,
    strengthens accessibility. Append-only; overrides earlier rules where
-   needed.  Reference plan: ~/.claude/plans/unfortunately-still-not-some-
-   synthetic-avalanche.md
+   needed.
    ========================================================================== */
 
 :root {
@@ -3786,6 +3814,10 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 }
 @media (max-width: 520px) {
   .lp-break-code { font-size: 10px; }
+  /* Consumer head can stack on narrow screens so the source table name
+     (e.g. analytics.conversion_7d) shows in full instead of truncating. */
+  .lp-consumer-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .lp-consumer-src { max-width: 100%; }
 }
 
 /* Break header: title shouldn't push the pill off-screen */
@@ -5119,4 +5151,97 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
   display: flex;
   gap: 8px;
   margin-top: 4px;
+}
+
+/* ==========================================================================
+   Tweaks wiring — accent picker + code theme (Tweaks panel, key `t`)
+   Makes the live theming controls in TweaksPanel actually retheme the UI.
+   --accent drives 46 rules; --accent-weak/-soft are derived so washes track.
+   ========================================================================== */
+
+/* Accent swatches — values mirror the ACCENTS table in App.jsx. */
+:root[data-accent="blue"]   { --accent: #2D7DFF; }
+:root[data-accent="cyan"]   { --accent: #22D3EE; }
+:root[data-accent="violet"] { --accent: #7C5CFF; }
+:root[data-accent="green"]  { --accent: #4ADE80; }
+:root[data-accent="amber"]  { --accent: #FFB454; }
+
+/* Keep the soft/weak washes in sync with whichever accent is active. */
+:root[data-accent] {
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, var(--theme-white));
+  --accent-weak: color-mix(in oklab, var(--accent) 12%, var(--theme-white));
+}
+
+/* Code theme — "mono" flattens syntax highlighting to a single ink tone,
+   keeping comments faint and italic for legibility. "color" is the default. */
+:root[data-code-theme="mono"] .code-body .tok-k,
+:root[data-code-theme="mono"] .code-body .tok-s,
+:root[data-code-theme="mono"] .code-body .tok-n,
+:root[data-code-theme="mono"] .code-body .tok-f,
+:root[data-code-theme="mono"] .code-body .tok-t,
+:root[data-code-theme="mono"] .tok-k,
+:root[data-code-theme="mono"] .tok-s,
+:root[data-code-theme="mono"] .tok-n,
+:root[data-code-theme="mono"] .tok-f,
+:root[data-code-theme="mono"] .tok-t {
+  color: #E8EAED;
+  font-weight: 500;
+}
+:root[data-code-theme="mono"] .code-body .tok-c,
+:root[data-code-theme="mono"] .tok-c {
+  color: #5A6E8F;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Mobile: Overview pipeline — wrap the 10 stops instead of squeezing them
+   into a 10-column row (where single long words like "Streaming" /
+   "Orchestrate" clipped at ~35px columns). Drops the connecting SVG track,
+   which only reads as a single horizontal line, and relaxes the fixed card
+   height so wrapped titles stay fully visible.
+   ========================================================================== */
+@media (max-width: 720px) {
+  .ov-pipe-stops {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: auto;
+    gap: 6px;
+  }
+  .ov-pipe-svg { display: none; }
+  .ov-stop {
+    height: auto;
+    min-height: 116px;
+    padding: 12px 8px;
+  }
+  .ov-stop-title { height: auto; }
+  .ov-stop-tag { height: auto; }
+  .ov2-flow .ov-pipe { padding: 16px 12px 12px; }
+}
+@media (max-width: 440px) {
+  .ov-pipe-stops { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ==========================================================================
+   Mobile content overflow guards — pre-existing narrow-viewport offenders.
+   Panel headers and inline SQL/code blocks were forcing horizontal scroll
+   on phones; allow the header to wrap and the code to soft-wrap at <=560px.
+   ========================================================================== */
+@media (max-width: 560px) {
+  .panel-head { flex-wrap: wrap; }
+  .panel-meta {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+  /* Inline SQL preview (Ch7 Serve): wrap instead of overflowing the card. */
+  .aa-yaml {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  /* Long inline identifiers (e.g. table names) must break, not overflow. */
+  .ccard-d,
+  .ccard-d code,
+  p code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
 }
