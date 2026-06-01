@@ -4,10 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interactive Courses · timloehr.me</title>
-  <meta name="description" content="Four interactive, zero-signup courses on data engineering, data science, infrastructure, and AI-assisted development" />
+  <meta name="description" content="Six interactive, zero-signup courses on the modern data and AI stack: data engineering, data science, data infrastructure, plus AI-assisted development with Codex, Claude, and the AI-Native operating model. Open and learn — no install, no backend." />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://www.timloehr.me/interactive-courses/" />
+
+  <!-- Open Graph -->
   <meta property="og:title" content="Interactive Courses · timloehr.me" />
-  <meta property="og:description" content="Four interactive, zero-signup courses on data engineering, data science, infrastructure, and AI-assisted development" />
+  <meta property="og:description" content="Six interactive, zero-signup courses on the modern data and AI stack: data engineering, data science, data infrastructure, plus AI-assisted development with Codex, Claude, and the AI-Native operating model." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.timloehr.me/interactive-courses/" />
+  <meta property="og:image" content="https://www.timloehr.me/interactive-courses/docs/screenshots/social-preview.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Interactive Courses · timloehr.me" />
+  <meta name="twitter:description" content="Six interactive, zero-signup courses on the modern data and AI stack: data engineering, data science, data infrastructure, plus AI-assisted development with Codex, Claude, and the AI-Native operating model." />
+  <meta name="twitter:image" content="https://www.timloehr.me/interactive-courses/docs/screenshots/social-preview.jpg" />
+
+  <!-- Inline SVG favicon (rounded-square mark, no external file) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0d14'/%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='none' stroke='%237c6fff' stroke-width='1.5' opacity='0.5'/%3E%3Cpath d='M10 21V11l6 7 6-7v10' fill='none' stroke='%2338bdf8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -254,6 +273,8 @@
     .card-2 { --card-gradient: linear-gradient(90deg, #38bdf8, #34d399); --card-glow: var(--glow-2); }
     .card-3 { --card-gradient: linear-gradient(90deg, #34d399, #fbbf24); --card-glow: var(--glow-3); }
     .card-4 { --card-gradient: linear-gradient(90deg, #f472b6, #fb923c); --card-glow: var(--glow-4); }
+    .card-5 { --card-gradient: linear-gradient(90deg, #fb923c, #fbbf24); --card-glow: rgba(251,146,60,0.15); }
+    .card-6 { --card-gradient: linear-gradient(90deg, #7c6fff, #f472b6); --card-glow: rgba(124,111,255,0.16); }
 
     .card-icon {
       width: 44px; height: 44px;
@@ -267,6 +288,8 @@
     .card-2 .card-icon { background: rgba(56,189,248,0.12); }
     .card-3 .card-icon { background: rgba(52,211,153,0.12); }
     .card-4 .card-icon { background: rgba(244,114,182,0.12); }
+    .card-5 .card-icon { background: rgba(251,146,60,0.12); }
+    .card-6 .card-icon { background: rgba(124,111,255,0.12); }
 
     .card-number {
       font-family: var(--mono);
@@ -348,6 +371,8 @@
     .card-2:hover .card-cta { color: #7dd3fc; }
     .card-3:hover .card-cta { color: #6ee7b7; }
     .card-4:hover .card-cta { color: #f9a8d4; }
+    .card-5:hover .card-cta { color: #fdba74; }
+    .card-6:hover .card-cta { color: #c4bbff; }
 
     /* ─── Footer ─── */
     footer {
@@ -385,7 +410,9 @@
     .card:nth-child(2) { animation: fadeUp 0.6s 0.18s ease both; }
     .card:nth-child(3) { animation: fadeUp 0.6s 0.26s ease both; }
     .card:nth-child(4) { animation: fadeUp 0.6s 0.34s ease both; }
-    footer { animation: fadeUp 0.6s 0.42s ease both; }
+    .card:nth-child(5) { animation: fadeUp 0.6s 0.42s ease both; }
+    .card:nth-child(6) { animation: fadeUp 0.6s 0.5s ease both; }
+    footer { animation: fadeUp 0.6s 0.58s ease both; }
   </style>
 </head>
 <body>
@@ -403,13 +430,13 @@
       </div>
       <h1>Interactive Courses</h1>
       <p class="header-sub">
-        Four hands-on courses covering the modern data and AI stack.
+        Six hands-on courses covering the modern data and AI stack.
         Zero signup, zero build step — just open and learn.
       </p>
       <div class="header-meta">
         <span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          4 courses
+          6 courses
         </span>
         <span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -506,26 +533,78 @@
           </span>
         </a>
 
-        <!-- Card 4: AI Coding -->
+        <!-- Card 4: Codex Course -->
         <a
           href="./codex/"
           class="card card-4"
           role="listitem"
-          aria-label="AI Coding with Claude — Start course"
+          aria-label="Codex Course — Start course"
         >
           <div class="card-icon" aria-hidden="true">🤖</div>
           <div class="card-number">Course 04</div>
-          <h2 class="card-title">AI Coding with Claude</h2>
+          <h2 class="card-title">Codex Course</h2>
           <p class="card-subtitle">
-            Ship production software faster with AI-assisted development. Learn prompt engineering
-            for code, agentic workflows, and how to maintain quality while moving at speed.
+            A terminal-first playbook for the OpenAI coding agent. Build the mental model,
+            master sandboxing, AGENTS.md, task specs, and review loops to ship real engineering work.
+          </p>
+          <div class="tags" aria-label="Technologies covered">
+            <span class="tag">Codex</span>
+            <span class="tag">OpenAI</span>
+            <span class="tag">AGENTS.md</span>
+            <span class="tag">Sandboxing</span>
+            <span class="tag">Pull Requests</span>
+          </div>
+          <span class="card-cta">
+            Start course <span class="arrow" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Card 5: Claude Course -->
+        <a
+          href="./claude/"
+          class="card card-5"
+          role="listitem"
+          aria-label="Claude Course — Start course"
+        >
+          <div class="card-icon" aria-hidden="true">✨</div>
+          <div class="card-number">Course 05</div>
+          <h2 class="card-title">Claude Course</h2>
+          <p class="card-subtitle">
+            Prompt like you mean it. The habits that separate people who love Claude from those who
+            bounce off it — prompt anatomy, context engineering, CLAUDE.md, agents, evals, and safety.
           </p>
           <div class="tags" aria-label="Technologies covered">
             <span class="tag">Claude</span>
             <span class="tag">Claude Code</span>
             <span class="tag">MCP</span>
-            <span class="tag">Agents</span>
+            <span class="tag">Prompting</span>
             <span class="tag">Evals</span>
+          </div>
+          <span class="card-cta">
+            Start course <span class="arrow" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- Card 6: The AI-Native Operator -->
+        <a
+          href="./ai-native/"
+          class="card card-6"
+          role="listitem"
+          aria-label="The AI-Native Operator — Start course"
+        >
+          <div class="card-icon" aria-hidden="true">🧭</div>
+          <div class="card-number">Course 06</div>
+          <h2 class="card-title">The AI-Native Operator</h2>
+          <p class="card-subtitle">
+            An operating model for working AI-native: the mindset, engineering practice, and org
+            design for shipping with AI agents — across nine modules of interactive exercises and quizzes.
+          </p>
+          <div class="tags" aria-label="Technologies covered">
+            <span class="tag">Agents</span>
+            <span class="tag">Workflows</span>
+            <span class="tag">Orchestration</span>
+            <span class="tag">Evals</span>
+            <span class="tag">Org Design</span>
           </div>
           <span class="card-cta">
             Start course <span class="arrow" aria-hidden="true">→</span>
