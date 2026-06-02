@@ -29,7 +29,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="./docs/screenshots/data-engineering-fundamentals.jpg" />
 
   <style>
     /* ─── Reset & Base ─── */
@@ -40,10 +41,10 @@
       --bg-card:     #13131f;
       --bg-card-hov: #181828;
       --border:      rgba(255,255,255,0.07);
-      --border-hov:  rgba(255,255,255,0.14);
+      --border-hov:  rgba(255,255,255,0.16);
       --text:        #e8e8f0;
-      --text-muted:  #6b6b8a;
-      --text-dim:    #9999b8;
+      --text-muted:  #8e8eac;   /* AA on card bg */
+      --text-dim:    #b4b4d2;
       --accent-1:    #7c6fff;   /* violet  */
       --accent-2:    #38bdf8;   /* sky     */
       --accent-3:    #34d399;   /* emerald */
@@ -52,7 +53,7 @@
       --glow-2:      rgba(56,189,248,0.15);
       --glow-3:      rgba(52,211,153,0.15);
       --glow-4:      rgba(244,114,182,0.15);
-      --radius:      16px;
+      --radius:      18px;
       --mono:        'JetBrains Mono', monospace;
       --sans:        'Inter', system-ui, sans-serif;
     }
@@ -66,6 +67,7 @@
       min-height: 100vh;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     /* ─── Noise texture overlay ─── */
@@ -80,551 +82,342 @@
     }
 
     /* ─── Ambient background blobs ─── */
-    .bg-blobs {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .bg-blobs span {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.25;
-    }
-    .bg-blobs span:nth-child(1) {
-      width: 600px; height: 600px;
-      background: var(--accent-1);
-      top: -200px; left: -150px;
-      animation: drift 18s ease-in-out infinite alternate;
-    }
-    .bg-blobs span:nth-child(2) {
-      width: 500px; height: 500px;
-      background: var(--accent-2);
-      top: 30%; right: -180px;
-      animation: drift 22s ease-in-out infinite alternate-reverse;
-    }
-    .bg-blobs span:nth-child(3) {
-      width: 400px; height: 400px;
-      background: var(--accent-3);
-      bottom: -100px; left: 25%;
-      animation: drift 26s ease-in-out infinite alternate;
-    }
-    @keyframes drift {
-      from { transform: translate(0, 0) scale(1); }
-      to   { transform: translate(30px, 20px) scale(1.08); }
-    }
+    .bg-blobs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-blobs span { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; }
+    .bg-blobs span:nth-child(1) { width: 600px; height: 600px; background: var(--accent-1); top: -200px; left: -150px; animation: drift 18s ease-in-out infinite alternate; }
+    .bg-blobs span:nth-child(2) { width: 500px; height: 500px; background: var(--accent-2); top: 30%; right: -180px; animation: drift 22s ease-in-out infinite alternate-reverse; }
+    .bg-blobs span:nth-child(3) { width: 400px; height: 400px; background: var(--accent-3); bottom: -100px; left: 25%; animation: drift 26s ease-in-out infinite alternate; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
 
     /* ─── Layout ─── */
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 24px 80px;
-    }
+    .page { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 24px 80px; }
 
     /* ─── Header ─── */
-    header {
-      padding: 64px 0 56px;
-      text-align: center;
-    }
+    header { padding: 72px 0 40px; text-align: center; }
 
     .header-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 6px 14px;
-      margin-bottom: 28px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 100px; padding: 6px 14px; margin-bottom: 28px;
     }
-    .header-eyebrow .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent-3);
-      box-shadow: 0 0 8px var(--accent-3);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.85); }
-    }
+    .header-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 8px var(--accent-3); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
 
     h1 {
-      font-size: clamp(2rem, 5vw, 3.25rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 18px;
+      font-size: clamp(2.1rem, 5.5vw, 3.5rem); font-weight: 800; letter-spacing: -0.035em;
+      line-height: 1.1; margin-bottom: 20px;
       background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.55));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    h1 .grad {
+      background: linear-gradient(115deg, var(--accent-1), var(--accent-2) 60%, var(--accent-3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
-    .header-sub {
-      font-size: 1.05rem;
-      color: var(--text-dim);
-      max-width: 560px;
-      margin: 0 auto 0;
-      font-weight: 400;
-      line-height: 1.7;
+    .header-sub { font-size: 1.08rem; color: var(--text-dim); max-width: 600px; margin: 0 auto; font-weight: 400; line-height: 1.7; }
+
+    /* ─── Stats strip ─── */
+    .stats {
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch;
+      gap: 0; margin: 36px auto 0; max-width: 660px;
+      border: 1px solid var(--border); border-radius: 16px;
+      background: rgba(255,255,255,0.02); overflow: hidden;
+    }
+    .stat { flex: 1 1 0; min-width: 120px; padding: 18px 14px; text-align: center; position: relative; }
+    .stat + .stat { border-left: 1px solid var(--border); }
+    .stat-num {
+      display: block; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+      background: linear-gradient(135deg, #fff, var(--text-dim));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-label { display: block; margin-top: 6px; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    @media (max-width: 560px) {
+      .stat { flex-basis: 50%; min-width: 0; }
+      .stat:nth-child(3), .stat:nth-child(4) { border-top: 1px solid var(--border); }
+      .stat:nth-child(3) { border-left: none; }
     }
 
-    .header-meta {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      margin-top: 28px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-family: var(--mono);
-    }
-    .header-meta span {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .header-meta { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 26px; font-size: 0.8rem; color: var(--text-muted); font-family: var(--mono); flex-wrap: wrap; }
+    .header-meta span { display: flex; align-items: center; gap: 6px; }
 
-    /* ─── Divider ─── */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-      margin-bottom: 52px;
+    /* ─── Section label ─── */
+    .section-label {
+      display: flex; align-items: center; gap: 16px; margin: 56px 0 26px;
+      font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted);
     }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
 
     /* ─── Grid ─── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-    @media (max-width: 680px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
 
     /* ─── Card ─── */
     .card {
-      position: relative;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      text-decoration: none;
-      color: inherit;
-      overflow: hidden;
-      transition:
-        transform 0.25s cubic-bezier(.2,.8,.2,1),
-        border-color 0.25s ease,
-        background 0.25s ease,
-        box-shadow 0.25s ease;
-      cursor: pointer;
+      position: relative; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); display: flex; flex-direction: column;
+      text-decoration: none; color: inherit; overflow: hidden;
+      transition: transform .28s cubic-bezier(.2,.8,.2,1), border-color .28s ease, background .28s ease, box-shadow .28s ease;
     }
+    .card::after { content: ''; position: absolute; inset: -1px; border-radius: var(--radius); background: var(--card-glow, var(--glow-1)); opacity: 0; z-index: -1; transition: opacity .3s ease; filter: blur(22px); }
+    .card:hover { transform: translateY(-5px); border-color: var(--border-hov); background: var(--bg-card-hov); box-shadow: 0 28px 64px rgba(0,0,0,0.55), 0 8px 20px rgba(0,0,0,0.3); }
+    .card:hover::after { opacity: 1; }
+    .card:focus-visible { outline: 2px solid var(--accent-1); outline-offset: 3px; }
 
-    /* Animated top-border gradient line */
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      border-radius: var(--radius) var(--radius) 0 0;
-      background: var(--card-gradient, linear-gradient(90deg, var(--accent-1), var(--accent-2)));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+    /* Per-card accents */
+    .card-1 { --card-gradient: linear-gradient(90deg,#7c6fff,#38bdf8); --card-glow: var(--glow-1); --cta:#a89fff; }
+    .card-2 { --card-gradient: linear-gradient(90deg,#38bdf8,#34d399); --card-glow: var(--glow-2); --cta:#7dd3fc; }
+    .card-3 { --card-gradient: linear-gradient(90deg,#34d399,#fbbf24); --card-glow: var(--glow-3); --cta:#6ee7b7; }
+    .card-4 { --card-gradient: linear-gradient(90deg,#f472b6,#fb923c); --card-glow: var(--glow-4); --cta:#f9a8d4; }
+    .card-5 { --card-gradient: linear-gradient(90deg,#fb923c,#fbbf24); --card-glow: rgba(251,146,60,0.16); --cta:#fdba74; }
+    .card-6 { --card-gradient: linear-gradient(90deg,#7c6fff,#f472b6); --card-glow: rgba(124,111,255,0.16); --cta:#c4bbff; }
 
-    /* Glow behind card on hover */
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: var(--radius);
-      background: var(--card-glow, var(--glow-1));
-      opacity: 0;
-      z-index: -1;
-      transition: opacity 0.3s ease;
-      filter: blur(20px);
-    }
+    /* Card media (real course screenshot) */
+    .card-media { position: relative; height: 176px; overflow: hidden; background: #0a0a12; border-bottom: 1px solid var(--border); }
+    .card-media img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+    .card:hover .card-media img { transform: scale(1.06); }
+    .card-media::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(13,13,20,0) 40%, rgba(19,19,31,0.55) 78%, var(--bg-card) 100%); z-index: 1; }
+    .card-media::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-gradient); opacity: 0; transition: opacity .3s ease; z-index: 2; }
+    .card:hover .card-media::after { opacity: 1; }
 
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--border-hov);
-      background: var(--bg-card-hov);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+    .card-badge {
+      position: absolute; top: 12px; left: 12px; z-index: 2;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+      color: #fff; background: rgba(10,10,18,0.72); backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 100px; padding: 5px 11px;
     }
-    .card:hover::before { opacity: 1; }
-    .card:hover::after  { opacity: 1; }
+    .card-level {
+      position: absolute; top: 12px; right: 12px; z-index: 2;
+      font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text); background: rgba(10,10,18,0.72); backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 100px; padding: 4px 10px;
+    }
+    .card-flag { color: #ffd9a0; border-color: rgba(255,193,120,0.4); background: rgba(120,70,20,0.55); }
 
-    /* Per-card accent colors */
-    .card-1 { --card-gradient: linear-gradient(90deg, #7c6fff, #38bdf8); --card-glow: var(--glow-1); }
-    .card-2 { --card-gradient: linear-gradient(90deg, #38bdf8, #34d399); --card-glow: var(--glow-2); }
-    .card-3 { --card-gradient: linear-gradient(90deg, #34d399, #fbbf24); --card-glow: var(--glow-3); }
-    .card-4 { --card-gradient: linear-gradient(90deg, #f472b6, #fb923c); --card-glow: var(--glow-4); }
-    .card-5 { --card-gradient: linear-gradient(90deg, #fb923c, #fbbf24); --card-glow: rgba(251,146,60,0.15); }
-    .card-6 { --card-gradient: linear-gradient(90deg, #7c6fff, #f472b6); --card-glow: rgba(124,111,255,0.16); }
+    .card-body { padding: 22px 28px 26px; display: flex; flex-direction: column; flex: 1; }
 
-    .card-icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      margin-bottom: 20px;
-      flex-shrink: 0;
-    }
-    .card-1 .card-icon { background: rgba(124,111,255,0.12); }
-    .card-2 .card-icon { background: rgba(56,189,248,0.12); }
-    .card-3 .card-icon { background: rgba(52,211,153,0.12); }
-    .card-4 .card-icon { background: rgba(244,114,182,0.12); }
-    .card-5 .card-icon { background: rgba(251,146,60,0.12); }
-    .card-6 .card-icon { background: rgba(124,111,255,0.12); }
+    .card-title { font-size: 1.24rem; font-weight: 700; letter-spacing: -0.02em; color: #fff; line-height: 1.25; margin-bottom: 9px; }
+    .card-subtitle { font-size: 0.9rem; color: var(--text-dim); line-height: 1.58; margin-bottom: 16px; flex: 1; }
 
-    .card-number {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
+    .card-stats { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; font-family: var(--mono); font-size: 0.74rem; color: var(--text-muted); }
+    .card-stats span { display: inline-flex; align-items: center; gap: 6px; }
+    .card-stats svg { width: 13px; height: 13px; opacity: 0.85; }
 
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 650;
-      letter-spacing: -0.02em;
-      color: #fff;
-      line-height: 1.3;
-      margin-bottom: 8px;
-    }
+    /* Tags */
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+    .tag { font-family: var(--mono); font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 100px; border: 1px solid var(--border); color: var(--text-dim); background: rgba(255,255,255,0.03); transition: border-color .2s, color .2s, background .2s; white-space: nowrap; }
+    .card:hover .tag { border-color: var(--border-hov); background: rgba(255,255,255,0.05); }
 
-    .card-subtitle {
-      font-size: 0.88rem;
-      color: var(--text-dim);
-      line-height: 1.55;
-      margin-bottom: 22px;
-      flex: 1;
-    }
-
-    /* ─── Tags ─── */
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 24px;
-    }
-    .tag {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 500;
-      padding: 3px 10px;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      background: rgba(255,255,255,0.03);
-      transition: border-color 0.2s, color 0.2s, background 0.2s;
-      white-space: nowrap;
-    }
-    .card:hover .tag {
-      border-color: var(--border-hov);
-      color: var(--text-dim);
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* ─── CTA ─── */
-    .card-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-dim);
-      transition: color 0.2s, gap 0.2s;
-      margin-top: auto;
-    }
-    .card-cta .arrow {
-      font-size: 1rem;
-      transition: transform 0.2s cubic-bezier(.2,.8,.2,1);
-    }
-    .card:hover .card-cta {
-      color: #fff;
-      gap: 12px;
-    }
-    .card:hover .card-cta .arrow {
-      transform: translateX(4px);
-    }
-
-    /* Per-card CTA accent */
-    .card-1:hover .card-cta { color: #a89fff; }
-    .card-2:hover .card-cta { color: #7dd3fc; }
-    .card-3:hover .card-cta { color: #6ee7b7; }
-    .card-4:hover .card-cta { color: #f9a8d4; }
-    .card-5:hover .card-cta { color: #fdba74; }
-    .card-6:hover .card-cta { color: #c4bbff; }
+    /* CTA */
+    .card-cta { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; color: var(--text-dim); transition: color .2s, gap .2s; margin-top: auto; }
+    .card-cta .arrow { font-size: 1rem; transition: transform .2s cubic-bezier(.2,.8,.2,1); }
+    .card:hover .card-cta { color: var(--cta); gap: 12px; }
+    .card:hover .card-cta .arrow { transform: translateX(4px); }
 
     /* ─── Footer ─── */
-    footer {
-      text-align: center;
-      padding: 48px 0 0;
-      border-top: 1px solid var(--border);
-      margin-top: 72px;
+    footer { text-align: center; padding: 44px 0 0; border-top: 1px solid var(--border); margin-top: 72px; }
+    .star-cta {
+      display: inline-flex; align-items: center; gap: 9px; margin-bottom: 26px;
+      font-size: 0.92rem; font-weight: 600; color: var(--text); text-decoration: none;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-hov);
+      border-radius: 100px; padding: 10px 20px; transition: transform .2s, border-color .2s, background .2s;
     }
-    footer p {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-family: var(--mono);
-      line-height: 1.8;
-    }
-    footer a {
-      color: var(--text-dim);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    footer a:hover { color: #fff; }
+    .star-cta:hover { transform: translateY(-2px); border-color: rgba(251,191,36,0.5); background: rgba(251,191,36,0.08); }
+    .star-cta svg { width: 16px; height: 16px; color: #fbbf24; }
+    footer p { font-size: 0.82rem; color: var(--text-muted); font-family: var(--mono); line-height: 1.8; }
+    footer a:not(.star-cta) { color: var(--text-dim); text-decoration: none; transition: color .2s; }
+    footer a:not(.star-cta):hover { color: #fff; }
 
-    /* ─── Focus states (accessibility) ─── */
-    .card:focus-visible {
-      outline: 2px solid var(--accent-1);
-      outline-offset: 4px;
+    /* ─── Fade-in ─── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    header { animation: fadeUp .6s ease both; }
+    .section-label { animation: fadeUp .6s .08s ease both; }
+    .card:nth-child(1) { animation: fadeUp .6s .12s ease both; }
+    .card:nth-child(2) { animation: fadeUp .6s .2s ease both; }
+    .card:nth-child(3) { animation: fadeUp .6s .28s ease both; }
+    .card:nth-child(4) { animation: fadeUp .6s .36s ease both; }
+    .card:nth-child(5) { animation: fadeUp .6s .44s ease both; }
+    .card:nth-child(6) { animation: fadeUp .6s .52s ease both; }
+    footer { animation: fadeUp .6s .6s ease both; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
     }
-
-    /* ─── Fade-in animation ─── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    header { animation: fadeUp 0.6s ease both; }
-    .card:nth-child(1) { animation: fadeUp 0.6s 0.1s ease both; }
-    .card:nth-child(2) { animation: fadeUp 0.6s 0.18s ease both; }
-    .card:nth-child(3) { animation: fadeUp 0.6s 0.26s ease both; }
-    .card:nth-child(4) { animation: fadeUp 0.6s 0.34s ease both; }
-    .card:nth-child(5) { animation: fadeUp 0.6s 0.42s ease both; }
-    .card:nth-child(6) { animation: fadeUp 0.6s 0.5s ease both; }
-    footer { animation: fadeUp 0.6s 0.58s ease both; }
   </style>
 </head>
 <body>
-  <div class="bg-blobs" aria-hidden="true">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
+  <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span></div>
 
   <div class="page">
     <header>
-      <div class="header-eyebrow">
-        <span class="dot"></span>
-        timloehr.me
-      </div>
-      <h1>Interactive Courses</h1>
+      <div class="header-eyebrow"><span class="dot"></span> timloehr.me</div>
+      <h1>Learn the data &amp; AI stack <span class="grad">by doing</span></h1>
       <p class="header-sub">
-        Six hands-on courses covering the modern data and AI stack.
-        Zero signup, zero build step — just open and learn.
+        Six hands-on courses with live, in-browser simulators you can poke, break, and rebuild.
+        Zero signup, zero install — open a course and start learning.
       </p>
+
+      <div class="stats" role="list" aria-label="At a glance">
+        <div class="stat" role="listitem"><span class="stat-num">6</span><span class="stat-label">courses</span></div>
+        <div class="stat" role="listitem"><span class="stat-num">90+</span><span class="stat-label">lessons</span></div>
+        <div class="stat" role="listitem"><span class="stat-num">40+</span><span class="stat-label">live sims</span></div>
+        <div class="stat" role="listitem"><span class="stat-num">$0</span><span class="stat-label">no signup</span></div>
+      </div>
+
       <div class="header-meta">
-        <span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          6 courses
-        </span>
-        <span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Self-paced
-        </span>
-        <span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Free &amp; open
-        </span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Self-paced</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Runs in your browser</span>
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> MIT licensed</span>
       </div>
     </header>
 
-    <div class="divider" aria-hidden="true"></div>
+    <div class="section-label">All courses</div>
 
     <main>
       <div class="grid" role="list">
 
-        <!-- Card 1: Data Engineering -->
-        <a
-          href="./data-engineering-fundamentals/"
-          class="card card-1"
-          role="listitem"
-          aria-label="Data Engineering Fundamentals — Start course"
-        >
-          <div class="card-icon" aria-hidden="true">⚙️</div>
-          <div class="card-number">Course 01</div>
-          <h2 class="card-title">Data Engineering Fundamentals</h2>
-          <p class="card-subtitle">
-            Build production-grade data pipelines from the ground up. Master ETL patterns,
-            batch &amp; streaming architectures, and the tools used by data teams at scale.
-          </p>
-          <div class="tags" aria-label="Technologies covered">
-            <span class="tag">Python</span>
-            <span class="tag">SQL</span>
-            <span class="tag">Airflow</span>
-            <span class="tag">dbt</span>
-            <span class="tag">Spark</span>
-            <span class="tag">Kafka</span>
+        <!-- Card 1: Data Engineering (flagship) -->
+        <a href="./data-engineering-fundamentals/" class="card card-1" role="listitem" aria-label="Data Engineering Fundamentals — Start course">
+          <div class="card-media">
+            <img src="./docs/screenshots/data-engineering-fundamentals.jpg" alt="Preview of the Data Engineering Fundamentals course" width="640" height="400" />
+            <span class="card-badge">⚙️ Course 01</span>
+            <span class="card-level card-flag">★ Flagship</span>
           </div>
-          <span class="card-cta">
-            Start course <span class="arrow" aria-hidden="true">→</span>
-          </span>
+          <div class="card-body">
+            <h2 class="card-title">Data Engineering Fundamentals</h2>
+            <p class="card-subtitle">Build production-grade data pipelines from the ground up — ETL patterns, batch &amp; streaming, partitioning, orchestration, and data quality.</p>
+            <div class="card-stats">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>10 chapters</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>15 live simulators</span>
+            </div>
+            <div class="tags" aria-label="Technologies covered">
+              <span class="tag">Python</span><span class="tag">SQL</span><span class="tag">Airflow</span><span class="tag">dbt</span><span class="tag">Spark</span><span class="tag">Kafka</span>
+            </div>
+            <span class="card-cta">Start course <span class="arrow" aria-hidden="true">→</span></span>
+          </div>
         </a>
 
         <!-- Card 2: Data Science -->
-        <a
-          href="./data-science/"
-          class="card card-2"
-          role="listitem"
-          aria-label="Data Science Fundamentals — Start course"
-        >
-          <div class="card-icon" aria-hidden="true">📊</div>
-          <div class="card-number">Course 02</div>
-          <h2 class="card-title">Data Science Fundamentals</h2>
-          <p class="card-subtitle">
-            From exploratory analysis to model deployment. Learn statistical thinking,
-            ML fundamentals, and how to communicate insights that drive decisions.
-          </p>
-          <div class="tags" aria-label="Technologies covered">
-            <span class="tag">Python</span>
-            <span class="tag">pandas</span>
-            <span class="tag">scikit-learn</span>
-            <span class="tag">PyTorch</span>
-            <span class="tag">MLflow</span>
+        <a href="./data-science/" class="card card-2" role="listitem" aria-label="Data Science Fundamentals — Start course">
+          <div class="card-media">
+            <img src="./docs/screenshots/data-science.jpg" alt="Preview of the Data Science Fundamentals course" width="640" height="400" loading="lazy" />
+            <span class="card-badge">📊 Course 02</span>
+            <span class="card-level">Intermediate</span>
           </div>
-          <span class="card-cta">
-            Start course <span class="arrow" aria-hidden="true">→</span>
-          </span>
+          <div class="card-body">
+            <h2 class="card-title">Data Science Fundamentals</h2>
+            <p class="card-subtitle">From exploratory analysis to model deployment — statistical thinking, CLT, SHAP, A/B-test power, causal DAGs, drift, and a full capstone.</p>
+            <div class="card-stats">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>13 chapters</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>live simulators</span>
+            </div>
+            <div class="tags" aria-label="Technologies covered">
+              <span class="tag">Python</span><span class="tag">pandas</span><span class="tag">scikit-learn</span><span class="tag">PyTorch</span><span class="tag">MLflow</span>
+            </div>
+            <span class="card-cta">Start course <span class="arrow" aria-hidden="true">→</span></span>
+          </div>
         </a>
 
         <!-- Card 3: Data Infrastructure -->
-        <a
-          href="./data-infrastructure/"
-          class="card card-3"
-          role="listitem"
-          aria-label="Data Infrastructure — Start course"
-        >
-          <div class="card-icon" aria-hidden="true">🏗️</div>
-          <div class="card-number">Course 03</div>
-          <h2 class="card-title">Data Infrastructure</h2>
-          <p class="card-subtitle">
-            Design and operate cloud-native data platforms. Cover warehousing, lakehouse
-            architectures, IaC, and the reliability engineering principles behind big data systems.
-          </p>
-          <div class="tags" aria-label="Technologies covered">
-            <span class="tag">Snowflake</span>
-            <span class="tag">BigQuery</span>
-            <span class="tag">Terraform</span>
-            <span class="tag">Docker</span>
-            <span class="tag">Kubernetes</span>
+        <a href="./data-infrastructure/" class="card card-3" role="listitem" aria-label="Data Infrastructure — Start course">
+          <div class="card-media">
+            <img src="./docs/screenshots/data-infrastructure.jpg" alt="Preview of the Data Infrastructure course" width="640" height="400" loading="lazy" />
+            <span class="card-badge">🏗️ Course 03</span>
+            <span class="card-level">Advanced</span>
           </div>
-          <span class="card-cta">
-            Start course <span class="arrow" aria-hidden="true">→</span>
-          </span>
+          <div class="card-body">
+            <h2 class="card-title">Data Infrastructure</h2>
+            <p class="card-subtitle">The data stack at staff-engineer system-design depth — storage internals, CAP/PACELC, lakehouse, streaming &amp; watermarks, CDC, idempotency, SLAs.</p>
+            <div class="card-stats">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>12 lessons</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>7 interactive widgets</span>
+            </div>
+            <div class="tags" aria-label="Technologies covered">
+              <span class="tag">Snowflake</span><span class="tag">BigQuery</span><span class="tag">Kafka</span><span class="tag">Iceberg</span><span class="tag">Spark</span>
+            </div>
+            <span class="card-cta">Start course <span class="arrow" aria-hidden="true">→</span></span>
+          </div>
         </a>
 
         <!-- Card 4: Codex Course -->
-        <a
-          href="./codex/"
-          class="card card-4"
-          role="listitem"
-          aria-label="Codex Course — Start course"
-        >
-          <div class="card-icon" aria-hidden="true">🤖</div>
-          <div class="card-number">Course 04</div>
-          <h2 class="card-title">Codex Course</h2>
-          <p class="card-subtitle">
-            A terminal-first playbook for the OpenAI coding agent. Build the mental model,
-            master sandboxing, AGENTS.md, task specs, and review loops to ship real engineering work.
-          </p>
-          <div class="tags" aria-label="Technologies covered">
-            <span class="tag">Codex</span>
-            <span class="tag">OpenAI</span>
-            <span class="tag">AGENTS.md</span>
-            <span class="tag">Sandboxing</span>
-            <span class="tag">Pull Requests</span>
+        <a href="./codex/" class="card card-4" role="listitem" aria-label="Codex Course — Start course">
+          <div class="card-media">
+            <img src="./docs/screenshots/codex.jpg" alt="Preview of the Codex Course" width="640" height="400" loading="lazy" />
+            <span class="card-badge">🤖 Course 04</span>
+            <span class="card-level">All levels</span>
           </div>
-          <span class="card-cta">
-            Start course <span class="arrow" aria-hidden="true">→</span>
-          </span>
+          <div class="card-body">
+            <h2 class="card-title">Codex Course</h2>
+            <p class="card-subtitle">A terminal-first playbook for the OpenAI coding agent — mental model, sandboxing, AGENTS.md, task specs, and review loops to ship real engineering work.</p>
+            <div class="card-stats">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>12 lessons</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>+ capstone</span>
+            </div>
+            <div class="tags" aria-label="Technologies covered">
+              <span class="tag">Codex</span><span class="tag">OpenAI</span><span class="tag">AGENTS.md</span><span class="tag">Sandboxing</span><span class="tag">Pull Requests</span>
+            </div>
+            <span class="card-cta">Start course <span class="arrow" aria-hidden="true">→</span></span>
+          </div>
         </a>
 
         <!-- Card 5: Claude Course -->
-        <a
-          href="./claude/"
-          class="card card-5"
-          role="listitem"
-          aria-label="Claude Course — Start course"
-        >
-          <div class="card-icon" aria-hidden="true">✨</div>
-          <div class="card-number">Course 05</div>
-          <h2 class="card-title">Claude Course</h2>
-          <p class="card-subtitle">
-            Prompt like you mean it. The habits that separate people who love Claude from those who
-            bounce off it — prompt anatomy, context engineering, CLAUDE.md, agents, evals, and safety.
-          </p>
-          <div class="tags" aria-label="Technologies covered">
-            <span class="tag">Claude</span>
-            <span class="tag">Claude Code</span>
-            <span class="tag">MCP</span>
-            <span class="tag">Prompting</span>
-            <span class="tag">Evals</span>
+        <a href="./claude/" class="card card-5" role="listitem" aria-label="Claude Course — Start course">
+          <div class="card-media">
+            <img src="./docs/screenshots/claude.jpg" alt="Preview of the Claude Course" width="640" height="400" loading="lazy" />
+            <span class="card-badge">✨ Course 05</span>
+            <span class="card-level">All levels</span>
           </div>
-          <span class="card-cta">
-            Start course <span class="arrow" aria-hidden="true">→</span>
-          </span>
+          <div class="card-body">
+            <h2 class="card-title">Claude Course</h2>
+            <p class="card-subtitle">Prompt like you mean it — prompt anatomy, context engineering, CLAUDE.md, agents &amp; tool use, grounding, evals, and safety, in twelve hands-on lessons.</p>
+            <div class="card-stats">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>12 lessons</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>live widgets</span>
+            </div>
+            <div class="tags" aria-label="Technologies covered">
+              <span class="tag">Claude</span><span class="tag">Claude Code</span><span class="tag">MCP</span><span class="tag">Prompting</span><span class="tag">Evals</span>
+            </div>
+            <span class="card-cta">Start course <span class="arrow" aria-hidden="true">→</span></span>
+          </div>
         </a>
 
         <!-- Card 6: The AI-Native Operator -->
-        <a
-          href="./ai-native/"
-          class="card card-6"
-          role="listitem"
-          aria-label="The AI-Native Operator — Start course"
-        >
-          <div class="card-icon" aria-hidden="true">🧭</div>
-          <div class="card-number">Course 06</div>
-          <h2 class="card-title">The AI-Native Operator</h2>
-          <p class="card-subtitle">
-            An operating model for working AI-native: the mindset, engineering practice, and org
-            design for shipping with AI agents — across nine modules of interactive exercises and quizzes.
-          </p>
-          <div class="tags" aria-label="Technologies covered">
-            <span class="tag">Agents</span>
-            <span class="tag">Workflows</span>
-            <span class="tag">Orchestration</span>
-            <span class="tag">Evals</span>
-            <span class="tag">Org Design</span>
+        <a href="./ai-native/" class="card card-6" role="listitem" aria-label="The AI-Native Operator — Start course">
+          <div class="card-media">
+            <img src="./docs/screenshots/ai-native.jpg" alt="Preview of The AI-Native Operator course" width="640" height="400" loading="lazy" />
+            <span class="card-badge">🧭 Course 06</span>
+            <span class="card-level">All levels</span>
           </div>
-          <span class="card-cta">
-            Start course <span class="arrow" aria-hidden="true">→</span>
-          </span>
+          <div class="card-body">
+            <h2 class="card-title">The AI-Native Operator</h2>
+            <p class="card-subtitle">An operating model for working AI-native — the mindset, engineering practice, and org design for shipping with AI agents, across nine modules of exercises and quizzes.</p>
+            <div class="card-stats">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>9 modules</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>39 lessons</span>
+            </div>
+            <div class="tags" aria-label="Technologies covered">
+              <span class="tag">Agents</span><span class="tag">Workflows</span><span class="tag">Orchestration</span><span class="tag">Evals</span><span class="tag">Org Design</span>
+            </div>
+            <span class="card-cta">Start course <span class="arrow" aria-hidden="true">→</span></span>
+          </div>
         </a>
 
       </div>
     </main>
 
     <footer>
+      <a class="star-cta" href="https://github.com/Mavengence/interactive-courses" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.8.6-5.1 4.5 1.5 6.7L12 17.3 5.9 20.6l1.5-6.7L2.3 8.9l6.8-.6L12 2z"/></svg>
+        Star on GitHub
+      </a>
       <p>
         Built by <a href="https://timloehr.me" target="_blank" rel="noopener">Tim Löhr</a>
-        &nbsp;·&nbsp;
-        <a href="https://github.com/Mavengence/interactive-courses" target="_blank" rel="noopener">GitHub</a>
-        &nbsp;·&nbsp;
-        MIT License
+        &nbsp;·&nbsp; <a href="https://github.com/Mavengence/interactive-courses" target="_blank" rel="noopener">Source</a>
+        &nbsp;·&nbsp; MIT License
       </p>
-      <p style="margin-top:8px;">
-        No build step &nbsp;·&nbsp; No signup &nbsp;·&nbsp; Open source
-      </p>
+      <p style="margin-top:8px;">No build step &nbsp;·&nbsp; No signup &nbsp;·&nbsp; Runs entirely in your browser</p>
     </footer>
   </div>
 </body>
