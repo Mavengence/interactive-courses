@@ -21,7 +21,7 @@
         const contrib = (vals[f.key] - f.mean) * f.weight;
         const from = running;
         running = clamp(running + contrib, 0.01, 0.99);
-        return { ...f, contrib: running - from, from, to: running };
+        return { ...f, contrib, from, to: running };
       });
       return { rows: rows2, finalScore: running };
     }, [vals]);
@@ -36,7 +36,7 @@
         eyebrow: "SIMULATION",
         title: "SHAP waterfall \xB7 loan approval",
         meta: `score ${round(finalScore, 3)} \xB7 ${approved ? "APPROVED" : "DECLINED"}`,
-        caption: "Each feature's contribution = (your value \u2212 population mean) \xD7 weight. Bars extend right (positive) or left (negative) from the running total. The sum lands at the final prediction score."
+        caption: "Each feature's contribution = (your value \u2212 population mean) \xD7 weight. Bars extend right (positive) or left (negative) from the running total, which is clamped to a valid [0.01, 0.99] probability."
       },
       /* @__PURE__ */ React.createElement("div", { className: "sim-row" }, /* @__PURE__ */ React.createElement("div", { className: "sim-controls", style: { minWidth: 220 } }, LOAN_FEATURES.map((f) => /* @__PURE__ */ React.createElement("div", { className: "sim-ctrl", key: f.key }, /* @__PURE__ */ React.createElement("label", null, f.label, " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, vals[f.key])), /* @__PURE__ */ React.createElement(
         "input",
@@ -210,20 +210,28 @@
         const prob = trueProb(sx, sy);
         samples.push({ sx, sy, w, prob });
       }
-      let sw = 0, swxx = 0, swyy = 0, swxy = 0, swpx = 0, swpy = 0, swp = 0;
+      let sw = 0, swx = 0, swy = 0, swp = 0;
       samples.forEach(({ sx, sy, w, prob }) => {
-        const dx = sx - qx, dy = sy - qy;
         sw += w;
-        swxx += w * dx * dx;
-        swyy += w * dy * dy;
-        swxy += w * dx * dy;
-        swpx += w * prob * dx;
-        swpy += w * prob * dy;
+        swx += w * (sx - qx);
+        swy += w * (sy - qy);
         swp += w * prob;
       });
-      const a02 = swp / (sw || 1);
-      const a12 = swpx / (swxx + 1e-3);
-      const a22 = swpy / (swyy + 1e-3);
+      const swInv = sw || 1;
+      const mx = swx / swInv, my = swy / swInv, mp = swp / swInv;
+      let cxx = 0, cyy = 0, cxy = 0, cpx = 0, cpy = 0;
+      samples.forEach(({ sx, sy, w, prob }) => {
+        const dx = sx - qx - mx, dy = sy - qy - my, dp = prob - mp;
+        cxx += w * dx * dx;
+        cyy += w * dy * dy;
+        cxy += w * dx * dy;
+        cpx += w * dp * dx;
+        cpy += w * dp * dy;
+      });
+      const det = (cxx + 1e-3) * (cyy + 1e-3) - cxy * cxy;
+      const a12 = det !== 0 ? ((cyy + 1e-3) * cpx - cxy * cpy) / det : 0;
+      const a22 = det !== 0 ? ((cxx + 1e-3) * cpy - cxy * cpx) / det : 0;
+      const a02 = mp - a12 * mx - a22 * my;
       return { a0: a02, a1: a12, a2: a22, prob: trueProb(qx, qy) };
     }, [qx, qy, trueProb]);
     const SW = 300, SH = 280;

@@ -126,6 +126,15 @@ window.CX.L12 = {
     startTimer();
     clockContainer.appendChild(timer);
 
+    const validHours = {
+      triage: [9, 9.5],
+      spec: [9.25, 10],
+      launch: [10, 10.25],
+      'async review': [10.5, 12],
+      iterate: [14, 15],
+      merge: [15.5, 16]
+    };
+
     const placedBlocks = new Set();
     const certificate = document.createElement('div');
     certificate.className = 'cx-L12-certificate';
@@ -188,18 +197,9 @@ window.CX.L12 = {
       const rect = clockContainer.getBoundingClientRect();
       const dropX = e.clientX - rect.left;
       const dropY = e.clientY - rect.top;
-      const dropAngle = Math.atan2(dropY - clockContainer.offsetHeight / 2, dropX - clockContainer.offsetWidth / 2);
+      const dropAngle = Math.atan2(dropY - rect.height / 2, dropX - rect.width / 2);
       let dropHour = (dropAngle * 12 / Math.PI) + 6;
       if (dropHour < 0) dropHour += 24;
-
-      const validHours = {
-        triage: [9, 9.5],
-        spec: [9.25, 10],
-        launch: [10, 10.25],
-        'async review': [10.5, 12],
-        iterate: [14, 15],
-        merge: [15.5, 16]
-      };
 
       if (isValidDrop(blockName, dropHour)) {
         const block = blocks.find(b => b.name === blockName);

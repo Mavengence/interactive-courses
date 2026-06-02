@@ -34,12 +34,15 @@
         const alpha = ALPHA_OPTIONS[alphaIdx];
         const zCrit = normInv(1 - alpha / 2);
         const rng = mulberry32(seed);
+        const obsVar = 2 * BASE_CONV * (1 - BASE_CONV);
         let falsePos = 0;
         for (let s = 0; s < N_SIMS; s++) {
           let hit = false;
+          let sumDiff = 0;
           for (let n = step; n <= MAX_N; n += step) {
-            const se = Math.sqrt(2 * BASE_CONV * (1 - BASE_CONV) / n);
-            const z = randn(rng);
+            sumDiff += randn(rng) * Math.sqrt(step * obsVar);
+            const se = Math.sqrt(obsVar / n);
+            const z = sumDiff / n / se;
             if (Math.abs(z) > zCrit) {
               hit = true;
               break;

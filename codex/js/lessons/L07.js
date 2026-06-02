@@ -7,9 +7,9 @@ window.CX.L07 = {
     const cpId = ctx.cpId || 'pr-xray';
 
     const bugs = {
-      4: { id: 1, found: false, description: 'TTL unit mismatch' },
-      9: { id: 2, found: false, description: 'Off-by-one error' },
-      12: { id: 3, found: false, description: 'Inconsistent units' },
+      4: { id: 1, found: false, description: 'Inconsistent units — WINDOW (ms) is never used' },
+      11: { id: 2, found: false, description: 'Off-by-one — `>` allows a 101st request' },
+      15: { id: 3, found: false, description: 'TTL unit mismatch — hardcoded 60, comment is wrong' },
     };
     const totalBugs = 3;
     let bugsFound = 0;

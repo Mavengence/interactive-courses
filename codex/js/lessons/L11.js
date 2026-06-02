@@ -194,7 +194,7 @@ window.CX.L11 = {
       <div class="${NS}-scoreboard">sorted: 0/8 &middot; mistakes: 0</div>
       <div class="${NS}-drop-area">
         <div class="${NS}-drop-zone proven" data-type="proven"><h3>PROVEN</h3></div>
-        <div class="${NS}-drop-zone avoid" data-type="avoid"><h3>AVOID</h3></div>
+        <div class="${NS}-drop-zone avoid" data-type="anti"><h3>AVOID</h3></div>
       </div>
       <div class="${NS}-final-banner">Pattern library locked in</div>
     `;

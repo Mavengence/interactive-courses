@@ -92,7 +92,14 @@
       }
     );
     const [current, setCurrent] = useState(() => localStorage.getItem("de-course-chap") || "home");
-    const [progress, setProgress] = useState(() => JSON.parse(localStorage.getItem("de-course-prog") || "{}"));
+    const [progress, setProgress] = useState(() => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem("de-course-prog") || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (e) {
+        return {};
+      }
+    });
     const [internalMode, setInternalMode] = useState(() => localStorage.getItem("de-course-mode") === "1");
     const [reduceMotion, setReduceMotion] = useState(() => localStorage.getItem("de-course-rm") === "1");
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("de-course-sb") === "1");

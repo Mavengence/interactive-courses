@@ -41,15 +41,17 @@ window.CX.L06 = {
       document.head.appendChild(styleSheet);
     }
 
-    let completedCount = 0;
+    const satisfied = new Set();
+    let completed = false;
 
     const updateScoreboard = () => {
       const scoreboard = root.querySelector(`.${ns}-scoreboard`);
-      scoreboard.innerHTML = `definition of done: ${completedCount}/7`;
+      scoreboard.innerHTML = `definition of done: ${satisfied.size}/7`;
     };
 
     const checkCompletion = () => {
-      if (completedCount === 7) {
+      if (satisfied.size === 7 && !completed) {
+        completed = true;
         const prHeader = root.querySelector(`.${ns}-pr-header`);
         prHeader.textContent = 'READY';
         if (ctx.Progress) {
@@ -101,12 +103,15 @@ window.CX.L06 = {
         const item = criteria[itemIndex];
         const statusEl = root.querySelectorAll(`.${ns}-status`)[itemIndex];
 
+        const idx = parseInt(itemIndex);
         if (parseInt(optionIndex) === item.correct) {
           statusEl.className = `${ns}-status correct`;
-          completedCount++;
-          root.querySelector(`#pr-check-${itemIndex}`).textContent = `☑ Check ${parseInt(itemIndex) + 1}`;
+          satisfied.add(idx);
+          root.querySelector(`#pr-check-${itemIndex}`).textContent = `☑ Check ${idx + 1}`;
         } else {
           statusEl.className = `${ns}-status mediocre`;
+          satisfied.delete(idx);
+          root.querySelector(`#pr-check-${itemIndex}`).textContent = `☐ Check ${idx + 1}`;
         }
 
         updateScoreboard();

@@ -99,6 +99,9 @@ window.CX.L10 = {
     };
 
     let completedTasks = 0;
+    let conflictShown = false;
+    let conflictResolved = false;
+    let completed = false;
 
     function _cxL10_initGraph() {
         svg.innerHTML = '<line x1="30" y1="0" x2="30" y2="100%" stroke="var(--ink-3)" stroke-width="2"/>';
@@ -124,10 +127,13 @@ window.CX.L10 = {
     }
 
     function _cxL10_checkCompletion() {
-        if (tasks.t2.status === 'done' && tasks.t3.status === 'done') {
+        if (tasks.t2.status === 'done' && tasks.t3.status === 'done' && !conflictResolved && !conflictShown) {
+            conflictShown = true;
             _cxL10_handleConflict();
+            return;
         }
-        if (completedTasks === 3) {
+        if (completedTasks === 3 && conflictResolved && !completed) {
+            completed = true;
             statusBar.textContent = 'All tasks completed! 3 agents, 17 commits, 1 conflict resolved, wall-clock time 6m';
             if (ctx.Progress) {
                 ctx.Progress.markCheckpoint(lessonId, cpId, 'bespoke');
@@ -153,7 +159,9 @@ window.CX.L10 = {
         root.appendChild(conflictPanel);
 
         root.querySelector('#rebase-btn').addEventListener('click', () => {
+            conflictResolved = true;
             conflictPanel.remove();
+            statusBar.textContent = 'Conflict resolved: T3 rebased on T2.';
             _cxL10_checkCompletion();
         });
 
@@ -168,7 +176,9 @@ window.CX.L10 = {
                 <button id="keep-t3-btn">Keep T3</button>
             `;
             root.querySelector('#keep-t3-btn').addEventListener('click', () => {
+                conflictResolved = true;
                 conflictPanel.remove();
+                statusBar.textContent = 'Conflict resolved: kept T3 (logger.info).';
                 _cxL10_checkCompletion();
             });
         });

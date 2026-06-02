@@ -195,7 +195,7 @@ window.CX.L05 = {
     const readout = container.querySelector(`.${ns('readout')}`);
     const toast = container.querySelector(`.${ns('toast')}`);
 
-    let value = 0;
+    let value = 0.6;
 
     const updateUI = (val) => {
       const successProb = 0.92 * Math.pow(1 - val, 2.5) + 0.08;
@@ -272,7 +272,7 @@ window.CX.L05 = {
       }
     });
 
-    updateUI(0);
+    updateUI(value);
     requestAnimationFrame(function animate() {
       updateUI(value);
       requestAnimationFrame(animate);

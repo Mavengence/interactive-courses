@@ -1,7 +1,7 @@
 const { useState, useRef, useEffect, useMemo, useCallback, Fragment } = React;
 async function callClaude(promptOrMessages, systemPrompt) {
   try {
-    const arg = typeof promptOrMessages === "string" ? promptOrMessages : { messages: promptOrMessages, ...systemPrompt ? { system: systemPrompt } : {} };
+    const arg = typeof promptOrMessages === "string" ? systemPrompt ? { prompt: promptOrMessages, system: systemPrompt } : promptOrMessages : { messages: promptOrMessages, ...systemPrompt ? { system: systemPrompt } : {} };
     const res = await window.claude.complete(arg);
     return res;
   } catch (e) {
@@ -1290,7 +1290,7 @@ function PromptLibraryShaper({ lessonId, cpId }) {
         id: "structure",
         label: "Structured shape",
         ok: hasStructure && hasRole,
-        partial: hasStructure || hasRole,
+        partial: !(hasStructure && hasRole) && (hasStructure || hasRole),
         hint: hasStructure && hasRole ? "Good \u2014 role + sections." : 'Add a role ("You are \u2026") and clear sections.'
       }
     ];
