@@ -98,7 +98,7 @@
 .kt-part.hit { border-color: var(--cyan-ink); background: var(--cyan-wash); animation: ktPartHit 0.6s ease-out; }
 @keyframes ktPartHit { 0% { transform: translateY(0); } 30% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
 .kt-pname { font-family: var(--mono); font-size: 0.78rem; font-weight: 700; color: var(--cyan-deep); }
-.kt-pnum { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-3); }
+.kt-pnum { font-family: var(--mono); font-size: 0.68rem; color: var(--ink-2); }
 .kt-cgroup { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .kt-cons-box { border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: 10px 12px; text-align: center; transition: background 0.25s, border-color 0.25s, opacity 0.3s; display: flex; flex-direction: column; gap: 4px; }
 .kt-cn { font-family: var(--mono); font-weight: 700; color: var(--ink); font-size: 0.94rem; }
@@ -185,7 +185,7 @@
 .cdc-svg-val { font-family: var(--mono); font-size: 11px; fill: var(--ink); }
 .cdc-svg-note { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
 .cdc-svg-prop { font-family: var(--mono); font-size: 11px; fill: var(--ink-2); }
-.cdc-svg-flaw { font-family: var(--mono); font-size: 11px; fill: #b85a4a; font-weight: 500; }
+.cdc-svg-flaw { font-family: var(--mono); font-size: 11px; fill: var(--bad); font-weight: 500; }
 .cdc-legend { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--rule); background: var(--paper-2); font-size: 0.82rem; color: var(--ink-2); line-height: 1.5; }
 .cdc-legend-text { flex: 1; }
 
@@ -289,4 +289,4 @@
 .idem-svg-h { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-3); }
 .idem-svg-row { font-family: var(--mono); font-size: 9px; fill: var(--ink-2); }
 .idem-sql { font-family: var(--mono); font-size: 0.74rem; line-height: 1.55; padding: 10px 12px; background: oklch(0.18 0.015 250); color: oklch(0.9 0.01 240); border-radius: 4px; margin: 0; white-space: pre; overflow-x: auto; }
-.idem-prop { font-family: var(--mono); font-size: 0.72rem; color: #3f8264; padding-top: 4px; border-top: 1px dashed var(--rule-2); }
+.idem-prop { font-family: var(--mono); font-size: 0.72rem; color: var(--ok); padding-top: 4px; border-top: 1px dashed var(--rule-2); }

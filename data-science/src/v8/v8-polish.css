@@ -125,9 +125,21 @@
 .btn .kbd { margin-left: 4px; }
 
 /* ---------- Focus ring (accessibility) ---------- */
-.btn:focus-visible, .sim-ctrl input:focus-visible, .sb-item:focus-visible {
+.btn:focus-visible, .sim-ctrl input:focus-visible, .sb-item:focus-visible,
+.seg button:focus-visible, .content button:focus-visible,
+.content a:focus-visible, .content input:focus-visible {
   outline: 2px solid var(--violet);
   outline-offset: 2px;
+}
+/* Range sliders zero out the native outline; restore a keyboard focus ring on the thumb. */
+.content input[type="range"]:focus-visible {
+  outline: none;
+}
+.content input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 2px 8px rgba(232,49,143,0.35), 0 0 0 4px rgba(91,62,232,0.45);
+}
+.content input[type="range"]:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(91,62,232,0.45);
 }
 
 /* ---------- Plot head — consistent, readable ---------- */

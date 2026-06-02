@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>02 · CAP, PACELC & The Latency Tax — Data Infra</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0d14'/%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='none' stroke='%237c6fff' stroke-width='1.5' opacity='0.5'/%3E%3Cpath d='M10 21V11l6 7 6-7v10' fill='none' stroke='%2338bdf8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="../styles/core.css?v=2"/>
 <link rel="stylesheet" href="../styles/lesson.css?v=11"/>
 <style>
@@ -13,13 +14,15 @@
      ============================================================ */
   :root {
     --m2-cobalt:   oklch(0.52 0.18 260);
-    --m2-cobalt-2: oklch(0.62 0.16 258);
+    /* -2 tints darkened to 0.52 L so the badge / pill / label text that uses
+       them clears WCAG AA on both the matching wash and the paper canvas. */
+    --m2-cobalt-2: oklch(0.52 0.16 258);
     --m2-cobalt-w: oklch(0.94 0.04 260);
     --m2-crimson:  oklch(0.55 0.20 22);
-    --m2-crimson-2:oklch(0.65 0.18 22);
+    --m2-crimson-2:oklch(0.52 0.18 22);
     --m2-crimson-w:oklch(0.95 0.04 22);
     --m2-amber:    oklch(0.75 0.15 70);
-    --m2-amber-2:  oklch(0.65 0.16 60);
+    --m2-amber-2:  oklch(0.52 0.16 60);
     --m2-amber-w:  oklch(0.96 0.05 75);
     --m2-graph:    oklch(0.32 0.02 250);
     --m2-graph-2:  oklch(0.5 0.02 250);

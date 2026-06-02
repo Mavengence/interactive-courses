@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>10 · Idempotency, Backfills, Exactly-Once — Data Infra</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0d14'/%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='none' stroke='%237c6fff' stroke-width='1.5' opacity='0.5'/%3E%3Cpath d='M10 21V11l6 7 6-7v10' fill='none' stroke='%2338bdf8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
 <link rel="stylesheet" href="../styles/core.css?v=2"/>
 <link rel="stylesheet" href="../styles/lesson.css?v=11"/>
 <link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
@@ -172,22 +173,22 @@ ON CONFLICT (event_id)
             <tbody>
               <tr style="border-bottom: 1px dashed var(--rule-2);">
                 <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Kafka</td>
-                <td style="padding:4px 8px; color: #3f8264;">Exactly-once</td>
+                <td style="padding:4px 8px; color: var(--ok);">Exactly-once</td>
                 <td style="padding:4px 8px; color: var(--ink-2);">Transactional API, offset commit in tx</td>
               </tr>
               <tr style="border-bottom: 1px dashed var(--rule-2);">
                 <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Iceberg (via Flink)</td>
-                <td style="padding:4px 8px; color: #3f8264;">Effectively exactly-once</td>
+                <td style="padding:4px 8px; color: var(--ok);">Effectively exactly-once</td>
                 <td style="padding:4px 8px; color: var(--ink-2);">Flink 2PC sink + checkpoint</td>
               </tr>
               <tr style="border-bottom: 1px dashed var(--rule-2);">
                 <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Postgres</td>
-                <td style="padding:4px 8px; color: #a8641f;">At-least-once + idempotent</td>
+                <td style="padding:4px 8px; color: var(--warn);">At-least-once + idempotent</td>
                 <td style="padding:4px 8px; color: var(--ink-2);">UPSERT on key or ON CONFLICT DO NOTHING</td>
               </tr>
               <tr>
                 <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → HTTP API</td>
-                <td style="padding:4px 8px; color: #b85a4a;">At-least-once only</td>
+                <td style="padding:4px 8px; color: var(--bad);">At-least-once only</td>
                 <td style="padding:4px 8px; color: var(--ink-2);">Idempotency key (client-generated UUID)</td>
               </tr>
             </tbody>

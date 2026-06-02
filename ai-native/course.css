@@ -9,10 +9,12 @@
    Contrast overrides — darken the tertiary ink so muted labels
    (mod codes, section headers, edition, crumbs, durations) clear
    WCAG AA (>=4.5:1) on the light page/sidebar surfaces. The base
-   token (#8A8D91) only reached ~3.3:1.
+   token (#8A8D91) only reached ~3.3:1. #696C73 clears 4.5:1 not just
+   on white but on the gray-100 (#F0F2F5) sidebar hover background and
+   the blue-50 (#E7F3FF) active background too.
    ------------------------------------------------------------------ */
 :root {
-  --fg-3: #6E7178;
+  --fg-3: #696C73;
 }
 
 html, body {
@@ -365,6 +367,10 @@ input:focus-visible,
 @media (max-width: 700px) {
   .crs-outcomes { grid-template-columns: 1fr; }
   .crs-hero__title { font-size: 38px; }
+  /* Tighten the syllabus module rows so the mono duration chips never push
+     the page wider than a 320px viewport — let chips wrap and shrink gaps. */
+  .crs-mod-row { grid-template-columns: 44px 1fr auto; gap: 12px; }
+  .crs-mod-row__chips { flex-wrap: wrap; gap: 8px 12px; }
 }
 
 /* ============================================================
@@ -1187,8 +1193,12 @@ input:focus-visible,
   font-weight: 600;
   letter-spacing: 0.04em;
 }
-.crs-quiz__score--good { color: var(--team-green); }
-.crs-quiz__score--mid { color: var(--team-yellow); }
+/* Score colors darkened so the small (13px) bold mono text clears WCAG AA
+   (>=4.5:1) on the white card. The base green (#31A24C=3.28) and yellow
+   (#F7B928=1.76) tokens are tuned for large/dark surfaces and fail as small
+   text on white. These darker shades keep the same hue. */
+.crs-quiz__score--good { color: #2A8040; }
+.crs-quiz__score--mid { color: #9A6700; }
 .crs-quiz__score--bad { color: var(--team-red); }
 
 /* ============================================================

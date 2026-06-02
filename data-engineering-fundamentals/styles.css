@@ -477,10 +477,10 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .bf-part.bug .rows { color: #F7B928; }
 .bf-part.bug .sub { color: #8B5C00; font-weight: 700; }
 .bf-part.failed .rows { color: var(--theme-red); }
-.bf-part.failed .sub { color: var(--theme-red); font-weight: 700; }
+.bf-part.failed .sub { color: #C41733; font-weight: 700; }
 .bf-part.doubled .rows { color: var(--theme-red); }
-.bf-part.doubled .sub { color: var(--theme-red); font-weight: 700; }
-.bf-part.success .sub { color: var(--theme-green); font-weight: 700; }
+.bf-part.doubled .sub { color: #C41733; font-weight: 700; }
+.bf-part.success .sub { color: var(--fg-success-ink); font-weight: 700; }
 .bf-spark { position: absolute; width: 4px; height: 4px; background: var(--theme-red); border-radius: 50%; animation: bf-spark 0.6s ease-out forwards; pointer-events: none; }
 @keyframes bf-spark { to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
 
@@ -984,6 +984,12 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
   .cv-ctls { grid-template-columns: 1fr; }
   .cv-sliders { grid-template-columns: repeat(3, 1fr); }
 }
+/* Narrow phones: the three side-by-side sliders crush their labels below
+   ~360px. Stack them (and the readouts) so nothing clips at 320px. */
+@media (max-width: 560px) {
+  .cv-sliders { grid-template-columns: 1fr; }
+  .cv-readouts { grid-template-columns: 1fr; }
+}
 
 /* ============================================================
  * Ch5 · Trust meter
@@ -1171,7 +1177,7 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .tm-day.running { background: var(--accent); animation: pulse 0.6s ease-in-out infinite; }
 .tm-day.corrupt-mark::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #B8770A; }
 .tm-day .mark { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font: 700 11px var(--font-mono); color: #B8770A; }
-.tm-timeline-legend { display: flex; gap: 16px; font: 500 10.5px var(--font-mono); color: var(--fg-2); }
+.tm-timeline-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font: 500 10.5px var(--font-mono); color: var(--fg-2); }
 .tm-timeline-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
 .tm-timeline-legend .sw.pending { background: var(--border); }
 .tm-timeline-legend .sw.ok { background: var(--theme-green); }
@@ -1202,6 +1208,8 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
  * Ch6 · Discovery speedrun + Lineage camera
  * ============================================================ */
 .ds-intro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 560px) { .ds-intro-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 380px) { .ds-intro-grid { grid-template-columns: 1fr; } }
 .ds-shortcut-card {
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -1275,8 +1283,8 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 }
 @keyframes ds-slide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 .reduce-motion .ds-result { animation: none; }
-.ds-result-head { font: 700 12px var(--font-mono); color: var(--theme-green); letter-spacing: 0.04em; margin-bottom: 10px; }
-.ds-result.is-revealed .ds-result-head { color: #B8770A; }
+.ds-result-head { font: 700 12px var(--font-mono); color: var(--fg-success-ink); letter-spacing: 0.04em; margin-bottom: 10px; }
+.ds-result.is-revealed .ds-result-head { color: var(--fg-warning-ink); }
 .ds-result-rows { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 14px; margin-bottom: 8px; }
 .ds-row { display: flex; gap: 10px; font: 500 12px var(--font-mono); }
 .ds-row .k { color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.05em; font-size: 10.5px; min-width: 70px; padding-top: 1px; }
@@ -1313,7 +1321,7 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .ds-lb-row { display: grid; grid-template-columns: 40px 1fr auto; gap: 16px; align-items: center; padding: 10px 14px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; }
 .ds-lb-row.you { background: var(--accent-weak); border-color: var(--accent); }
 .ds-lb-row .rank { font: 800 14px var(--font-mono); color: var(--fg-2); }
-.ds-lb-row.you .rank { color: var(--accent); }
+.ds-lb-row.you .rank { color: var(--accent-ink); }
 .ds-lb-row .name { font: 600 13px var(--font-mono); color: var(--fg-1); }
 .ds-lb-row .time { font: 700 14px var(--font-mono); color: var(--fg-1); }
 
@@ -1889,10 +1897,10 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .cs-node.coord { background: var(--fg-1); color: #fff; border-color: var(--fg-1); }
 .cs-node.worker { background: #F3F8FF; border-color: rgba(8,102,255,0.3); color: var(--theme-blue); }
 .cs-node.worker.local { display: flex; flex-direction: column; gap: 3px; }
-.cs-node-ssd { font-size: 9.5px; color: var(--theme-green); font-weight: 700; letter-spacing: 0.04em; }
+.cs-node-ssd { font-size: 9.5px; color: var(--fg-success-ink); font-weight: 700; letter-spacing: 0.04em; }
 .cs-node.big { padding: 22px 28px; font-size: 13px; }
 .cs-node-lab { font-weight: 800; }
-.cs-node-mem { font-family: var(--font-mono); font-size: 10.5px; color: var(--theme-blue); margin-top: 4px; font-weight: 700; }
+.cs-node-mem { font-family: var(--font-mono); font-size: 10.5px; color: #5B9BFF; margin-top: 4px; font-weight: 700; }
 .cs-blob { background: #fff; border: 1.5px dashed var(--theme-gray-300); border-radius: 6px; padding: 10px; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--fg-2); font-weight: 700; letter-spacing: 0.04em; }
 
 .cs-stats { display: flex; flex-direction: column; gap: 10px; }
@@ -2041,7 +2049,7 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .lp-gs .n { font-size: 17px; font-weight: 800; color: var(--fg-1); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
 .lp-gs .lab { font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-2); }
 .lp-gs .sub { font-size: 9.5px; color: var(--fg-2); margin-top: 1px; }
-.lp-gs .bad { font-size: 9.5px; color: #E41E3F; font-weight: 700; margin-top: 1px; letter-spacing: 0.04em; }
+.lp-gs .bad { font-size: 9.5px; color: #C41733; font-weight: 700; margin-top: 1px; letter-spacing: 0.04em; }
 
 /* === SABOTAGE CONSOLE === */
 .lp-console {
@@ -2215,14 +2223,14 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .lp-consumer-good { background: #F2FAF4; border-top: 2px solid var(--theme-green); }
 .lp-consumer-good .lp-consumer-v { color: #0b3d1b; }
 .lp-consumer-bad { background: #FFF8EA; border-top: 2px solid #B8770A; }
-.lp-consumer-bad .lp-consumer-v { color: #B8770A; }
-.lp-consumer-bad .lp-consumer-warn { color: #B8770A; }
+.lp-consumer-bad .lp-consumer-v { color: #8B5C00; }
+.lp-consumer-bad .lp-consumer-warn { color: #8B5C00; }
 .lp-consumer-wait { background: #FFFBF2; border-top: 2px solid #F7B928; }
 .lp-consumer-wait .lp-consumer-v { color: #8B5C00; font-size: 32px; }
 .lp-consumer-wait .lp-consumer-warn { color: #8B5C00; }
 .lp-consumer-err { background: #FFF1F1; border-top: 2px solid #E41E3F; }
 .lp-consumer-err .lp-consumer-v { color: #E41E3F; font-family: var(--font-mono); font-size: 24px; font-weight: 800; letter-spacing: 0.04em; }
-.lp-consumer-err .lp-consumer-warn { color: #E41E3F; }
+.lp-consumer-err .lp-consumer-warn { color: #C41733; }
 
 @media (max-width: 1000px) {
   .lp-stage { height: 420px; }
@@ -3778,6 +3786,14 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 @media (max-width: 720px) {
   .tb { padding: 0 16px; }
 }
+/* Very narrow phones: the back-link + Prev/Next must fit a 320px viewport.
+   Tighten the bar and drop the redundant kbd arrow hints from the nav. */
+@media (max-width: 400px) {
+  .tb { padding: 0 12px; gap: 10px; }
+  .tb-right { gap: 4px; }
+  .tb-right .btn { padding: 6px 9px; }
+  .tb-right .btn .kbd { display: none; }
+}
 
 /* --- Reduced motion: disable looping / heavy animations -------------- */
 @media (prefers-reduced-motion: reduce) {
@@ -4259,7 +4275,7 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
   text-align: center;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--fg-3);
+  color: var(--fg-2);
   font-style: italic;
 }
 
@@ -4840,7 +4856,7 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 /* Highlight the "target: col[47] revenue" label when in col mode */
 .sc-disk.col .sc-col47 {
   background: rgba(37,99,235,0.18);
-  color: #60A5FA;
+  color: #1F66C7;
   border-color: rgba(37,99,235,0.5);
   box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
   transition: all 280ms var(--ease-pro);
@@ -5169,6 +5185,9 @@ html, body { background: var(--bg-page); color: var(--fg-1); font-family: var(--
 .ds-solution-banner code {
   font: 700 13px var(--font-mono);
   color: #FFE4B5;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 .ds-solution-banner .why {
   color: #C8D2E0;

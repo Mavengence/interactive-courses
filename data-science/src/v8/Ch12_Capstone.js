@@ -198,7 +198,8 @@
       let i = 0;
       const interval = setInterval(() => {
         if (i < step.log.length) {
-          setLogLines((prev) => [...prev, step.log[i]]);
+          const line = step.log[i];
+          setLogLines((prev) => [...prev, line]);
           i++;
           if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
         } else {
@@ -246,8 +247,8 @@
           fontWeight: 700,
           background: done ? "rgba(100,226,181,0.2)" : active ? "rgba(209,255,58,0.15)" : "rgba(255,255,255,0.05)",
           border: done ? "1px solid rgba(100,226,181,0.5)" : active ? "1px solid rgba(209,255,58,0.4)" : "1px solid var(--hair)",
-          color: done ? "var(--mint)" : active ? "var(--lime)" : "var(--ink-4)"
-        } }, done ? "\u2713" : i + 1), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: done ? "var(--mint)" : active ? "var(--ink-1)" : "var(--ink-4)" } }, step.label));
+          color: done ? "var(--mint-ink)" : active ? "var(--lime-ink)" : "var(--ink-4)"
+        } }, done ? "\u2713" : i + 1), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: done ? "var(--mint-ink)" : active ? "var(--ink-1)" : "var(--ink-4)" } }, step.label));
       })), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", gap: 12 } }, /* @__PURE__ */ React.createElement("div", { ref: logRef, style: {
         fontFamily: "var(--font-mono)",
         fontSize: 12,
@@ -512,7 +513,7 @@
           /* @__PURE__ */ React.createElement("span", { style: {
             flex: 1,
             fontSize: 13.5,
-            color: done ? "var(--mint)" : "var(--ink-1)",
+            color: done ? "var(--mint-ink)" : "var(--ink-1)",
             textDecoration: done ? "line-through" : "none",
             transition: "color 0.2s"
           } }, item.label),
