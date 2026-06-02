@@ -467,6 +467,11 @@ textarea:focus, input:focus, select:focus {
   font-size: 0.88em;
   color: var(--cyan-deep);
   border: 1px solid var(--rule);
+  /* Long inline tokens (S3 paths, SQL clauses) must break instead of pushing
+     the narrow mobile column past the viewport. Only triggers when the token
+     can't fit — desktop layout is unaffected. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .prose blockquote {
   border-left: 3px solid var(--cyan);

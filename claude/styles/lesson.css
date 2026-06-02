@@ -191,3 +191,34 @@
 .nav-prev-next .title { font-family: var(--serif); font-weight: 600; color: var(--ink); margin-top: 4px; font-size: 1.05rem; }
 .nav-prev-next .next { text-align: right; }
 @media (max-width: 640px) { .nav-prev-next { grid-template-columns: 1fr; } }
+
+/* ===== Narrow-viewport widget overflow guards (<=480px) =====
+   The interactive widgets use inline grid/flex layouts with fixed track sizes
+   and nowrap buttons. On phones (down to 320px) these push past the viewport.
+   These rules only apply at <=480px, so desktop (>=720px) layout is untouched. */
+@media (max-width: 480px) {
+  /* Flex rows of [input flex:1] + [nowrap button]: a flex item's default
+     min-width:auto keeps the input from shrinking, so the button overflows.
+     Let the input collapse, and allow the row to wrap if still too tight. */
+  .card input,
+  .card textarea,
+  .card select { min-width: 0; }
+  .card .btn { max-width: 100%; }
+  /* Fixed two-column widget grids (1fr 1fr, 1.1fr 1fr, 140px 1fr, 1fr auto)
+     can't shrink below their content on a phone, so the right-hand panel
+     (usually a <pre>) is pushed past the edge. Collapse just these to a single
+     column; auto-fit/minmax grids already reflow and are left alone. */
+  .card div[style*="1fr 1fr"],
+  .card div[style*="1.1fr 1fr"],
+  .card div[style*="140px 1fr"],
+  .card div[style*="1fr auto"] {
+    grid-template-columns: 1fr !important;
+    min-width: 0;
+  }
+  .card [style*="grid-template-columns"] > * { min-width: 0; }
+  /* Code/pre inside widgets: keep wrapping, never force a min-content width. */
+  .card pre.code,
+  .card pre { max-width: 100%; min-width: 0; overflow-x: auto; overflow-wrap: anywhere; word-break: break-word; }
+  /* Long unbreakable tokens (ids, keys, paths) in drills must wrap. */
+  .card span, .card code, .card .mono { overflow-wrap: anywhere; }
+}

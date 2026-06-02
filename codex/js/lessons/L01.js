@@ -113,10 +113,13 @@ window.CX.L01 = {
         }
         .cx-L01-diagram-container {
           flex: 1;
+          min-width: 0;
         }
         .cx-L01-svg {
+          display: block;
           width: 100%;
           max-width: 400px;
+          height: auto;
         }
         .cx-L01-controls-container {
           display: flex;
@@ -216,6 +219,25 @@ window.CX.L01 = {
         @keyframes cx-L01-dash {
           to {
             stroke-dashoffset: -12;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .cx-L01-container {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 16px;
+          }
+          .cx-L01-diagram-container {
+            width: 100%;
+            order: -1;
+          }
+          .cx-L01-controls-container {
+            padding-top: 0;
+          }
+          .cx-L01-meter-container {
+            width: 100%;
+            padding-top: 0;
           }
         }
 

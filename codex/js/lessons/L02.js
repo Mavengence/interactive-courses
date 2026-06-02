@@ -151,6 +151,29 @@ window.CX.L02 = {
       @keyframes flash-red {
         50% { background: rgba(255, 0, 0, 0.5); }
       }
+
+      @media (max-width: 480px) {
+        .${ns}-box {
+          width: 130px;
+          height: 130px;
+        }
+        .${ns}-face {
+          width: 130px;
+          height: 130px;
+        }
+        .${ns}-face-top {
+          transform: rotateX(90deg) translateZ(65px);
+        }
+        .${ns}-face-left {
+          transform: rotateY(-90deg) translateZ(65px);
+        }
+        .${ns}-face-right {
+          transform: rotateY(0deg) translateZ(65px);
+        }
+        .${ns}-controls {
+          left: 8px;
+        }
+      }
     `;
     document.head.appendChild(style);
 

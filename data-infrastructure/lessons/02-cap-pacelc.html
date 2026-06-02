@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <title>02 · CAP, PACELC & The Latency Tax — Data Infra</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d0d14'/%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='none' stroke='%237c6fff' stroke-width='1.5' opacity='0.5'/%3E%3Cpath d='M10 21V11l6 7 6-7v10' fill='none' stroke='%2338bdf8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"/>
-<link rel="stylesheet" href="../styles/core.css?v=2"/>
+<link rel="stylesheet" href="../styles/core.css?v=3"/>
 <link rel="stylesheet" href="../styles/lesson.css?v=11"/>
 <style>
   /* ============================================================
@@ -89,6 +89,17 @@
     align-items: stretch;
   }
   @media (max-width: 880px) { .m2-th-stage { grid-template-columns: 1fr; } }
+  /* Grid items default to min-width:auto, so their min-content (2-up choice
+     buttons, SVG aspect box) forces the single-column track wider than a 320px
+     viewport. Let them shrink to the column and stack choices when tight. */
+  @media (max-width: 480px) {
+    .m2-th-svg-wrap, .m2-th-side, .m2-th-prompt, .m2-th-choices,
+    .m2-th-readout, .m2-th-toolbar { min-width: 0; }
+    .m2-th-choices { grid-template-columns: 1fr; }
+    .m2-th-choice { min-width: 0; overflow-wrap: anywhere; }
+    .m2-th-choice .sub, .m2-th-choice .ttl { overflow-wrap: anywhere; word-break: break-word; }
+    .m2-th-toolbar { flex-wrap: wrap; }
+  }
 
   .m2-th-svg-wrap {
     position: relative;
@@ -276,6 +287,10 @@
     align-items: stretch;
   }
   @media (max-width: 880px) { .m2-pc-stage { grid-template-columns: 1fr; } }
+  /* Same min-width:auto fix for the PACELC compass grid items. */
+  @media (max-width: 480px) {
+    .m2-pc-svg-wrap, .m2-pc-card { min-width: 0; }
+  }
 
   .m2-pc-svg-wrap {
     position: relative;

@@ -22,6 +22,13 @@
 .sf-overlay { position: relative; display: grid; gap: 6px; padding: 4px; }
 .sf-lane { display: grid; grid-template-columns: 264px 1fr; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid transparent; border-radius: 8px; transition: background 0.4s, border-color 0.4s; min-height: 52px; }
 .sf-lane.hit { background: color-mix(in oklch, var(--accent) 6%, var(--paper)); border-color: color-mix(in oklch, var(--accent) 35%, transparent); animation: sfLaneHit 0.7s ease-out; }
+/* On very narrow screens the fixed 264px label column can't sit beside the
+   pulse column without overflowing — stack them and let both shrink. */
+@media (max-width: 480px) {
+  .sf-lane { grid-template-columns: 1fr; gap: 6px; }
+  .sf-lane-l { min-width: 0; flex-wrap: wrap; }
+  .sf-pulse { min-width: 0; }
+}
 @keyframes sfLaneHit { 0% { transform: translateX(0); } 15% { transform: translateX(2px); } 100% { transform: translateX(0); } }
 .sf-lane-l { display: flex; align-items: center; gap: 12px; }
 .sf-num { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; color: var(--cyan-ink); letter-spacing: -0.04em; min-width: 36px; opacity: 0.7; }
@@ -91,6 +98,14 @@
 .kt-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .kt-overlay { position: relative; display: grid; grid-template-rows: auto auto auto; gap: 28px; }
 .kt-band { display: grid; grid-template-columns: 130px 1fr; align-items: center; gap: 14px; }
+/* Narrow screens: the 130px label column + 4-up partition grid overflow.
+   Stack the label above its content and drop partitions/consumers to 2-up. */
+@media (max-width: 480px) {
+  .kt-band { grid-template-columns: 1fr; gap: 8px; }
+  .kt-pgroup { grid-template-columns: repeat(2, 1fr); }
+  .kt-cgroup { grid-template-columns: repeat(2, 1fr); }
+  .kt-part, .kt-cons-box { min-width: 0; }
+}
 .kt-lbl { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
 .kt-prod-box { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--cyan-ink); border-radius: 999px; background: var(--cyan-wash); font-family: var(--mono); font-size: 0.82rem; color: var(--cyan-deep); width: max-content; }
 .kt-pgroup { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -280,13 +295,13 @@
  * ============================================================ */
 .idem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 6px; }
 @media (max-width: 900px) { .idem-grid { grid-template-columns: 1fr; } }
-.idem-card { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.idem-card { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--paper); padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .idem-num { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3); letter-spacing: 0.08em; }
 .idem-title { font-family: var(--mono); font-size: 0.98rem; font-weight: 700; color: var(--ink); }
 .idem-when { font-size: 0.78rem; color: var(--ink-3); font-style: italic; margin-top: -6px; }
-.idem-vis { background: var(--paper-2); border: 1px solid var(--rule-2); border-radius: 6px; padding: 8px; }
+.idem-vis { background: var(--paper-2); border: 1px solid var(--rule-2); border-radius: 6px; padding: 8px; min-width: 0; overflow: hidden; }
 .idem-svg { display: block; width: 100%; height: auto; }
 .idem-svg-h { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-3); }
 .idem-svg-row { font-family: var(--mono); font-size: 9px; fill: var(--ink-2); }
-.idem-sql { font-family: var(--mono); font-size: 0.74rem; line-height: 1.55; padding: 10px 12px; background: oklch(0.18 0.015 250); color: oklch(0.9 0.01 240); border-radius: 4px; margin: 0; white-space: pre; overflow-x: auto; }
+.idem-sql { font-family: var(--mono); font-size: 0.74rem; line-height: 1.55; padding: 10px 12px; background: oklch(0.18 0.015 250); color: oklch(0.9 0.01 240); border-radius: 4px; margin: 0; white-space: pre; overflow-x: auto; min-width: 0; max-width: 100%; }
 .idem-prop { font-family: var(--mono); font-size: 0.72rem; color: var(--ok); padding-top: 4px; border-top: 1px dashed var(--rule-2); }
