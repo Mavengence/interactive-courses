@@ -255,12 +255,12 @@ window.CX.L02 = {
         if (toggle.dataset.cap === 'net' && toggle.checked) {
           box.classList.add('net-warn');
           verificationPanel.textContent = 'NET ON supply-chain risk';
-          setTimeout(() => box.classList.remove('net-warn'), 1000);
+          setTimeout(() => { box.classList.remove('net-warn'); updateStatus(); }, 1000);
         }
         if (toggle.dataset.cap === 'secrets' && toggle.checked) {
           box.classList.add('secrets-warn');
           verificationPanel.textContent = 'SECRETS EXPOSED rotate after run';
-          setTimeout(() => box.classList.remove('secrets-warn'), 1000);
+          setTimeout(() => { box.classList.remove('secrets-warn'); updateStatus(); }, 1000);
         }
 
         if (toggledOnce.size === 5) {

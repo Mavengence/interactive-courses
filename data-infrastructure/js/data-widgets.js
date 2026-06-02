@@ -1214,7 +1214,7 @@
         </div>
         <div class="wm-legend">
           <span><i class="dot ok"></i> on time</span>
-          <span><i class="dot late"></i> late, within 3s budget</span>
+          <span><i class="dot late"></i> late, within 4s budget</span>
           <span><i class="dot drop"></i> dropped (past budget)</span>
           <span class="muted">y = event_time · x = processing_time</span>
         </div>
@@ -1695,7 +1695,8 @@
     const cvs = el.querySelector('.bfx-canvas');
     const ctx = cvs.getContext('2d');
     const N = 32, K = 3;
-    const bits = new Array(N).fill(0);
+    const bits = new Array(N).fill(0);      // animated/visual bit state
+    const committed = new Array(N).fill(0); // logical committed state (membership truth)
     let added = 0;
     let particles = []; // {x0,y0,x1,y1,t,dur,born,color,kind, label, hashIdx}
     let bitFlashes = new Map(); // i -> {born, dur, color}
@@ -1881,6 +1882,7 @@
     el.querySelector('[data-act="add"]').onclick = () => {
       const v = el.querySelector('[data-add]').value.trim(); if (!v) return;
       const hs = fire(v, 'add');
+      hs.forEach(h => { committed[h] = 1; }); // commit membership immediately (animation lags)
       added++;
       outcome = { kind:'add', key: v, hs };
       el.querySelector('[data-out]').innerHTML = `<b>added "${esc(v)}"</b> · 3 hashes → bits ${hs.join(', ')} are now 1`;
@@ -1889,7 +1891,7 @@
     el.querySelector('[data-act="check"]').onclick = () => {
       const v = el.querySelector('[data-check]').value.trim(); if (!v) return;
       const hs = fire(v, 'check');
-      const allSet = hs.every(h => bits[h]);
+      const allSet = hs.every(h => committed[h]); // test committed state — never a false negative
       setTimeout(() => {
         outcome = { kind: allSet ? 'maybe' : 'no', key: v, hs };
         el.querySelector('[data-out]').innerHTML = allSet
@@ -1898,7 +1900,7 @@
       }, 700);
     };
     el.querySelector('[data-act="reset"]').onclick = () => {
-      bits.fill(0); added = 0; outcome = null; particles = []; bitFlashes.clear();
+      bits.fill(0); committed.fill(0); added = 0; outcome = null; particles = []; bitFlashes.clear();
       el.querySelector('[data-out]').innerHTML = 'Reset.';
     };
     function resize(){

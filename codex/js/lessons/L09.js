@@ -136,7 +136,7 @@ window.CX.L09 = {
       ruff: { needed: false, name: 'ruff', purpose: 'python linter' },
       mypy: { needed: false, name: 'mypy', purpose: 'python types' },
       'docker-compose': { needed: true, name: 'docker-compose', purpose: 'container orchestration', command: 'docker compose up test-db OK' },
-      'postgres-test-db': { needed: true, name: 'postgres-test-db', purpose: 'isolated test database', command: 'npm ci OK' },
+      'postgres-test-db': { needed: true, name: 'postgres-test-db', purpose: 'isolated test database', command: 'pg_ctl start · test-db ready' },
       'make ci': { needed: true, name: 'make ci', purpose: 'CI entrypoint', command: 'make ci green OK' },
     };
 

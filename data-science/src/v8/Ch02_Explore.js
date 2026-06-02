@@ -373,13 +373,6 @@
       [-0.2, 0.4, 1, 0.7],
       [0.1, 0.55, 0.7, 1]
     ];
-    const corrMatrix = useMemo(() => {
-      return TRUE_CORR.map(
-        (row) => row.map(
-          (r, j) => j === row.indexOf(r) ? 1 : r * (1 - noise) + (Math.random() < 0.5 ? 1 : -1) * noise * 0.05
-        )
-      );
-    }, [noise]);
     const computedCorr = useMemo(() => {
       const rng = mulberry32(42 + Math.round(noise * 100));
       const raw = Array.from({ length: N_VARS }, () => []);

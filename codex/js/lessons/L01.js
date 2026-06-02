@@ -235,11 +235,13 @@ window.CX.L01 = {
     injectStyles();
     render();
 
-    const buttons = root.querySelector('.cx-L01-buttons');
-    buttons.addEventListener('click', (e) => {
-      if (!e.target.matches('.cx-L01-button')) return;
+    // Delegate on `root` (stable across renders); `.cx-L01-buttons` is
+    // recreated by every render() so binding there loses the listener.
+    root.addEventListener('click', (e) => {
+      const btn = e.target.closest('.cx-L01-button');
+      if (!btn) return;
 
-      const action = e.target.dataset.action;
+      const action = btn.dataset.action;
       switch (action) {
         case 'vague-task':
           state.task = 0.3;
@@ -257,6 +259,7 @@ window.CX.L01 = {
           state.task = 1.0;
           state.repo = 1.0;
           state.sandbox = 1.0;
+          state.weakened.clear();
           break;
       }
       render();
