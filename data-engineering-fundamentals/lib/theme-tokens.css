@@ -52,6 +52,12 @@
   --fg-success:          var(--theme-green);
   --fg-danger:           var(--theme-red);
   --fg-warning:          var(--theme-yellow);
+  /* AA-safe text variants of the semantic colors — use whenever the color is
+     applied to small/normal text on a light surface (the bright fills above
+     dip below 4.5:1 as text). Reserve --theme-green/-red for fills & icons. */
+  --fg-success-ink:      #27813C;
+  --fg-danger-ink:       #D61A39;
+  --fg-warning-ink:      #9E6609;
 
   /* ----- Borders --------------------------------------------------------- */
   --border:              1px solid var(--theme-gray-200);

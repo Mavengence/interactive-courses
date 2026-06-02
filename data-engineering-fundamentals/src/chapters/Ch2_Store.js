@@ -78,7 +78,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: "Store: <span class='accent'>one bad day</span> poisons every day that follows it.",
         hook: "Most tables are a photo of yesterday. <strong>Cumulative tables</strong> are the whole photo album: each day, you carry yesterday's state forward and merge in today's deltas. Elegant when clean, catastrophic when broken: one bad day taints every day after it until you backfill.",

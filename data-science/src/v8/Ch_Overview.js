@@ -14,6 +14,18 @@
     { id: "deploy", n: "11", title: "Deploy", tag: "alive in production", blurb: "Monitor drift. Retrain on signal, not schedule.", hue: "#1FAF7E" },
     { id: "cap", n: "12", title: "Capstone", tag: "the whole loop", blurb: "Ship one end-to-end. Noise \u2192 decision \u2192 feedback.", hue: "#E8318F" }
   ];
+  // AA-readable (>=4.5:1 on cream panel) darkened twin of each bright hue,
+  // used for small CTA text while the bright hue stays for dots/borders.
+  const HUE_INK = {
+    "#5B3EE8": "#4A2FCC",
+    "#1CA5D9": "#137A9C",
+    "#1FAF7E": "#178060",
+    "#6BCF3F": "#447F1C",
+    "#E8A031": "#946012",
+    "#F25F3A": "#BE4020",
+    "#E8318F": "#BE216F",
+    "#D83A3A": "#B02A2A"
+  };
   function FlowingPipeline({ onStageClick }) {
     const t = useTicker(true);
     const [hover, setHover] = useState(null);
@@ -265,7 +277,7 @@
       {
         className: "ov-course",
         key: s.id,
-        style: { "--hue": s.hue },
+        style: { "--hue": s.hue, "--hue-ink": HUE_INK[s.hue] || s.hue },
         onClick: () => goTo(s.id)
       },
       /* @__PURE__ */ React.createElement("div", { className: "ov-course-top" }, /* @__PURE__ */ React.createElement("span", { className: "ov-course-n" }, s.n), /* @__PURE__ */ React.createElement("span", { className: "ov-course-dot", style: { background: s.hue, color: s.hue } })),

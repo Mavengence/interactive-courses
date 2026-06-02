@@ -9,6 +9,10 @@
     const xp = window.Progress?.getXP() || 0;
     const isLesson = !!opts.lesson;
     const pathPrefix = isLesson ? '../' : '';
+    // Back to the course catalogue. Resolve relative to the repo root so it works
+    // both locally (served at root) and on Pages under /interactive-courses/.
+    // Lesson pages live one level deeper, so they need an extra '../'.
+    const catalogueHref = location.pathname.includes('/lessons/') ? '../../' : '../';
     const el = document.createElement('div');
     el.className = 'topbar';
     el.innerHTML = `
@@ -30,6 +34,9 @@
             </span>
             <span class="brand-tagline">a senior-IC playbook</span>
           </span>
+        </a>
+        <a class="topbar-back" href="${catalogueHref}" aria-label="Back to all courses">
+          <span class="tb-arrow" aria-hidden="true">←</span><span class="tb-label-full"> All courses</span><span class="tb-label-short"> Courses</span>
         </a>
         <nav>
           <a href="${pathPrefix}index.html#tracks">Lessons</a>

@@ -23,6 +23,13 @@
   --warn: oklch(0.68 0.15 40);
   --bad: oklch(0.58 0.18 25);
   --info: oklch(0.55 0.09 240);
+  /* Text-on-light variants — same hue, darkened to clear WCAG AA (>=4.5:1 on
+     paper). Use these whenever a semantic colour is the *text* colour over a
+     light surface; keep the brighter base tokens for fills, borders, icons,
+     strokes, and text sitting on dark (--ink) backgrounds. */
+  --ok-ink: oklch(0.5 0.13 150);
+  --warn-ink: oklch(0.53 0.15 40);
+  --bad-ink: oklch(0.535 0.18 25);
 
   --shadow-sm: 0 1px 0 rgba(40,25,10,.04), 0 1px 2px rgba(40,25,10,.06);
   --shadow-md: 0 2px 4px rgba(40,25,10,.05), 0 8px 24px rgba(40,25,10,.08);
@@ -334,6 +341,24 @@ textarea:focus, input:focus, select:focus {
 }
 .topbar nav a { color: var(--ink-2); }
 .topbar nav a:hover { color: var(--ink); text-decoration: none; }
+/* "All courses" back link — styled to sit natively in the topbar nav,
+   slightly emphasised (amber ink + subtle wash) so it reads as the way out. */
+.topbar nav a.nav-back {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--amber-ink);
+  font-weight: 600;
+  padding: 4px 11px;
+  border: 1px solid var(--rule-2);
+  border-radius: 999px;
+  background: var(--amber-wash);
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.topbar nav a.nav-back:hover {
+  color: var(--amber-ink);
+  background: color-mix(in oklch, var(--amber-wash) 60%, var(--amber) 18%);
+  border-color: color-mix(in oklch, var(--amber-ink) 35%, transparent);
+}
+.topbar nav a.nav-back span { font-weight: 700; }
 .xp-pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 4px 10px 4px 6px;
@@ -357,6 +382,13 @@ textarea:focus, input:focus, select:focus {
   .topbar-inner { padding: 12px 16px; gap: 12px; }
   .topbar nav { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
   .topbar nav a { display: none; }
+  /* Keep the way out visible on mobile — the other text links are dropped,
+     but "All courses" is the primary escape hatch and must stay reachable. */
+  .topbar nav a.nav-back {
+    display: inline-flex;
+    padding: 3px 9px;
+    font-size: 0.74rem;
+  }
   .xp-pill { padding: 3px 9px 3px 5px; gap: 6px; font-size: 0.74rem; }
   .xp-pill .spark { width: 14px; height: 14px; }
   .brand-word-1 { font-size: 1.02rem; }
@@ -442,8 +474,16 @@ pre.code {
 }
 pre.code .tok-k { color: oklch(0.78 0.12 60); }
 pre.code .tok-s { color: oklch(0.82 0.1 150); }
-pre.code .tok-c { color: oklch(0.55 0.02 60); font-style: italic; }
+pre.code .tok-c { color: oklch(0.65 0.02 60); font-style: italic; }
 pre.code .tok-n { color: oklch(0.78 0.08 250); }
+
+/* Light-surface code (e.g. a pre.code forced onto paper). The default token
+   palette is tuned for the dark code block; on a light background those bright
+   hues drop well below AA, so re-map them to darker, AA-passing variants. */
+pre.code.on-light .tok-k { color: oklch(0.5 0.13 52); }
+pre.code.on-light .tok-s { color: oklch(0.46 0.12 150); }
+pre.code.on-light .tok-c { color: oklch(0.5 0.02 60); }
+pre.code.on-light .tok-n { color: oklch(0.46 0.12 250); }
 
 /* ===== RunConsole — shared streaming-output drawer =====
    Fixed height when open (internal scroll), smooth open/close.

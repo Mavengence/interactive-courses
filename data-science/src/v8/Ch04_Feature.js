@@ -46,10 +46,10 @@
       return { headers, rows };
     }, [mode]);
     const colorFor = (mode2, val, colIdx) => {
-      if (mode2 === "onehot") return val === "1" ? "#D1FF3A" : "#2a2a2a";
-      if (mode2 === "label") return colIdx === 1 ? `hsl(${Number(val) * 40}, 65%, 52%)` : "transparent";
-      if (mode2 === "target") return colIdx === 1 ? `hsl(${(Number(val) - 6) * 120}, 60%, 48%)` : "transparent";
-      if (mode2 === "frequency") return colIdx === 2 ? `hsl(200, 70%, ${70 - Number(val) * 80}%)` : "transparent";
+      if (mode2 === "onehot") return val === "1" ? "#D1FF3A" : "var(--bg-hi)";
+      if (mode2 === "label") return colIdx === 1 ? `hsl(${Number(val) * 40}, 60%, 64%)` : "transparent";
+      if (mode2 === "target") return colIdx === 1 ? `hsl(${(Number(val) - 6) * 120}, 55%, 64%)` : "transparent";
+      if (mode2 === "frequency") return colIdx === 2 ? `hsl(200, 65%, ${Math.max(60, 84 - Number(val) * 80)}%)` : "transparent";
       return "transparent";
     };
     return /* @__PURE__ */ React.createElement(
@@ -78,18 +78,19 @@
       ))),
       /* @__PURE__ */ React.createElement("div", { style: { overflowX: "auto", marginTop: 16 } }, /* @__PURE__ */ React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontFamily: "'JetBrains Mono', monospace", fontSize: 12 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, tableData.headers.map((h, i) => /* @__PURE__ */ React.createElement("th", { key: i, style: {
         padding: "6px 10px",
-        borderBottom: "1px solid #333",
+        borderBottom: "1px solid var(--hair-2)",
         textAlign: "left",
-        color: "#8A8680",
+        color: "var(--ink-3)",
         fontWeight: 600,
         whiteSpace: "nowrap"
-      } }, h)))), /* @__PURE__ */ React.createElement("tbody", null, tableData.rows.map((row, ri) => /* @__PURE__ */ React.createElement("tr", { key: ri, style: { borderBottom: "1px solid #1e1e1e" } }, row.map((cell, ci) => {
+      } }, h)))), /* @__PURE__ */ React.createElement("tbody", null, tableData.rows.map((row, ri) => /* @__PURE__ */ React.createElement("tr", { key: ri, style: { borderBottom: "1px solid var(--hair)" } }, row.map((cell, ci) => {
         const bg = colorFor(mode, cell, ci);
-        const isHighlight = bg !== "transparent" && bg !== "#2a2a2a";
+        const isHighlight = bg !== "transparent" && bg !== "var(--bg-hi)";
+        const txt = ci === 0 ? "var(--ink-1)" : !isHighlight ? "var(--ink-2)" : "#0A0A0A";
         return /* @__PURE__ */ React.createElement("td", { key: ci, style: {
           padding: "5px 10px",
           background: ci === 0 ? "transparent" : bg,
-          color: isHighlight ? "#0a0a0a" : bg === "#2a2a2a" ? "#444" : "#e0e0e0",
+          color: txt,
           fontWeight: ci === 0 ? 400 : 600,
           transition: "background 0.3s"
         } }, cell);
@@ -97,20 +98,20 @@
       mode === "label" && /* @__PURE__ */ React.createElement("div", { style: {
         marginTop: 12,
         padding: "8px 12px",
-        background: "#3a1a1a",
-        border: "1px solid #7a2020",
+        background: "rgba(216,58,58,0.08)",
+        border: "1px solid rgba(216,58,58,0.3)",
         borderRadius: 6,
         fontSize: 12,
-        color: "#ff8080"
+        color: "var(--bad-ink)"
       } }, "\u26A0 Linear models will treat Berlin (5) as 5\xD7 New York (1). This ordering is meaningless and injects noise."),
       mode === "target" && /* @__PURE__ */ React.createElement("div", { style: {
         marginTop: 12,
         padding: "8px 12px",
-        background: "#1a2a1a",
-        border: "1px solid #2a6a2a",
+        background: "rgba(31,175,126,0.08)",
+        border: "1px solid rgba(31,175,126,0.3)",
         borderRadius: 6,
         fontSize: 12,
-        color: "#80cc80"
+        color: "var(--good-ink)"
       } }, "\u2713 Computed out-of-fold (correct). Values shown are held-out fold means \u2014 no target leakage.")
     );
   }
@@ -198,7 +199,7 @@
         marginTop: 8,
         fontSize: 12,
         fontFamily: "'JetBrains Mono', monospace"
-      } }, /* @__PURE__ */ React.createElement("span", { style: { color: complexityColor } }, complexityLabel), /* @__PURE__ */ React.createElement("span", { style: { color: "#8A8680" } }, "Features: ", degree === 1 ? "x" : degree === 2 ? "x, x\xB2" : "x, x\xB2, x\xB3"), /* @__PURE__ */ React.createElement("span", { style: { color: "#8A8680" } }, "Complexity: ", "\u25CF".repeat(degree), "\u25CB".repeat(3 - degree)))),
+      } }, /* @__PURE__ */ React.createElement("span", { style: { color: inkOf(complexityColor) } }, complexityLabel), /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-3)" } }, "Features: ", degree === 1 ? "x" : degree === 2 ? "x, x\xB2" : "x, x\xB2, x\xB3"), /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-3)" } }, "Complexity: ", "\u25CF".repeat(degree), "\u25CB".repeat(3 - degree)))),
       /* @__PURE__ */ React.createElement("svg", { viewBox: `0 0 ${W} ${H}`, style: { width: "100%", display: "block" } }, [-0.5, 0, 0.5, 1].map((yv) => /* @__PURE__ */ React.createElement(
         "line",
         {
@@ -329,9 +330,9 @@
         const barW = Math.round(score * 100);
         return /* @__PURE__ */ React.createElement("div", { key: f.name, style: {
           padding: "10px 12px",
-          border: `1.5px solid ${isKept ? "#3a5a1a" : "#3a1a1a"}`,
+          border: `1.5px solid ${isKept ? "rgba(31,175,126,0.4)" : "rgba(216,58,58,0.35)"}`,
           borderRadius: 8,
-          background: isKept ? "#0f1f08" : "#1a0808",
+          background: isKept ? "rgba(31,175,126,0.08)" : "rgba(216,58,58,0.07)",
           transition: "background 0.35s, border-color 0.35s",
           position: "relative",
           overflow: "hidden"
@@ -341,26 +342,26 @@
           bottom: 0,
           height: 3,
           width: `${barW}%`,
-          background: isKept ? "#D1FF3A" : "#4a1a1a",
+          background: isKept ? "var(--good)" : "rgba(216,58,58,0.45)",
           transition: "width 0.4s, background 0.35s"
         } }), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", { style: {
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 12,
-          color: isKept ? "#D1FF3A" : "#6a3a3a"
+          color: isKept ? "var(--good-ink)" : "var(--bad-ink)"
         } }, f.name), /* @__PURE__ */ React.createElement("span", { style: {
           fontSize: 11,
           fontFamily: "'JetBrains Mono', monospace",
-          color: isKept ? "#aaa" : "#5a2a2a"
-        } }, score.toFixed(2))), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: isKept ? "#5a8a30" : "#6a3030", marginTop: 3 } }, isKept ? "\u2713 KEEP" : "\u2717 DROP", " \xB7 ", scoreLabel));
+          color: isKept ? "var(--ink-2)" : "var(--bad-ink)"
+        } }, score.toFixed(2))), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: isKept ? "var(--good-ink)" : "var(--bad-ink)", marginTop: 3 } }, isKept ? "\u2713 KEEP" : "\u2717 DROP", " \xB7 ", scoreLabel));
       })),
       method === "corr" && /* @__PURE__ */ React.createElement("div", { style: {
         marginTop: 10,
         padding: "7px 11px",
-        background: "#1a1a2a",
-        border: "1px solid #3a3a6a",
+        background: "rgba(91,62,232,0.07)",
+        border: "1px solid rgba(91,62,232,0.25)",
         borderRadius: 6,
         fontSize: 12,
-        color: "#8080cc"
+        color: "var(--violet-ink)"
       } }, "page_views dropped: highly correlated with session_dur (r = 0.93). Keeping both adds no information.")
     );
   }
@@ -421,16 +422,16 @@
           onChange: (e) => setFeatureB(Number(e.target.value)),
           style: { width: "100%" }
         }
-      )), /* @__PURE__ */ React.createElement("div", { className: "sim-ctrl", style: { marginTop: 8 } }, /* @__PURE__ */ React.createElement("label", null, "Heatmap view"), /* @__PURE__ */ React.createElement("div", { className: "seg" }, /* @__PURE__ */ React.createElement("button", { className: view === "interaction" ? "on" : "", onClick: () => setView("interaction") }, "A\xD7B"), /* @__PURE__ */ React.createElement("button", { className: view === "additive" ? "on" : "", onClick: () => setView("additive") }, "A+B"))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 14, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "#8A8680" } }, "A + B = ", /* @__PURE__ */ React.createElement("span", { style: { color: "#e0e0e0" } }, currentAdditive)), /* @__PURE__ */ React.createElement("div", { style: { color: "#8A8680", marginTop: 4 } }, "A \xD7 B = ", /* @__PURE__ */ React.createElement("span", { style: { color: "#D1FF3A" } }, currentInteraction)), /* @__PURE__ */ React.createElement("div", { style: {
+      )), /* @__PURE__ */ React.createElement("div", { className: "sim-ctrl", style: { marginTop: 8 } }, /* @__PURE__ */ React.createElement("label", null, "Heatmap view"), /* @__PURE__ */ React.createElement("div", { className: "seg" }, /* @__PURE__ */ React.createElement("button", { className: view === "interaction" ? "on" : "", onClick: () => setView("interaction") }, "A\xD7B"), /* @__PURE__ */ React.createElement("button", { className: view === "additive" ? "on" : "", onClick: () => setView("additive") }, "A+B"))), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 14, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "A + B = ", /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-1)" } }, currentAdditive)), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)", marginTop: 4 } }, "A \xD7 B = ", /* @__PURE__ */ React.createElement("span", { style: { color: "var(--lime-ink)" } }, currentInteraction)), /* @__PURE__ */ React.createElement("div", { style: {
         marginTop: 6,
         padding: "6px 8px",
-        background: "#1a1a1a",
+        background: "var(--bg-hi)",
         borderRadius: 5,
         fontSize: 11,
-        color: delta > 0 ? "#D1FF3A" : "#ff8080"
-      } }, delta > 0 ? `Interaction adds +${delta} signal` : delta < 0 ? `Interaction gives ${delta} vs additive` : "Equal at this point")), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 12, fontSize: 11, color: "#6a6a6a", lineHeight: 1.5 } }, "Real example:", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("span", { style: { color: "#8a8a8a" } }, "CTR \u2248 user_age_score \xD7 ad_relevance"), /* @__PURE__ */ React.createElement("br", null), "High relevance + wrong age = low CTR", /* @__PURE__ */ React.createElement("br", null), "Both high = ", /* @__PURE__ */ React.createElement("span", { style: { color: "#D1FF3A" } }, "disproportionate lift"))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center" } }, /* @__PURE__ */ React.createElement("div", { style: {
+        color: delta > 0 ? "var(--lime-ink)" : "var(--bad-ink)"
+      } }, delta > 0 ? `Interaction adds +${delta} signal` : delta < 0 ? `Interaction gives ${delta} vs additive` : "Equal at this point")), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 12, fontSize: 11, color: "var(--ink-3)", lineHeight: 1.5 } }, "Real example:", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-2)" } }, "CTR \u2248 user_age_score \xD7 ad_relevance"), /* @__PURE__ */ React.createElement("br", null), "High relevance + wrong age = low CTR", /* @__PURE__ */ React.createElement("br", null), "Both high = ", /* @__PURE__ */ React.createElement("span", { style: { color: "var(--lime-ink)" } }, "disproportionate lift"))), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center" } }, /* @__PURE__ */ React.createElement("div", { style: {
         fontSize: 11,
-        color: "#8A8680",
+        color: "var(--ink-3)",
         marginBottom: 6,
         fontFamily: "'JetBrains Mono', monospace"
       } }, view === "interaction" ? "A \xD7 B output" : "A + B output", " (A\u2192 B\u2191)"), /* @__PURE__ */ React.createElement("svg", { viewBox: `0 0 ${W + 20} ${H + 20}`, style: { width: Math.min(280, W + 20), display: "block" } }, grid.map(

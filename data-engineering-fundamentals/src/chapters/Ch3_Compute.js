@@ -104,7 +104,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: "Compute: <span class='accent'>the planner bets on statistics.</span> Wrong stats, wrong plan.",
         hook: "Every JOIN is a bet the planner makes against table statistics. Broadcast or shuffle. If the stats are stale, it broadcasts a 5 GB table and OOMs 400 workers simultaneously. The SQL didn't change. The statistics did.",

@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>10 · Idempotency, Backfills, Exactly-Once — Data Infra</title>
-<link rel="stylesheet" href="../styles/core.css?v=1"/>
+<link rel="stylesheet" href="../styles/core.css?v=2"/>
 <link rel="stylesheet" href="../styles/lesson.css?v=11"/>
 <link rel="stylesheet" href="../styles/data-widgets.css?v=10"/>
 </head>
@@ -182,7 +182,7 @@ ON CONFLICT (event_id)
               </tr>
               <tr style="border-bottom: 1px dashed var(--rule-2);">
                 <td style="padding:4px 8px; color: var(--cyan-deep);">Kafka → Postgres</td>
-                <td style="padding:4px 8px; color: #cf8a3f;">At-least-once + idempotent</td>
+                <td style="padding:4px 8px; color: #a8641f;">At-least-once + idempotent</td>
                 <td style="padding:4px 8px; color: var(--ink-2);">UPSERT on key or ON CONFLICT DO NOTHING</td>
               </tr>
               <tr>
@@ -246,7 +246,7 @@ ON CONFLICT (event_id)
 
 <script src="../js/progress.js"></script>
 <script src="../js/lessons.js?v=3"></script>
-<script src="../js/topbar.js?v=2"></script>
+<script src="../js/topbar.js?v=4"></script>
 <script src="../js/toast.js"></script>
 <script src="../js/widgets.js"></script>
 <script src="../js/data-widgets.js?v=13"></script>

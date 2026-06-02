@@ -81,7 +81,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: "Ingest: <span class='accent'>where data is born,</span> and what it costs to trust it.",
         hook: "Events are captured live on the edge and land in two places: a <strong>sampled, real-time store</strong> (ClickHouse) for on-call; and an <strong>exact, batch warehouse</strong> (Snowflake) for accounting. The bridge between them is a watermark: a line past which late events are dropped. Drag it wrong and you ship wrong numbers.",

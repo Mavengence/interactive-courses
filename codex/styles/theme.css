@@ -325,6 +325,36 @@ pre, .block-mono, .code-block {
   background: var(--bg-elevated) !important;
 }
 
+/* Back to catalogue — native pill on the light topbar. */
+.topbar .topbar-back {
+  flex-shrink: 0;
+  color: var(--fg-secondary) !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--rule-strong) !important;
+  border-radius: 999px !important;
+  padding: 6px 12px 6px 10px !important;
+  gap: 6px;
+}
+.topbar .topbar-back .tb-arrow {
+  font-size: 1.05em;
+  line-height: 1;
+  transition: transform 200ms cubic-bezier(.2,.7,.2,1);
+}
+.topbar .topbar-back:hover {
+  color: var(--fg-primary) !important;
+  background: rgba(11, 13, 16, 0.06) !important;
+  border-color: var(--fg-muted) !important;
+}
+.topbar .topbar-back:hover .tb-arrow { transform: translateX(-2px); }
+.topbar .topbar-back:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}
+@media (max-width: 560px) {
+  .topbar .topbar-back .tb-back-label { display: none; }
+  .topbar .topbar-back { padding: 6px 10px !important; }
+}
+
 /* Progress badge */
 .topbar .progress-pill,
 .topbar .xp-pill,
@@ -1324,7 +1354,16 @@ a[class*="start-"] {
   gap: 8px;
 }
 .btn-primary:hover,
-a.btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+a.btn-primary:hover,
+.btn-primary:focus,
+a.btn-primary:focus,
+.btn-primary:active,
+a.btn-primary:active {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  color: var(--bg-page) !important;
+  -webkit-text-fill-color: var(--bg-page) !important;
+}
 .btn-secondary,
 a.btn-secondary {
   background: transparent !important;

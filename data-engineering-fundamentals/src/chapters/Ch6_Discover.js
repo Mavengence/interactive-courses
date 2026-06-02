@@ -354,7 +354,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: `Discover: <span class='accent'>six shortcuts</span> replace four hours of code spelunking.`,
         hook: `A consumer's first question is always the same: "is this the right table?" The answer should be instant. ${N.palette} shortcuts, ${N.datasetspec} metadata files, and ${N.open_lineage} lineage turn <em>hours of Snowflake code archaeology</em> into <em>three-character commands</em>. Learn the six and you are faster than 90% of the org.`,

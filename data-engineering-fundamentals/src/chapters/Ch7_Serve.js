@@ -116,7 +116,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: "Serve: <span class='accent'>five teams.</span> Five DAU numbers. One meeting.",
         hook: "The warehouse has the right number. Nobody can agree what it is. Without a metrics layer, every team defines DAU in their dashboard SQL: independently, slightly differently, each plausible. You cannot reconcile them after the meeting. You can only prevent it before.",

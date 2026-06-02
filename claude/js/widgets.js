@@ -88,7 +88,7 @@ function PromptCompare({ lessonId, cpId, weak, strong, task = "Write a launch em
     setLoading(false);
     if (cpId) window.CourseProgress.completeCheckpoint(lessonId, cpId, 15);
   };
-  return /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("div", { className: "card-title" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "eyebrow" }, "compare"), /* @__PURE__ */ React.createElement("h3", null, "Run both, see the gap")), /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: run, disabled: loading }, loading ? /* @__PURE__ */ React.createElement(React.Fragment, null, "Running both ", /* @__PURE__ */ React.createElement(Dots, null)) : "Run both \u2192")), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "start" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--bad)" } }, "weak prompt"), /* @__PURE__ */ React.createElement("pre", { className: "code", style: { marginTop: 6, maxHeight: 150, overflowY: "auto", fontSize: ".78rem", whiteSpace: "pre-wrap", wordBreak: "break-word" } }, weak), /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("div", { className: "card-title" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "eyebrow" }, "compare"), /* @__PURE__ */ React.createElement("h3", null, "Run both, see the gap")), /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: run, disabled: loading }, loading ? /* @__PURE__ */ React.createElement(React.Fragment, null, "Running both ", /* @__PURE__ */ React.createElement(Dots, null)) : "Run both \u2192")), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "start" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--bad-ink)" } }, "weak prompt"), /* @__PURE__ */ React.createElement("pre", { className: "code", style: { marginTop: 6, maxHeight: 150, overflowY: "auto", fontSize: ".78rem", whiteSpace: "pre-wrap", wordBreak: "break-word" } }, weak), /* @__PURE__ */ React.createElement(
     RunConsole,
     {
       loading,
@@ -99,7 +99,7 @@ function PromptCompare({ lessonId, cpId, weak, strong, task = "Write a launch em
       height: 220,
       emptyHint: "Output appears here."
     }
-  )), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--ok)" } }, "strong prompt"), /* @__PURE__ */ React.createElement("pre", { className: "code", style: { marginTop: 6, maxHeight: 150, overflowY: "auto", fontSize: ".78rem", whiteSpace: "pre-wrap", wordBreak: "break-word" } }, strong), /* @__PURE__ */ React.createElement(
+  )), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--ok-ink)" } }, "strong prompt"), /* @__PURE__ */ React.createElement("pre", { className: "code", style: { marginTop: 6, maxHeight: 150, overflowY: "auto", fontSize: ".78rem", whiteSpace: "pre-wrap", wordBreak: "break-word" } }, strong), /* @__PURE__ */ React.createElement(
     RunConsole,
     {
       loading,
@@ -152,7 +152,7 @@ ${v}
       height: 280,
       emptyHint: "Submit a prompt to get a graded breakdown."
     },
-    result ? /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "auto 1fr", gap: 20, alignItems: "start" } }, /* @__PURE__ */ React.createElement(ScoreDial, { score }), /* @__PURE__ */ React.createElement("div", { style: { fontSize: ".9rem" } }, result.strengths && /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 10 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--ok)" } }, "strengths"), /* @__PURE__ */ React.createElement("ul", { style: { margin: "4px 0 0 18px", padding: 0 } }, result.strengths.map((x, i) => /* @__PURE__ */ React.createElement("li", { key: i }, x)))), result.weaknesses && /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 10 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--bad)" } }, "weaknesses"), /* @__PURE__ */ React.createElement("ul", { style: { margin: "4px 0 0 18px", padding: 0 } }, result.weaknesses.map((x, i) => /* @__PURE__ */ React.createElement("li", { key: i }, x)))), result.oneBetterRewrite && /* @__PURE__ */ React.createElement("details", { style: { marginTop: 8 } }, /* @__PURE__ */ React.createElement("summary", { style: { cursor: "pointer", fontWeight: 600 } }, "See a stronger rewrite"), /* @__PURE__ */ React.createElement("pre", { className: "code", style: { marginTop: 8, whiteSpace: "pre-wrap" } }, result.oneBetterRewrite)), result.raw && /* @__PURE__ */ React.createElement("div", { className: "small muted" }, "Couldn't parse response. Raw: ", /* @__PURE__ */ React.createElement("pre", { style: { whiteSpace: "pre-wrap", fontSize: ".8rem" } }, result.raw)))) : loading ? /* @__PURE__ */ React.createElement("div", { className: "rc-loading" }, /* @__PURE__ */ React.createElement(Dots, null), " ", /* @__PURE__ */ React.createElement("span", { className: "small muted", style: { marginLeft: 8 } }, "grading against the rubric\u2026")) : null
+    result ? /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "auto 1fr", gap: 20, alignItems: "start" } }, /* @__PURE__ */ React.createElement(ScoreDial, { score }), /* @__PURE__ */ React.createElement("div", { style: { fontSize: ".9rem" } }, result.strengths && /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 10 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--ok-ink)" } }, "strengths"), /* @__PURE__ */ React.createElement("ul", { style: { margin: "4px 0 0 18px", padding: 0 } }, result.strengths.map((x, i) => /* @__PURE__ */ React.createElement("li", { key: i }, x)))), result.weaknesses && /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 10 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { color: "var(--bad-ink)" } }, "weaknesses"), /* @__PURE__ */ React.createElement("ul", { style: { margin: "4px 0 0 18px", padding: 0 } }, result.weaknesses.map((x, i) => /* @__PURE__ */ React.createElement("li", { key: i }, x)))), result.oneBetterRewrite && /* @__PURE__ */ React.createElement("details", { style: { marginTop: 8 } }, /* @__PURE__ */ React.createElement("summary", { style: { cursor: "pointer", fontWeight: 600 } }, "See a stronger rewrite"), /* @__PURE__ */ React.createElement("pre", { className: "code", style: { marginTop: 8, whiteSpace: "pre-wrap" } }, result.oneBetterRewrite)), result.raw && /* @__PURE__ */ React.createElement("div", { className: "small muted" }, "Couldn't parse response. Raw: ", /* @__PURE__ */ React.createElement("pre", { style: { whiteSpace: "pre-wrap", fontSize: ".8rem" } }, result.raw)))) : loading ? /* @__PURE__ */ React.createElement("div", { className: "rc-loading" }, /* @__PURE__ */ React.createElement(Dots, null), " ", /* @__PURE__ */ React.createElement("span", { className: "small muted", style: { marginLeft: 8 } }, "grading against the rubric\u2026")) : null
   ));
 }
 function ScoreDial({ score }) {
@@ -222,8 +222,8 @@ Give kind, concrete feedback in 2 sentences explaining why the correct answer is
       },
       /* @__PURE__ */ React.createElement("span", { className: "mono", style: { color: "var(--ink-3)", marginRight: 10 } }, String.fromCharCode(65 + i)),
       opt,
-      isCorrect && /* @__PURE__ */ React.createElement("span", { style: { float: "right", color: "var(--ok)" } }, "\u2713"),
-      isWrong && /* @__PURE__ */ React.createElement("span", { style: { float: "right", color: "var(--bad)" } }, "\u2717")
+      isCorrect && /* @__PURE__ */ React.createElement("span", { style: { float: "right", color: "var(--ok-ink)" } }, "\u2713"),
+      isWrong && /* @__PURE__ */ React.createElement("span", { style: { float: "right", color: "var(--bad-ink)" } }, "\u2717")
     );
   })), !show ? /* @__PURE__ */ React.createElement("button", { className: "btn primary", style: { marginTop: 14 }, onClick: submit, disabled: pick === null }, "Submit answer") : /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", { style: { marginTop: 14, padding: "12px 14px", background: "var(--paper-2)", borderRadius: 10, fontSize: ".9rem", lineHeight: 1.55 } }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { marginBottom: 6 } }, "explanation"), explanation), /* @__PURE__ */ React.createElement(
     RunConsole,
@@ -436,7 +436,7 @@ function DragReorder({ lessonId, cpId, blocks, correctOrder, prompt }) {
         "\u2193"
       ))
     );
-  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, gap: 14, flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { className: "small", style: { color: checked ? ok ? "var(--ok)" : "var(--bad)" : "var(--ink-3)", fontWeight: checked ? 600 : 400 } }, checked ? ok ? "\u2713 Perfect \u2014 that's the template." : "\u2717 Not quite. Green rows are in the right place." : "Order them, then check."), /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: check }, "Check order")));
+  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, gap: 14, flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { className: "small", style: { color: checked ? ok ? "var(--ok-ink)" : "var(--bad-ink)" : "var(--ink-3)", fontWeight: checked ? 600 : 400 } }, checked ? ok ? "\u2713 Perfect \u2014 that's the template." : "\u2717 Not quite. Green rows are in the right place." : "Order them, then check."), /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: check }, "Check order")));
 }
 function Dot() {
   return /* @__PURE__ */ React.createElement("span", { style: { width: 3, height: 3, borderRadius: "50%", background: "var(--ink-3)", display: "block" } });
@@ -522,10 +522,10 @@ function SemanticSpace({ lessonId, cpId }) {
   const [loading, setLoading] = useState(false);
   const [highlight, setHighlight] = useState(null);
   const clusters = {
-    tech: "oklch(.6 .15 250)",
-    pm: "oklch(.62 .14 310)",
-    coffee: "oklch(.6 .14 40)",
-    music: "oklch(.58 .15 150)",
+    tech: "oklch(.48 .15 250)",
+    pm: "oklch(.48 .14 310)",
+    coffee: "oklch(.48 .14 40)",
+    music: "oklch(.48 .15 150)",
     user: "var(--amber-ink)"
   };
   const place = async () => {
@@ -736,7 +736,7 @@ Subject line, then body. No sign-off.`,
     height: 380,
     fontFamily: stageIdx === 2 ? "var(--sans)" : "var(--mono)",
     color: "var(--ink)"
-  } }, outputs[stageIdx] || /* @__PURE__ */ React.createElement("span", { className: "muted small", style: { fontFamily: "var(--sans)", fontStyle: "italic" } }, 'Hit "Run stage ', stageIdx + 1, `" to see Claude's response. Try stages 1 \u2192 2 \u2192 3 to feel the jump.`), loading[stageIdx] && /* @__PURE__ */ React.createElement("span", { className: "caret", style: { display: "inline-block", width: 8, height: "1em", background: "var(--amber-ink)", verticalAlign: "-2px", animation: "blink 1s step-end infinite", marginLeft: 2 } })), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", gap: 10, color: outputs[0] && outputs[2] && stageIdx === 2 ? "var(--ok)" : "transparent", fontSize: ".88rem", minHeight: 24 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: "1.2rem" } }, "\u2197"), /* @__PURE__ */ React.createElement("span", null, outputs[0] && outputs[2] && stageIdx === 2 ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", null, Math.round(outputs[2].length / Math.max(1, outputs[0].length) * 100) / 100, "\xD7"), " the substance \u2014 and actually usable.") : "\xA0")))), /* @__PURE__ */ React.createElement("style", null, `@keyframes blink { 50% { opacity: 0; } }`));
+  } }, outputs[stageIdx] || /* @__PURE__ */ React.createElement("span", { className: "muted small", style: { fontFamily: "var(--sans)", fontStyle: "italic" } }, 'Hit "Run stage ', stageIdx + 1, `" to see Claude's response. Try stages 1 \u2192 2 \u2192 3 to feel the jump.`), loading[stageIdx] && /* @__PURE__ */ React.createElement("span", { className: "caret", style: { display: "inline-block", width: 8, height: "1em", background: "var(--amber-ink)", verticalAlign: "-2px", animation: "blink 1s step-end infinite", marginLeft: 2 } })), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", gap: 10, color: outputs[0] && outputs[2] && stageIdx === 2 ? "var(--ok-ink)" : "transparent", fontSize: ".88rem", minHeight: 24 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: "1.2rem" } }, "\u2197"), /* @__PURE__ */ React.createElement("span", null, outputs[0] && outputs[2] && stageIdx === 2 ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", null, Math.round(outputs[2].length / Math.max(1, outputs[0].length) * 100) / 100, "\xD7"), " the substance \u2014 and actually usable.") : "\xA0")))), /* @__PURE__ */ React.createElement("style", null, `@keyframes blink { 50% { opacity: 0; } }`));
 }
 function Tokenizer({ lessonId, cpId }) {
   const [text, setText] = useState("The quick brown fox jumps over the lazy dog.");
@@ -834,11 +834,11 @@ function PromptDiff({ weak, strong, takeaway }) {
   const s = strong.split(/(\s+)/);
   const wSet = new Set(weak.toLowerCase().split(/\s+/));
   const sSet = new Set(strong.toLowerCase().split(/\s+/));
-  return /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("div", { className: "card-title" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "eyebrow" }, "diff view"), /* @__PURE__ */ React.createElement("h3", null, "What changed, word by word"))), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { marginBottom: 6, color: "var(--bad)" } }, "\u2014 before"), /* @__PURE__ */ React.createElement("div", { style: { padding: 14, background: "color-mix(in oklch, var(--bad) 6%, var(--paper-2))", borderRadius: 10, fontSize: ".88rem", lineHeight: 1.7, border: "1px solid color-mix(in oklch, var(--bad) 20%, var(--rule))" } }, w.map((tok, i) => {
+  return /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("div", { className: "card-title" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "eyebrow" }, "diff view"), /* @__PURE__ */ React.createElement("h3", null, "What changed, word by word"))), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { marginBottom: 6, color: "var(--bad-ink)" } }, "\u2014 before"), /* @__PURE__ */ React.createElement("div", { style: { padding: 14, background: "color-mix(in oklch, var(--bad) 6%, var(--paper-2))", borderRadius: 10, fontSize: ".88rem", lineHeight: 1.7, border: "1px solid color-mix(in oklch, var(--bad) 20%, var(--rule))" } }, w.map((tok, i) => {
     const bare = tok.toLowerCase().trim();
     const removed = bare && !sSet.has(bare);
     return /* @__PURE__ */ React.createElement("span", { key: i, style: { background: removed ? "color-mix(in oklch, var(--bad) 25%, transparent)" : "transparent", padding: removed ? "1px 2px" : 0, borderRadius: 2, textDecoration: removed ? "line-through" : "none", textDecorationColor: "var(--bad)" } }, tok);
-  }))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { marginBottom: 6, color: "var(--ok)" } }, "+ after"), /* @__PURE__ */ React.createElement("div", { style: { padding: 14, background: "color-mix(in oklch, var(--ok) 6%, var(--paper-2))", borderRadius: 10, fontSize: ".88rem", lineHeight: 1.7, border: "1px solid color-mix(in oklch, var(--ok) 25%, var(--rule))" } }, s.map((tok, i) => {
+  }))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { marginBottom: 6, color: "var(--ok-ink)" } }, "+ after"), /* @__PURE__ */ React.createElement("div", { style: { padding: 14, background: "color-mix(in oklch, var(--ok) 6%, var(--paper-2))", borderRadius: 10, fontSize: ".88rem", lineHeight: 1.7, border: "1px solid color-mix(in oklch, var(--ok) 25%, var(--rule))" } }, s.map((tok, i) => {
     const bare = tok.toLowerCase().trim();
     const added = bare && !wSet.has(bare);
     return /* @__PURE__ */ React.createElement("span", { key: i, style: { background: added ? "color-mix(in oklch, var(--ok) 25%, transparent)" : "transparent", padding: added ? "1px 2px" : 0, borderRadius: 2, fontWeight: added ? 600 : 400 } }, tok);
@@ -957,6 +957,7 @@ ${p.content}`).join("\n\n");
     const on = active[p.id];
     const color = `oklch(0.62 0.16 ${p.hue})`;
     const colorDim = `oklch(0.92 0.02 ${p.hue})`;
+    const colorInk = `oklch(0.46 0.15 ${p.hue})`;
     const isHover = hover === p.id;
     return /* @__PURE__ */ React.createElement(
       "button",
@@ -969,7 +970,8 @@ ${p.content}`).join("\n\n");
         onMouseLeave: () => setHover(null),
         style: {
           "--accent": color,
-          "--accent-dim": colorDim
+          "--accent-dim": colorDim,
+          "--accent-ink": colorInk
         }
       },
       /* @__PURE__ */ React.createElement("div", { className: "sc-rail" }),
@@ -984,7 +986,7 @@ ${p.content}`).join("\n\n");
     fontFamily: "var(--mono)",
     fontSize: ".62rem",
     letterSpacing: ".15em",
-    color: `oklch(0.52 0.14 ${p.hue})`,
+    color: `oklch(0.46 0.15 ${p.hue})`,
     textTransform: "uppercase",
     fontWeight: 700
   } }, p.label), /* @__PURE__ */ React.createElement("div", { style: { fontSize: ".84rem", lineHeight: 1.45, color: "var(--ink-2)", marginTop: 2 } }, p.content)))) : /* @__PURE__ */ React.createElement("div", { className: "small muted", style: { fontStyle: "italic", padding: "12px 0" } }, "No parts selected. Click a card.")), /* @__PURE__ */ React.createElement("div", { className: "os-runbar" }, /* @__PURE__ */ React.createElement("div", { className: "small muted" }, loading ? /* @__PURE__ */ React.createElement(React.Fragment, null, "Streaming ", /* @__PURE__ */ React.createElement(Dots, null)) : output ? `${output.split(/\s+/).filter(Boolean).length} words \xB7 from ${activeParts.length} parts` : "Fire this prompt at Claude \u2192"), /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: run, disabled: loading || !assembled }, loading ? "Running\u2026" : output ? "Run again \u2192" : "Run live \u2192")), /* @__PURE__ */ React.createElement("div", { className: "os-output" }, /* @__PURE__ */ React.createElement("div", { className: "tiny", style: { marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", null, "claude's output"), output && !loading && /* @__PURE__ */ React.createElement("span", { className: "muted", style: { textTransform: "none", letterSpacing: 0, fontFamily: "var(--mono)", fontSize: ".65rem" } }, "scroll \u2195")), output ? /* @__PURE__ */ React.createElement("div", { style: { fontSize: ".88rem", lineHeight: 1.55, whiteSpace: "pre-wrap" } }, output, loading && /* @__PURE__ */ React.createElement("span", { style: { display: "inline-block", width: 6, height: "1em", background: "var(--amber-ink)", verticalAlign: "-2px", animation: "blink 1s step-end infinite", marginLeft: 2 } })) : /* @__PURE__ */ React.createElement("div", { className: "small muted", style: { fontStyle: "italic" } }, "Output appears here. Try running with 2 parts, then with all 5 \u2014 the difference is the point."))));
@@ -1044,8 +1046,8 @@ function RedactionDrill({ lessonId, cpId }) {
     }
     if (isMistake) {
       return /* @__PURE__ */ React.createElement("span", { key: i, style: {
-        background: "color-mix(in oklch, var(--bad) 18%, transparent)",
-        color: "var(--bad)",
+        background: "color-mix(in oklch, var(--bad) 12%, transparent)",
+        color: "var(--bad-ink)",
         textDecoration: "line-through",
         padding: "1px 4px",
         borderRadius: 3
@@ -1059,7 +1061,7 @@ function RedactionDrill({ lessonId, cpId }) {
           onClick: () => toggle(i),
           style: {
             display: "inline-block",
-            background: submitted ? "var(--ok)" : "var(--ink)",
+            background: submitted ? "var(--ok-ink)" : "var(--ink)",
             color: "var(--paper)",
             padding: "1px 8px",
             borderRadius: 4,
@@ -1083,8 +1085,8 @@ function RedactionDrill({ lessonId, cpId }) {
         onMouseLeave: () => setHover(null),
         title: seg.sensitive,
         style: {
-          background: missed ? "color-mix(in oklch, var(--bad) 25%, transparent)" : hover === i ? "color-mix(in oklch, var(--amber) 50%, transparent)" : "color-mix(in oklch, var(--amber) 30%, transparent)",
-          color: missed ? "var(--bad)" : "var(--ink)",
+          background: missed ? "color-mix(in oklch, var(--bad) 12%, transparent)" : hover === i ? "color-mix(in oklch, var(--amber) 50%, transparent)" : "color-mix(in oklch, var(--amber) 30%, transparent)",
+          color: missed ? "var(--bad-ink)" : "var(--ink)",
           padding: "1px 4px",
           borderRadius: 3,
           cursor: submitted ? "default" : "pointer",
@@ -1095,7 +1097,7 @@ function RedactionDrill({ lessonId, cpId }) {
       },
       seg.text
     );
-  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, gap: 14, flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("div", { className: "small muted", style: { display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { width: 14, height: 14, background: "color-mix(in oklch, var(--amber) 30%, transparent)", border: "1px dashed var(--amber-ink)", borderRadius: 3, flexShrink: 0 } }), "risky \u2014 click to redact"), /* @__PURE__ */ React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { background: submitted ? "var(--ok)" : "var(--ink)", borderRadius: 3, color: "var(--paper)", fontSize: ".62rem", padding: "2px 6px", fontWeight: 600, letterSpacing: ".04em", flexShrink: 0 } }, "REDACTED"), "cleaned"), hover != null && SEGMENTS[hover]?.sensitive && /* @__PURE__ */ React.createElement("span", { style: { color: "var(--amber-ink)" } }, "\u2192 ", SEGMENTS[hover].sensitive)), submitted ? /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: reset }, "Reset & try again") : /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: submit }, "Submit paste \u2192")), submitted && /* @__PURE__ */ React.createElement("div", { style: {
+  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, gap: 14, flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("div", { className: "small muted", style: { display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { width: 14, height: 14, background: "color-mix(in oklch, var(--amber) 30%, transparent)", border: "1px dashed var(--amber-ink)", borderRadius: 3, flexShrink: 0 } }), "risky \u2014 click to redact"), /* @__PURE__ */ React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, /* @__PURE__ */ React.createElement("span", { style: { background: submitted ? "var(--ok-ink)" : "var(--ink)", borderRadius: 3, color: "var(--paper)", fontSize: ".62rem", padding: "2px 6px", fontWeight: 600, letterSpacing: ".04em", flexShrink: 0 } }, "REDACTED"), "cleaned"), hover != null && SEGMENTS[hover]?.sensitive && /* @__PURE__ */ React.createElement("span", { style: { color: "var(--amber-ink)" } }, "\u2192 ", SEGMENTS[hover].sensitive)), submitted ? /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: reset }, "Reset & try again") : /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: submit }, "Submit paste \u2192")), submitted && /* @__PURE__ */ React.createElement("div", { style: {
     marginTop: 14,
     padding: "14px 16px",
     borderRadius: 10,
@@ -1103,14 +1105,14 @@ function RedactionDrill({ lessonId, cpId }) {
     border: `1px solid ${allClean ? "var(--ok)" : "var(--bad)"}`,
     fontSize: ".9rem",
     lineHeight: 1.55
-  } }, allClean ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", { style: { color: "var(--ok)" } }, "\u2713 Safe to paste."), " All four sensitive fields caught, no false positives. This is the habit \u2014 read before you paste.") : /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", { style: { color: "var(--bad)" } }, "\u2717 Don't send this yet."), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 6 } }, totalSensitive - cleanCount > 0 && /* @__PURE__ */ React.createElement("div", null, "\u2192 ", /* @__PURE__ */ React.createElement("b", null, totalSensitive - cleanCount), " sensitive ", totalSensitive - cleanCount === 1 ? "field is" : "fields are", " still exposed (highlighted red)."), mistakeCount > 0 && /* @__PURE__ */ React.createElement("div", null, "\u2192 You over-redacted ", /* @__PURE__ */ React.createElement("b", null, mistakeCount), " safe ", mistakeCount === 1 ? "field" : "fields", " \u2014 fine, but unnecessary.")))));
+  } }, allClean ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", { style: { color: "var(--ok-ink)" } }, "\u2713 Safe to paste."), " All four sensitive fields caught, no false positives. This is the habit \u2014 read before you paste.") : /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", { style: { color: "var(--bad-ink)" } }, "\u2717 Don't send this yet."), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 6 } }, totalSensitive - cleanCount > 0 && /* @__PURE__ */ React.createElement("div", null, "\u2192 ", /* @__PURE__ */ React.createElement("b", null, totalSensitive - cleanCount), " sensitive ", totalSensitive - cleanCount === 1 ? "field is" : "fields are", " still exposed (highlighted red)."), mistakeCount > 0 && /* @__PURE__ */ React.createElement("div", null, "\u2192 You over-redacted ", /* @__PURE__ */ React.createElement("b", null, mistakeCount), " safe ", mistakeCount === 1 ? "field" : "fields", " \u2014 fine, but unnecessary.")))));
 }
 function FailureTagger({ lessonId, cpId }) {
   const MODES = [
-    { id: "halluc", label: "Hallucination", color: "oklch(0.58 0.18 20)", desc: "Confidently invented a fact." },
-    { id: "refusal", label: "Over-refusal", color: "oklch(0.62 0.16 280)", desc: "Refused something it should have done." },
-    { id: "format", label: "Format drift", color: "oklch(0.60 0.14 200)", desc: "Ignored the requested shape." },
-    { id: "offtopic", label: "Off-topic", color: "oklch(0.58 0.15 140)", desc: "Wandered away from the ask." }
+    { id: "halluc", label: "Hallucination", color: "oklch(0.58 0.18 20)", textColor: "oklch(0.5 0.18 20)", desc: "Confidently invented a fact." },
+    { id: "refusal", label: "Over-refusal", color: "oklch(0.62 0.16 280)", textColor: "oklch(0.5 0.16 280)", desc: "Refused something it should have done." },
+    { id: "format", label: "Format drift", color: "oklch(0.60 0.14 200)", textColor: "oklch(0.46 0.14 200)", desc: "Ignored the requested shape." },
+    { id: "offtopic", label: "Off-topic", color: "oklch(0.58 0.15 140)", textColor: "oklch(0.48 0.15 140)", desc: "Wandered away from the ask." }
   ];
   const CASES = [
     {
@@ -1219,7 +1221,7 @@ function FailureTagger({ lessonId, cpId }) {
             borderRadius: 14,
             border: isTheAnswer ? `1.5px solid var(--ok)` : isPicked && wrong ? "1.5px solid var(--bad)" : `1px solid ${isPicked ? m.color : "var(--rule-2)"}`,
             background: isPicked ? `color-mix(in oklch, ${m.color} 15%, var(--paper))` : "var(--paper)",
-            color: isPicked ? m.color : "var(--ink-2)",
+            color: isPicked ? m.textColor || m.color : "var(--ink-2)",
             fontFamily: "var(--sans)",
             fontSize: ".78rem",
             fontWeight: isPicked ? 600 : 400,
@@ -1228,7 +1230,7 @@ function FailureTagger({ lessonId, cpId }) {
           }
         },
         m.label,
-        isTheAnswer && !isPicked && /* @__PURE__ */ React.createElement("span", { style: { marginLeft: 6, color: "var(--ok)" } }, "\u2190 answer"),
+        isTheAnswer && !isPicked && /* @__PURE__ */ React.createElement("span", { style: { marginLeft: 6, color: "var(--ok-ink)" } }, "\u2190 answer"),
         isPicked && submitted && (correct ? " \u2713" : " \u2717")
       );
     })), submitted && /* @__PURE__ */ React.createElement("div", { style: {
@@ -1238,8 +1240,8 @@ function FailureTagger({ lessonId, cpId }) {
       lineHeight: 1.55,
       color: "var(--ink-2)",
       background: "var(--paper-2)"
-    } }, /* @__PURE__ */ React.createElement("b", { style: { color: correct ? "var(--ok)" : "var(--amber-ink)" } }, correct ? "\u2713 Correct." : `Actually: ${MODES.find((m) => m.id === c.correct).label}.`), " ", c.why));
-  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 } }, /* @__PURE__ */ React.createElement("div", { className: "small muted" }, submitted ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", { style: { color: correctCount >= 4 ? "var(--ok)" : correctCount >= 3 ? "var(--amber-ink)" : "var(--bad)" } }, correctCount, " / ", CASES.length, " correct."), " ", correctCount >= 4 ? "You know what a failure looks like." : "Reread the mode descriptions \u2014 this is the skill.") : allPicked ? "Ready to submit." : `${CASES.length - Object.keys(picks).length} left to tag.`), submitted ? /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: reset }, "Try again") : /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: submit, disabled: !allPicked }, "Check my tags \u2192")));
+    } }, /* @__PURE__ */ React.createElement("b", { style: { color: correct ? "var(--ok-ink)" : "var(--amber-ink)" } }, correct ? "\u2713 Correct." : `Actually: ${MODES.find((m) => m.id === c.correct).label}.`), " ", c.why));
+  })), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 } }, /* @__PURE__ */ React.createElement("div", { className: "small muted" }, submitted ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("b", { style: { color: correctCount >= 4 ? "var(--ok-ink)" : correctCount >= 3 ? "var(--amber-ink)" : "var(--bad-ink)" } }, correctCount, " / ", CASES.length, " correct."), " ", correctCount >= 4 ? "You know what a failure looks like." : "Reread the mode descriptions \u2014 this is the skill.") : allPicked ? "Ready to submit." : `${CASES.length - Object.keys(picks).length} left to tag.`), submitted ? /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: reset }, "Try again") : /* @__PURE__ */ React.createElement("button", { className: "btn primary", onClick: submit, disabled: !allPicked }, "Check my tags \u2192")));
 }
 function PromptLibraryShaper({ lessonId, cpId }) {
   const SAMPLE = `Write a PR review for the change in my auth-service repo. Use the style we agreed on in last week's #eng-chat thread. Focus on the stuff Jane and I care about.`;
@@ -1294,7 +1296,7 @@ function PromptLibraryShaper({ lessonId, cpId }) {
     ];
   }, [v]);
   const score = Math.round((checks.filter((c) => c.ok).length + checks.filter((c) => c.partial).length * 0.5) / checks.length * 100);
-  const scoreColor = score >= 80 ? "var(--ok)" : score >= 50 ? "var(--amber-ink)" : "var(--bad)";
+  const scoreColor = score >= 80 ? "var(--ok-ink)" : score >= 50 ? "var(--amber-ink)" : "var(--bad-ink)";
   const askClaude = async () => {
     setLoading(true);
     setAiFeedback("");

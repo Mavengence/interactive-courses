@@ -362,6 +362,34 @@ textarea:focus, input:focus, select:focus {
 .topbar nav a { color: var(--ink-2); }
 .topbar nav a:hover { color: var(--ink); text-decoration: none; }
 
+/* back to catalogue — sits next to the brand, styled to match the topbar */
+.topbar-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px 5px 9px;
+  border: 1px solid var(--rule-2);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+.topbar-back:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+  background: var(--paper-2);
+  text-decoration: none;
+}
+.topbar-back:focus-visible { outline: 2px solid var(--cyan-ink); outline-offset: 2px; }
+.topbar-back .tb-arrow { font-size: 0.92rem; line-height: 1; transition: transform .2s ease; }
+.topbar-back:hover .tb-arrow { transform: translateX(-2px); }
+/* default: show the full label; the short label appears only on tiny phones
+   (declared here, before the media queries, so the breakpoint override wins) */
+.topbar-back .tb-label-short { display: none; }
+
 .xp-pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 4px 10px 4px 6px;
@@ -395,11 +423,30 @@ textarea:focus, input:focus, select:focus {
     gap: 6px;
   }
   .xp-pill .spark { width: 13px; height: 13px; }
+  .topbar-back {
+    padding: 4px 9px 4px 7px;
+    font-size: 0.74rem;
+    gap: 5px;
+  }
 }
 @media (max-width: 460px) {
-  /* tightest phones: drop the secondary nav links, keep brand + XP */
+  /* tightest phones: drop the secondary nav links, keep brand + back + XP */
   .topbar nav { display: none; }
   .topbar-inner { gap: 8px; padding: 10px 14px; }
+  /* nav (with margin-left:auto) is gone — push XP to the far right instead,
+     leaving the back link beside the brand */
+  .xp-pill { margin-left: auto; }
+}
+@media (max-width: 360px) {
+  /* very narrow phones: keep the topbar from overflowing — tighten spacing
+     and let the brand tagline drop so brand + back + XP still fit */
+  .topbar-inner { gap: 6px; padding: 9px 10px; }
+  .topbar-back { padding: 4px 7px 4px 6px; font-size: 0.68rem; gap: 4px; }
+  .brand-tagline { display: none; }
+  /* keep a readable text label but abbreviate gracefully on the very tightest
+     phones so the topbar never forces horizontal overflow */
+  .topbar-back .tb-label-full { display: none; }
+  .topbar-back .tb-label-short { display: inline; }
 }
 
 /* lesson prose */

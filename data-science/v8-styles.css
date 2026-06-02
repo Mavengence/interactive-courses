@@ -18,7 +18,7 @@
   --ink-1:     #141216;   /* near-black warm */
   --ink-2:     #3A3540;
   --ink-3:     #6A6270;
-  --ink-4:     #A49D9A;
+  --ink-4:     #6E6763;   /* muted, AA-readable on cream/panel/bg-hi (>=4.5:1) */
 
   /* Hairlines */
   --hair:      rgba(20,18,22,0.08);
@@ -42,6 +42,24 @@
   --good:      #1FAF7E;
   --warn:      #E8A031;
   --bad:       #D83A3A;
+
+  /* Semantic ink — darkened twins for text on tinted/light backgrounds (AA >=4.5:1) */
+  --good-ink:  #0E7250;
+  --warn-ink:  #8A5810;
+  --bad-ink:   #B02A2A;
+
+  /* Accent ink — AA-readable twins of the bright palette, for TEXT on light paper.
+     The bright tokens above stay for dots, borders, fills, and SVG graphics. */
+  --lime-ink:    #3F7619;
+  --mint-ink:    #0E7250;
+  --cyan-ink:    #0F6E8C;
+  --violet-ink:  #4A2FCC;
+  --magenta-ink: #B71E6D;
+  --coral-ink:   #BE2C44;   /* warm pink/red accents (#FF6B80, #FF6B6B) */
+  --orange-ink:  #A64E0D;   /* #FF9F6B, #FFA94D */
+  --blue-ink:    #2257C7;   /* #5B9BE8, #3B82F6 */
+  --amberp-ink:  #8A5810;   /* #F59E0B, #F4C542 */
+  --red-ink:     #C0271F;   /* #EF4444 */
 
   /* Typography */
   --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -136,6 +154,9 @@ body::after {
   -webkit-appearance: none; appearance: none;
 }
 .sb-item:hover { background: var(--bg-hov); color: var(--ink-1); }
+/* Darken muted sub-text on hover so it stays AA-readable on the darker --bg-hov */
+.sb-item:hover .sb-sub  { color: #595361; }
+.sb-item:hover .sb-time { color: #5C564F; }
 .sb-item.active {
   background: var(--ink-1); color: #FBF8F1;
 }
@@ -154,7 +175,9 @@ body::after {
   background: var(--lime);
   color: var(--ink-1); border-color: transparent;
 }
-.sb-item.done .sb-num { background: rgba(31,175,126,0.14); color: var(--mint); border-color: rgba(31,175,126,0.3); }
+.sb-item.done .sb-num { background: rgba(31,175,126,0.14); color: var(--good-ink); border-color: rgba(31,175,126,0.3); }
+/* On hover the badge sits on the darker --bg-hov; deepen the green to keep it AA-readable */
+.sb-item.done:hover .sb-num { color: #0A6040; }
 .sb-mid { min-width: 0; }
 .sb-title { font-size: 13px; font-weight: 600; color: inherit; letter-spacing: -0.005em; }
 .sb-sub   { font-size: 10.5px; color: var(--ink-3); margin-top: 1px; font-family: var(--font-mono); letter-spacing: 0.015em; }
@@ -178,6 +201,21 @@ body::after {
   backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%);
   border-bottom: 1px solid var(--hair);
   display: flex; align-items: center; gap: 16px; padding: 0 32px;
+}
+.tb-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+  color: var(--ink-2); text-decoration: none; letter-spacing: 0.01em;
+  padding: 5px 10px 5px 8px; border-radius: 7px;
+  border: 1px solid var(--hair-2); background: var(--panel);
+  white-space: nowrap; flex: 0 0 auto;
+  transition: background 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+.tb-back:hover { background: var(--bg-hi); border-color: var(--hair-3); color: var(--ink-1); }
+.tb-back .tb-back-arrow { font-weight: 700; color: var(--magenta-2); }
+.tb-back-sep {
+  width: 1px; height: 18px; background: var(--hair-2); flex: 0 0 auto;
+  margin: 0 2px;
 }
 .crumb { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); flex: 1; letter-spacing: 0.01em; }
 .crumb .sep { margin: 0 8px; color: var(--ink-4); }
@@ -237,7 +275,7 @@ body::after {
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
   font-family: var(--font-mono); font-size: 11px; font-weight: 700;
-  color: var(--magenta); letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--magenta-2); letter-spacing: 0.18em; text-transform: uppercase;
   margin-bottom: 14px;
 }
 .hero-eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--magenta); }
@@ -511,12 +549,16 @@ body::after {
   /* Topbar + content take full width */
   .tb { padding: 0 18px; gap: 10px; }
   .crumb { font-size: 10.5px; }
+  .tb-back { padding: 5px 9px; font-size: 11px; }
   .content { padding: 28px 20px 90px; }
 }
 
 @media (max-width: 460px) {
-  .tb { height: 52px; padding: 0 14px; }
+  .tb { height: 52px; padding: 0 14px; gap: 8px; }
   .crumb .sep:first-of-type, .crumb b { display: none; }  /* trim crumb on tiny screens */
   .content { padding: 22px 16px 80px; }
   .btn { padding: 6px 10px; font-size: 11px; }
+  .tb-back-sep { display: none; }                 /* drop divider when space is tight */
+  .tb-back { padding: 5px 8px; gap: 4px; font-size: 0; } /* collapse to arrow only */
+  .tb-back .tb-back-arrow { font-size: 14px; }
 }

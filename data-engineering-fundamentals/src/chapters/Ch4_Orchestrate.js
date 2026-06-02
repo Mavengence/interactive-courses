@@ -184,7 +184,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: "Orchestrate: <span class='accent'>retries are a feature.</span> Only if the write is idempotent.",
         hook: "Airflow is the scheduler that runs every pipeline at a modern tech company. Its contract is simple and ruthless: <strong>any task may run more than once.</strong> Crashes, timeouts, backfills: the scheduler will retry. Your job is to make sure retries don't corrupt the table.",

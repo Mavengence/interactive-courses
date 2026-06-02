@@ -162,7 +162,7 @@
         fontWeight: 700,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        color: node.color,
+        color: inkOf(node.color),
         marginBottom: 8
       } }, node.label), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, lineHeight: 1.55, color: "var(--ink-1)", marginBottom: 10 } }, node.desc), /* @__PURE__ */ React.createElement("div", { style: {
         fontFamily: "var(--font-mono)",
@@ -170,7 +170,7 @@
         fontWeight: 700,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        color: "#FF6B80",
+        color: "var(--coral-ink)",
         marginBottom: 6
       } }, "Common failure"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12.5, lineHeight: 1.5, color: "var(--ink-2)" } }, node.fail)) : /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12.5, color: "var(--ink-3)", fontStyle: "italic", paddingTop: 8 } }, "Hover a component to inspect it.")))
     );
@@ -324,7 +324,7 @@
         fontWeight: 700,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        color: psiAlarm ? "#FF6B80" : "#64E2B5"
+        color: psiAlarm ? "var(--coral-ink)" : "var(--good-ink)"
       } }, psiAlarm ? "\u26A0 PSI ALARM" : "\u2713 PSI OK"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11.5, color: "var(--ink-2)", marginTop: 5 } }, "PSI = ", round(current.psi, 3), " ", psiAlarm ? "> 0.2 \u2192 retrain!" : "\u2264 0.2 \u2192 stable"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11.5, color: "var(--ink-2)", marginTop: 3 } }, "Accuracy = ", round(current.acc, 3), " ", accAlarm ? "\u2B07 degraded" : ""), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11.5, color: "var(--ink-2)", marginTop: 3 } }, "Decision boundary = ", round(current.boundary, 3))), /* @__PURE__ */ React.createElement("div", { style: {
         marginTop: 10,
         padding: "8px 12px",
@@ -407,7 +407,7 @@
           className: "btn",
           style: {
             background: strategy === k ? v.color : "transparent",
-            color: strategy === k ? "#0D0D0C" : v.color,
+            color: strategy === k ? "#0D0D0C" : inkOf(v.color),
             borderColor: v.color,
             fontSize: 10.5,
             padding: "4px 8px"
@@ -424,7 +424,7 @@
         fontSize: 11.5,
         color: "var(--ink-2)",
         lineHeight: 1.55
-      } }, /* @__PURE__ */ React.createElement("strong", { style: { color: info.color } }, info.label, ":"), " ", info.desc), /* @__PURE__ */ React.createElement("div", { style: {
+      } }, /* @__PURE__ */ React.createElement("strong", { style: { color: inkOf(info.color) } }, info.label, ":"), " ", info.desc), /* @__PURE__ */ React.createElement("div", { style: {
         marginTop: 8,
         padding: "8px 12px",
         borderRadius: 7,
@@ -432,7 +432,7 @@
         border: `1px solid ${discRate > 0.3 ? "rgba(255,107,128,0.35)" : "rgba(100,226,181,0.25)"}`,
         fontFamily: "var(--font-mono)",
         fontSize: 11
-      } }, /* @__PURE__ */ React.createElement("span", { style: { color: discRate > 0.3 ? "#FF6B80" : "#64E2B5" } }, discRate > 0.3 ? "\u26A0" : "\u2713", " Discrepancy rate: ", (discRate * 100).toFixed(0), "%"), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)", marginTop: 3, fontFamily: "inherit", fontSize: 10.5 } }, discRate > 0.3 ? "High \u2014 investigate v2 before promoting." : "Low \u2014 safe to ramp v2 further."))), /* @__PURE__ */ React.createElement("div", { style: { flex: "1 1 260px", overflowX: "auto" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } }, /* @__PURE__ */ React.createElement("div", { style: {
+      } }, /* @__PURE__ */ React.createElement("span", { style: { color: discRate > 0.3 ? "var(--coral-ink)" : "var(--good-ink)" } }, discRate > 0.3 ? "\u26A0" : "\u2713", " Discrepancy rate: ", (discRate * 100).toFixed(0), "%"), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)", marginTop: 3, fontFamily: "inherit", fontSize: 10.5 } }, discRate > 0.3 ? "High \u2014 investigate v2 before promoting." : "Low \u2014 safe to ramp v2 further."))), /* @__PURE__ */ React.createElement("div", { style: { flex: "1 1 260px", overflowX: "auto" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } }, /* @__PURE__ */ React.createElement("div", { style: {
         flex: 1,
         padding: "6px 12px",
         borderRadius: 6,
@@ -441,7 +441,7 @@
         textAlign: "center",
         fontFamily: "var(--font-mono)",
         fontSize: 10.5,
-        color: "#64E2B5"
+        color: "var(--good-ink)"
       } }, "v1 live \xB7 ", 100 - trafficPct, "%"), /* @__PURE__ */ React.createElement("div", { style: {
         flex: 1,
         padding: "6px 12px",
@@ -451,7 +451,7 @@
         textAlign: "center",
         fontFamily: "var(--font-mono)",
         fontSize: 10.5,
-        color: "#A78BFA"
+        color: "var(--violet-ink)"
       } }, "v2 shadow \xB7 ", trafficPct, "%")), /* @__PURE__ */ React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 11.5 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, ["Entity ID", "v1 score", "v2 score", "\u0394 > 0.15"].map((h) => /* @__PURE__ */ React.createElement("th", { key: h, style: {
         textAlign: "left",
         padding: "5px 8px",
@@ -469,17 +469,17 @@
         padding: "5px 8px",
         fontFamily: "var(--font-mono)",
         fontSize: 10.5,
-        color: "#64E2B5"
+        color: "var(--good-ink)"
       } }, r.v1), /* @__PURE__ */ React.createElement("td", { style: {
         padding: "5px 8px",
         fontFamily: "var(--font-mono)",
         fontSize: 10.5,
-        color: "#A78BFA"
+        color: "var(--violet-ink)"
       } }, r.v2), /* @__PURE__ */ React.createElement("td", { style: {
         padding: "5px 8px",
         textAlign: "center",
         fontSize: 12,
-        color: r.diff ? "#FF6B80" : "var(--ink-3)"
+        color: r.diff ? "var(--coral-ink)" : "var(--ink-3)"
       } }, r.diff ? "\u2717" : "\xB7")))))))
     );
   }
@@ -523,7 +523,7 @@
           className: "btn",
           style: {
             background: fsOn ? "#64E2B5" : "transparent",
-            color: fsOn ? "#0D0D0C" : "#FF6B80",
+            color: fsOn ? "#0D0D0C" : "var(--coral-ink)",
             borderColor: fsOn ? "#64E2B5" : "#FF6B80",
             fontFamily: "var(--font-mono)",
             fontSize: 10.5,
@@ -549,7 +549,7 @@
         fontFamily: "var(--font-mono)",
         fontSize: 28,
         fontWeight: 700,
-        color: skewColor,
+        color: inkOf(skewColor),
         transition: "color 0.3s"
       } }, skewScore.toFixed(2)), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11.5, color: "var(--ink-2)", marginTop: 4 } }, fsOn ? "Same transform, same result." : "Feature pipelines diverged.")), !fsOn && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.55 } }, "Without a feature store, training and serving code diverge over time. Small differences compound into large prediction errors."), fsOn && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11.5, color: "var(--ink-3)", lineHeight: 1.55 } }, "A shared feature store guarantees identical transformations at train time and serve time. Skew is structurally impossible.")), /* @__PURE__ */ React.createElement("div", { style: { flex: "1 1 280px" } }, /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 440 180", style: { width: "100%" } }, /* @__PURE__ */ React.createElement(
         "text",
@@ -787,7 +787,7 @@
         fontFamily: "var(--font-mono)",
         fontSize: 9,
         fontWeight: 700,
-        color: "#FF9F6B",
+        color: "var(--orange-ink)",
         marginBottom: 5,
         letterSpacing: "0.08em",
         textTransform: "uppercase"

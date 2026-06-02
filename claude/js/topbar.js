@@ -5,6 +5,10 @@
     // Anything under /lessons/ needs '../'; everything at the root uses ''.
     const inSub = /\/lessons\//.test(location.pathname);
     const up = inSub ? '../' : '';
+    // Catalogue (course list) lives one level above the course root:
+    //   course index  (<KEY>/index.html)      -> '../'
+    //   lesson page    (<KEY>/lessons/*.html)  -> '../../'
+    const catalogue = up + '../';
     const bar = document.createElement('div');
     bar.className = 'topbar';
     const state = window.CourseProgress ? window.CourseProgress.get() : { xp: 0, streak: { days: 0 } };
@@ -71,6 +75,9 @@
           </span>
         </a>
         <nav aria-label="Course navigation">
+          <a href="${catalogue}" class="nav-back" aria-label="Back to all courses">
+            <span aria-hidden="true">&larr;</span> All courses
+          </a>
           <a href="${up}index.html#lessons">Lessons</a>
           <a href="${up}index.html#progress">Progress</a>
           <span class="xp-pill" title="Total XP">

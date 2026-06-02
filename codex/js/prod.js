@@ -72,8 +72,14 @@
 
     const progress = getProgressSummary();
 
+    // Back to the catalogue (repo root). Resolves at repo-root and under /interactive-courses/.
+    const catalogueHref = isLessonPage() ? '../../' : '../';
+
     bar.innerHTML = `
       <div class="topbar-inner">
+        <a class="topbar-back" href="${catalogueHref}" aria-label="Back to all courses">
+          <span class="tb-arrow" aria-hidden="true">&larr;</span><span class="tb-back-label">All courses</span>
+        </a>
         <a class="brand" href="${prefix}index.html" aria-label="Codex Course — home">
           <span class="mark" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 22 22">

@@ -72,6 +72,23 @@ function randn(rng) {
   while (v === 0) v = rng();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
+// Bright-palette → AA-readable ink twin, for using a data-driven accent color
+// as TEXT on the light paper. Keep the bright original for SVG fills/dots/borders.
+const INK_MAP = {
+  "#FF6B80": "#B53C4D", "#D1FF3A": "#59700D", "#1FAF7E": "#067751", "#E8A031": "#905D0D",
+  "#FF4DA2": "#C22671", "#64E2B5": "#297359", "#5B9BE8": "#346AAC", "#A78BFA": "#7159B6",
+  "#FF9F6B": "#995733", "#9A6BFF": "#7749DB", "#4DE2FF": "#1A7182", "#1CA5D9": "#00709A",
+  "#6BCF3F": "#347618", "#FB923C": "#A15314", "#F87171": "#B34343", "#F25F3A": "#BD3918",
+  "#4ADE80": "#1C783E", "#2DD4BF": "#0B7567", "#FFC266": "#856029", "#FF8080": "#AB4949",
+  "#F4C542": "#816515", "#FFA94D": "#945B1D", "#FFA500": "#915E00", "#FF6B6B": "#B83D3D",
+  "#FBBF24": "#886202", "#F59E0B": "#935C00", "#EF4444": "#C92424", "#B89DFF": "#715CA6",
+  "#7B8CDE": "#5464AD", "#80CC80": "#427442", "#8080CC": "#6161A9", "#E8318F": "#C8136F",
+  "#D83A3A": "#CB2020", "#5B3EE8": "#4A2FCC",
+  // muted grays that were authored light for a dark theme — map to readable ink
+  "#8A8680": "#5C5650", "#C7C4BC": "#5C5650", "#F4F2EC": "#3A3540", "#A49D9A": "#6E6763",
+  "#D1D5DB": "#5C5650", "#F1F5F9": "#3A3540", "#E0E0E0": "#5C5650"
+};
+const inkOf = (c) => (c && INK_MAP[String(c).toUpperCase()]) || c;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const round = (v, d = 2) => Math.round(v * 10 ** d) / 10 ** d;
@@ -122,6 +139,7 @@ Object.assign(window, {
   useTicker,
   mulberry32,
   randn,
+  inkOf,
   clamp,
   lerp,
   round,

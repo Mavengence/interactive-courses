@@ -5,6 +5,16 @@
 
 * { box-sizing: border-box; }
 
+/* ------------------------------------------------------------------
+   Contrast overrides — darken the tertiary ink so muted labels
+   (mod codes, section headers, edition, crumbs, durations) clear
+   WCAG AA (>=4.5:1) on the light page/sidebar surfaces. The base
+   token (#8A8D91) only reached ~3.3:1.
+   ------------------------------------------------------------------ */
+:root {
+  --fg-3: #6E7178;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -62,6 +72,25 @@ input:focus-visible,
   flex-direction: column;
 }
 
+.crs-side__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 24px 16px;
+  padding: 6px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--fg-2);
+  text-decoration: none;
+  transition: var(--ease);
+}
+.crs-side__back:hover { color: var(--team-blue); text-decoration: none; }
+.crs-side__back-arrow { font-size: 13px; line-height: 1; }
+.crs-side__back:hover .crs-side__back-arrow { transform: translateX(-2px); }
+
 .crs-side__brand {
   padding: 0 24px 20px;
   border-bottom: var(--border);
@@ -97,7 +126,7 @@ input:focus-visible,
 }
 
 .crs-side__home:hover { color: var(--fg-1); background: var(--bg-hover); }
-.crs-side__home.is-active { color: var(--team-blue); border-left-color: var(--team-blue); background: var(--team-blue-50); }
+.crs-side__home.is-active { color: var(--team-blue-hover); border-left-color: var(--team-blue); background: var(--team-blue-50); }
 
 .crs-side__section {
   font-family: var(--font-mono);
@@ -139,11 +168,11 @@ input:focus-visible,
 
 .crs-side__mod:hover { background: var(--bg-hover); color: var(--fg-1); }
 .crs-side__mod.is-active {
-  color: var(--team-blue);
+  color: var(--team-blue-hover);
   border-left-color: var(--team-blue);
   background: var(--team-blue-50);
 }
-.crs-side__mod.is-active .crs-side__mod-code { color: var(--team-blue); }
+.crs-side__mod.is-active .crs-side__mod-code { color: var(--team-blue-hover); }
 
 .crs-side__progress {
   margin-top: auto;
@@ -726,7 +755,7 @@ input:focus-visible,
 .crs-callout--note .crs-callout__h {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--team-blue);
+  color: var(--team-blue-hover);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1147,7 +1176,7 @@ input:focus-visible,
 .crs-btn--primary:disabled {
   background: var(--team-gray-200);
   border-color: var(--team-gray-200);
-  color: var(--fg-3);
+  color: var(--fg-2);
   cursor: not-allowed;
 }
 

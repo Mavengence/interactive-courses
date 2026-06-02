@@ -104,7 +104,7 @@ input[type="range"]::-moz-range-thumb {
 }
 .loop-mini-n {
   font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
-  color: var(--magenta); letter-spacing: 0.1em;
+  color: var(--magenta-2); letter-spacing: 0.1em;
 }
 .loop-mini-t {
   font-family: var(--font-serif); font-size: 20px; color: var(--ink-1);
@@ -122,9 +122,9 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 5px; background: var(--panel); color: var(--ink-2);
   border: 1px solid var(--hair-2);
 }
-.tag-pill.good { background: rgba(31,175,126,0.1); color: var(--mint); border-color: rgba(31,175,126,0.3); }
-.tag-pill.bad  { background: rgba(216,58,58,0.1); color: var(--bad); border-color: rgba(216,58,58,0.3); }
-.tag-pill.warn { background: rgba(232,160,49,0.1); color: var(--warn); border-color: rgba(232,160,49,0.3); }
+.tag-pill.good { background: rgba(31,175,126,0.1); color: var(--good-ink); border-color: rgba(31,175,126,0.3); }
+.tag-pill.bad  { background: rgba(216,58,58,0.1); color: var(--bad-ink); border-color: rgba(216,58,58,0.3); }
+.tag-pill.warn { background: rgba(232,160,49,0.1); color: var(--warn-ink); border-color: rgba(232,160,49,0.3); }
 
 .plot-wrap {
   background: var(--panel);
@@ -251,11 +251,11 @@ input[type="range"]::-moz-range-thumb {
   font-family: var(--font-serif); font-size: 26px; color: var(--ink-1);
   letter-spacing: -0.02em; line-height: 1;
 }
-.ab-verdict[data-sig="yes"] .ab-verdict-v { color: var(--mint); }
+.ab-verdict[data-sig="yes"] .ab-verdict-v { color: var(--good-ink); }
 .ab-verdict-note {
   font-size: 11.5px; color: var(--ink-3); flex-basis: 100%;
 }
-.ab-verdict[data-sig="yes"] .ab-verdict-note { color: var(--mint); font-weight: 600; }
+.ab-verdict[data-sig="yes"] .ab-verdict-note { color: var(--good-ink); font-weight: 600; }
 
 .ab-power {
   padding: 12px 14px; border-radius: 10px;

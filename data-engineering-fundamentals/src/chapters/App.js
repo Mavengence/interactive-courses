@@ -1,18 +1,18 @@
 (() => {
   const { useState, useEffect, useRef, useCallback } = React;
   const CHAPTERS = [
-    { id: "home", n: "-", title: "Overview", sub: "The pipeline, end to end", time: "3 min", hex: "#6B7787" },
-    { id: "fund", n: "00", title: "Core Fundamentals", sub: "Storage, formats, engines", time: "8 min", hex: "#0F1729" },
-    { id: "ingest", n: "01", title: "Ingest", sub: "Where data is born", time: "9 min", hex: "#7C5CFF" },
-    { id: "stream", n: "02", title: "Streaming", sub: "The bridge to the warehouse", time: "7 min", hex: "#22D3EE" },
-    { id: "store", n: "03", title: "Store", sub: "Where data lives", time: "8 min", hex: "#2D7DFF" },
-    { id: "comp", n: "04", title: "Compute", sub: "How data is read", time: "9 min", hex: "#FF7A59" },
-    { id: "orch", n: "05", title: "Orchestrate", sub: "Airflow & idempotency", time: "8 min", hex: "#31A24C" },
-    { id: "qual", n: "06", title: "Quality", sub: "Pipeline ran \u2260 number is right", time: "8 min", hex: "#E41E3F" },
-    { id: "disc", n: "07", title: "Discover", sub: "Six shortcuts over four hours", time: "7 min", hex: "#B8770A" },
-    { id: "serve", n: "08", title: "Serve", sub: "Metrics & semantic models", time: "8 min", hex: "#0091FF" },
-    { id: "gov", n: "09", title: "Govern", sub: "The deploy gate", time: "7 min", hex: "#8B5CF6" },
-    { id: "cap", n: "10", title: "Capstone", sub: "Build dim_users E2E", time: "15 min", hex: "#E85D04" }
+    { id: "home", n: "-", title: "Overview", sub: "The pipeline, end to end", time: "3 min", hex: "#6B7787", ink: "#646F7E" },
+    { id: "fund", n: "00", title: "Core Fundamentals", sub: "Storage, formats, engines", time: "8 min", hex: "#0F1729", ink: "#0F1729" },
+    { id: "ingest", n: "01", title: "Ingest", sub: "Where data is born", time: "9 min", hex: "#7C5CFF", ink: "#6E4BFF" },
+    { id: "stream", n: "02", title: "Streaming", sub: "The bridge to the warehouse", time: "7 min", hex: "#22D3EE", ink: "#0B798A" },
+    { id: "store", n: "03", title: "Store", sub: "Where data lives", time: "8 min", hex: "#2D7DFF", ink: "#0060FD" },
+    { id: "comp", n: "04", title: "Compute", sub: "How data is read", time: "9 min", hex: "#FF7A59", ink: "#D32A00" },
+    { id: "orch", n: "05", title: "Orchestrate", sub: "Airflow & idempotency", time: "8 min", hex: "#31A24C", ink: "#267E3B" },
+    { id: "qual", n: "06", title: "Quality", sub: "Pipeline ran \u2260 number is right", time: "8 min", hex: "#E41E3F", ink: "#D81A39" },
+    { id: "disc", n: "07", title: "Discover", sub: "Six shortcuts over four hours", time: "7 min", hex: "#B8770A", ink: "#986308" },
+    { id: "serve", n: "08", title: "Serve", sub: "Metrics & semantic models", time: "8 min", hex: "#0091FF", ink: "#0070C5" },
+    { id: "gov", n: "09", title: "Govern", sub: "The deploy gate", time: "7 min", hex: "#8B5CF6", ink: "#7D48F5" },
+    { id: "cap", n: "10", title: "Capstone", sub: "Build dim_users E2E", time: "15 min", hex: "#E85D04", ink: "#BB4B03" }
   ];
   const ACCENTS = [
     { id: "blue", hex: "#2D7DFF", name: "Signal" },
@@ -44,7 +44,7 @@
         {
           key: c.id,
           className: `sb-item ${active ? "active" : ""} ${done && !active ? "done" : ""}`,
-          style: { "--ch-hex": c.hex },
+          style: { "--ch-hex": c.hex, "--ch-ink": c.ink },
           onClick: () => setCurrent(c.id),
           title: collapsed ? `${c.n} \xB7 ${c.title} \xB7 ${c.time}` : void 0
         },
@@ -54,7 +54,12 @@
     })));
   }
   function TopBar({ chapter, onPrev, onNext, prevDisabled, nextDisabled }) {
-    return /* @__PURE__ */ React.createElement("div", { className: "tb" }, /* @__PURE__ */ React.createElement("div", { className: "crumb" }, /* @__PURE__ */ React.createElement("b", null, "DE Fundamentals"), /* @__PURE__ */ React.createElement("span", { className: "sep" }, "/"), /* @__PURE__ */ React.createElement("span", null, "Chapter ", chapter.n), /* @__PURE__ */ React.createElement("span", { className: "sep" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "here" }, chapter.title)), /* @__PURE__ */ React.createElement("div", { className: "tb-right" }, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: onPrev, disabled: prevDisabled }, "\u2190 Prev ", /* @__PURE__ */ React.createElement("span", { className: "kbd" }, "\u2190")), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: onNext, disabled: nextDisabled }, "Next \u2192 ", /* @__PURE__ */ React.createElement("span", { className: "kbd" }, "\u2192"))));
+    return /* @__PURE__ */ React.createElement("div", { className: "tb" }, /* @__PURE__ */ React.createElement(
+      "a",
+      { className: "tb-allcourses", href: "../", title: "Back to all courses" },
+      /* @__PURE__ */ React.createElement("span", { className: "tb-allcourses-arrow", "aria-hidden": "true" }, "\u2190"),
+      "All courses"
+    ), /* @__PURE__ */ React.createElement("div", { className: "crumb" }, /* @__PURE__ */ React.createElement("b", null, "DE Fundamentals"), /* @__PURE__ */ React.createElement("span", { className: "sep" }, "/"), /* @__PURE__ */ React.createElement("span", null, "Chapter ", chapter.n), /* @__PURE__ */ React.createElement("span", { className: "sep" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "here" }, chapter.title)), /* @__PURE__ */ React.createElement("div", { className: "tb-right" }, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: onPrev, disabled: prevDisabled }, "\u2190 Prev ", /* @__PURE__ */ React.createElement("span", { className: "kbd" }, "\u2190")), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: onNext, disabled: nextDisabled }, "Next \u2192 ", /* @__PURE__ */ React.createElement("span", { className: "kbd" }, "\u2192"))));
   }
   function TweaksPanel({ state, set, onClose }) {
     return /* @__PURE__ */ React.createElement("div", { className: "tweaks-panel" }, /* @__PURE__ */ React.createElement("div", { className: "tweaks-head" }, /* @__PURE__ */ React.createElement("div", { className: "tweaks-title" }, "Tweaks"), /* @__PURE__ */ React.createElement("div", { className: "btn", style: { padding: "4px 9px", fontSize: 11 }, onClick: onClose }, "Close")), /* @__PURE__ */ React.createElement("div", { className: "tweaks-body" }, /* @__PURE__ */ React.createElement("div", { className: "tw-group" }, /* @__PURE__ */ React.createElement("div", { className: "tw-lab" }, "Accent"), /* @__PURE__ */ React.createElement("div", { className: "tw-swatch" }, ACCENTS.map((a) => /* @__PURE__ */ React.createElement(

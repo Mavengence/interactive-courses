@@ -2522,6 +2522,13 @@
       for (const key in TAG_COLOR) if (k.includes(key.split(' ')[0])) return TAG_COLOR[key];
       return '#5b8a8f';
     }
+    // Darker variants for the .ivx-tag badge so white label text meets WCAG AA.
+    // Canvas accents keep the lighter TAG_COLOR palette; only badge text needs >= 4.5:1.
+    const TAG_BADGE_DARK = { '#5b8a8f': '#4a767b', '#cf8a3f': '#a8641f' };
+    function tagBadgeColor(t){
+      const c = tagColor(t);
+      return TAG_BADGE_DARK[c] || c;
+    }
 
     function dotPos(i){
       const padX = 80, w = cvs.width;
@@ -2671,7 +2678,7 @@
       const prev = cur;
       cur = Math.max(0, Math.min(moves.length-1, i));
       const m = moves[cur];
-      const col = tagColor(m.tag);
+      const col = tagBadgeColor(m.tag);
       const direction = cur > prev ? 1 : -1;
       stage.style.opacity = '0';
       stage.style.transform = `translateX(${direction*16}px)`;

@@ -37,7 +37,7 @@
             borderRadius: 6,
             background: strategy === k ? "var(--bg-hi)" : "transparent",
             border: strategy === k ? "1px solid var(--hair-2)" : "1px solid var(--hair)",
-            color: strategy === k ? "var(--lime)" : "var(--ink-3)",
+            color: strategy === k ? "var(--lime-ink)" : "var(--ink-3)",
             font: "inherit",
             fontSize: 12.5,
             cursor: "pointer"
@@ -53,11 +53,11 @@
       } }, /* @__PURE__ */ React.createElement("div", { style: {
         fontFamily: "var(--font-mono)",
         fontSize: 10.5,
-        color: "var(--lime)",
+        color: "var(--lime-ink)",
         letterSpacing: "0.12em",
         textTransform: "uppercase",
         marginBottom: 6
-      } }, "Naive model"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6 } }, "Predict all-legit \u2192 ", /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink-1)" } }, naiveAcc, "% accuracy"), /* @__PURE__ */ React.createElement("br", null), "Catches ", /* @__PURE__ */ React.createElement("strong", { style: { color: "#FF6B80" } }, "0 of 492 frauds")))), /* @__PURE__ */ React.createElement("div", { className: "plot-wrap", style: { flex: 1 } }, /* @__PURE__ */ React.createElement("svg", { viewBox: `0 0 ${W} ${H + 60}`, style: { width: "100%" } }, /* @__PURE__ */ React.createElement("text", { x: "0", y: "18", fill: "var(--ink-3)", fontSize: "10", fontFamily: "'JetBrains Mono',monospace" }, "Legitimate"), /* @__PURE__ */ React.createElement(
+      } }, "Naive model"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6 } }, "Predict all-legit \u2192 ", /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink-1)" } }, naiveAcc, "% accuracy"), /* @__PURE__ */ React.createElement("br", null), "Catches ", /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--coral-ink)" } }, "0 of 492 frauds")))), /* @__PURE__ */ React.createElement("div", { className: "plot-wrap", style: { flex: 1 } }, /* @__PURE__ */ React.createElement("svg", { viewBox: `0 0 ${W} ${H + 60}`, style: { width: "100%" } }, /* @__PURE__ */ React.createElement("text", { x: "0", y: "18", fill: "var(--ink-3)", fontSize: "10", fontFamily: "'JetBrains Mono',monospace" }, "Legitimate"), /* @__PURE__ */ React.createElement(
         "rect",
         {
           x: "0",
@@ -105,7 +105,7 @@
         },
         fraudPct,
         "%"
-      ), /* @__PURE__ */ React.createElement("text", { x: "0", y: "148", fill: "var(--ink-4)", fontSize: "9.5", fontFamily: "'JetBrains Mono',monospace" }, "Legit: ", s.legit.toLocaleString(), "   Fraud: ", s.fraud.toLocaleString(), "   Total: ", total.toLocaleString())), strategy === "smote" && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", marginTop: 4, lineHeight: 1.6 } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--mint)" } }, "SMOTE:"), " Synthetic Minority Oversampling \u2014 interpolates new fraud samples between existing ones. Balanced dataset, but adds synthetic data risk."), strategy === "undersample" && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", marginTop: 4, lineHeight: 1.6 } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--lime)" } }, "Undersampling:"), " Drops majority class to match minority. Fast and clean, but discards 99.8% of your legitimate transaction data."), strategy === "none" && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", marginTop: 4, lineHeight: 1.6 } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink-2)" } }, "Raw data:"), " 0.17% fraud rate. Use PR-AUC, not accuracy. Weight classes during training.")))
+      ), /* @__PURE__ */ React.createElement("text", { x: "0", y: "148", fill: "var(--ink-4)", fontSize: "9.5", fontFamily: "'JetBrains Mono',monospace" }, "Legit: ", s.legit.toLocaleString(), "   Fraud: ", s.fraud.toLocaleString(), "   Total: ", total.toLocaleString())), strategy === "smote" && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", marginTop: 4, lineHeight: 1.6 } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--mint-ink)" } }, "SMOTE:"), " Synthetic Minority Oversampling \u2014 interpolates new fraud samples between existing ones. Balanced dataset, but adds synthetic data risk."), strategy === "undersample" && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", marginTop: 4, lineHeight: 1.6 } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--lime-ink)" } }, "Undersampling:"), " Drops majority class to match minority. Fast and clean, but discards 99.8% of your legitimate transaction data."), strategy === "none" && /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", marginTop: 4, lineHeight: 1.6 } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink-2)" } }, "Raw data:"), " 0.17% fraud rate. Use PR-AUC, not accuracy. Weight classes during training.")))
     );
   }
   const PIPELINE_STEPS = [
@@ -252,17 +252,17 @@
         fontFamily: "var(--font-mono)",
         fontSize: 12,
         lineHeight: 1.8,
-        color: "var(--ink-2)",
-        background: "rgba(0,0,0,0.35)",
+        color: "#D8D3CC",
+        background: "#17151C",
         borderRadius: 8,
         border: "1px solid var(--hair)",
         padding: "14px 16px",
         minHeight: 160,
         maxHeight: 200,
         overflowY: "auto"
-      } }, logLines.length === 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "var(--ink-4)" } }, '// Click "Run step" to execute: ', PIPELINE_STEPS[currentStep].label), logLines.map((line, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: {
-        color: line.startsWith("\u2713") ? "var(--mint)" : line.startsWith(">") ? "var(--ink-2)" : "var(--lime)"
-      } }, line)), running && /* @__PURE__ */ React.createElement("span", { style: { color: "var(--lime)", animation: "none" } }, "\u258B")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 10 } }, /* @__PURE__ */ React.createElement(
+      } }, logLines.length === 0 && /* @__PURE__ */ React.createElement("span", { style: { color: "#A39E98" } }, '// Click "Run step" to execute: ', PIPELINE_STEPS[currentStep].label), logLines.map((line, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: {
+        color: line.startsWith("\u2713") ? "#64E2B5" : line.startsWith(">") ? "#D8D3CC" : "#9FE06B"
+      } }, line)), running && /* @__PURE__ */ React.createElement("span", { style: { color: "#9FE06B", animation: "none" } }, "\u258B")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 10 } }, /* @__PURE__ */ React.createElement(
         "button",
         {
           onClick: runStep,
@@ -401,9 +401,9 @@
           onChange: (e) => setThreshold(+e.target.value)
         }
       )), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 } }, [
-        { k: "Precision", v: round(current.precision, 3), color: "var(--mint)" },
-        { k: "Recall", v: round(current.recall, 3), color: "#FF6B80" },
-        { k: "F1", v: round(current.f1, 3), color: "var(--lime)" }
+        { k: "Precision", v: round(current.precision, 3), color: "var(--mint-ink)" },
+        { k: "Recall", v: round(current.recall, 3), color: "var(--coral-ink)" },
+        { k: "F1", v: round(current.f1, 3), color: "var(--lime-ink)" }
       ].map((m) => /* @__PURE__ */ React.createElement("div", { key: m.k, style: {
         padding: "10px 12px",
         borderRadius: 7,
@@ -417,10 +417,10 @@
         letterSpacing: "0.1em",
         textTransform: "uppercase",
         marginBottom: 4
-      } }, m.k), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 700, color: m.color } }, m.v)))), /* @__PURE__ */ React.createElement("div", { style: { background: "rgba(0,0,0,0.25)", borderRadius: 8, border: "1px solid var(--hair)", padding: "12px 14px" } }, /* @__PURE__ */ React.createElement("div", { style: {
+      } }, m.k), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 700, color: m.color } }, m.v)))), /* @__PURE__ */ React.createElement("div", { style: { background: "var(--panel-hi)", borderRadius: 8, border: "1px solid var(--hair-2)", padding: "12px 14px" } }, /* @__PURE__ */ React.createElement("div", { style: {
         fontFamily: "var(--font-mono)",
         fontSize: 10,
-        color: "var(--lime)",
+        color: "var(--lime-ink)",
         letterSpacing: "0.12em",
         textTransform: "uppercase",
         marginBottom: 10
@@ -446,7 +446,7 @@
           value: falseAlertCost,
           onChange: (e) => setFalseAlertCost(+e.target.value)
         }
-      ))), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, fontSize: 12 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "Missed frauds", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("strong", { style: { color: "#FF6B80", fontSize: 16 } }, missedFraud)), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "False alerts", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink-2)", fontSize: 16 } }, falseAlerts.toLocaleString())), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "Total cost", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--lime)", fontSize: 16 } }, "$", totalCost.toLocaleString())))), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", lineHeight: 1.6 } }, threshold <= 0.25 && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("strong", { style: { color: "#FF6B80" } }, "Low threshold:"), " Catches most fraud but flags many legitimate transactions. High operational cost."), threshold > 0.25 && threshold <= 0.45 && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--lime)" } }, "Sweet spot (0.25\u20130.45):"), " Threshold ", threshold.toFixed(2), " catches ~", round(current.recall * 100, 0), "% of fraud with manageable false-positive rate."), threshold > 0.45 && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--mint)" } }, "High threshold:"), " Very precise \u2014 catches only the most obvious fraud. Misses edge cases."))))
+      ))), /* @__PURE__ */ React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, fontSize: 12 } }, /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "Missed frauds", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--coral-ink)", fontSize: 16 } }, missedFraud)), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "False alerts", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink-2)", fontSize: 16 } }, falseAlerts.toLocaleString())), /* @__PURE__ */ React.createElement("div", { style: { color: "var(--ink-3)" } }, "Total cost", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--lime-ink)", fontSize: 16 } }, "$", totalCost.toLocaleString())))), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: "var(--ink-3)", lineHeight: 1.6 } }, threshold <= 0.25 && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--coral-ink)" } }, "Low threshold:"), " Catches most fraud but flags many legitimate transactions. High operational cost."), threshold > 0.25 && threshold <= 0.45 && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--lime-ink)" } }, "Sweet spot (0.25\u20130.45):"), " Threshold ", threshold.toFixed(2), " catches ~", round(current.recall * 100, 0), "% of fraud with manageable false-positive rate."), threshold > 0.45 && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--mint-ink)" } }, "High threshold:"), " Very precise \u2014 catches only the most obvious fraud. Misses edge cases."))))
     );
   }
   const CHECKLIST_ITEMS = [
@@ -468,7 +468,7 @@
       return next;
     });
     const pct = Math.round(checked.size / CHECKLIST_ITEMS.length * 100);
-    const barColor = pct === 100 ? "var(--mint)" : pct >= 50 ? "var(--lime)" : "#FF6B80";
+    const barColor = pct === 100 ? "var(--mint-ink)" : pct >= 50 ? "var(--lime-ink)" : "var(--coral-ink)";
     return /* @__PURE__ */ React.createElement(
       Panel,
       {

@@ -316,7 +316,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: `Streaming: <span class='accent'>real-time</span> and <span class='accent'>accurate</span> are pick-two.`,
         hook: `Events arrive continuously: clicks, impressions, heartbeats. <strong>${N.flink}</strong> on top of <strong>${N.kafkastreams}</strong> gives you answers in seconds. ${N.snowflake} gives you answers you can bet a launch on. <em>They are not the same number.</em> Your job: know which one your decision needs, and bridge the two cleanly.`,

@@ -208,7 +208,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   font-size: .8rem; font-weight: 700;
 }
-.lesson-card.done .arrow { color: var(--ok); }
+.lesson-card.done .arrow { color: var(--ok-ink); }
 
 /* Progress section */
 .progress-section { padding: 40px 0 80px; }
@@ -348,7 +348,7 @@
   border-radius: 5px;
 }
 .stack-card.on .sc-idx {
-  color: var(--accent); border-color: color-mix(in oklch, var(--accent) 40%, var(--rule-2));
+  color: var(--accent-ink, var(--accent)); border-color: color-mix(in oklch, var(--accent) 40%, var(--rule-2));
   background: color-mix(in oklch, var(--accent) 8%, var(--paper-2));
 }
 .stack-card .sc-label {
@@ -360,7 +360,7 @@
 .stack-card.off .sc-label { color: var(--ink-3); font-weight: 500; }
 .stack-card .sc-weight {
   font-family: var(--mono); font-size: .7rem; font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-ink, var(--accent));
   letter-spacing: .02em;
 }
 .stack-card.off .sc-weight { color: var(--ink-4, var(--ink-3)); opacity: 0.5; }

@@ -226,6 +226,35 @@ textarea:focus, input:focus, select:focus {
   display: flex; align-items: center; gap: 20px;
   padding: 14px 32px;
 }
+/* ------- back to catalogue ------- */
+.topbar-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.78rem; font-weight: 500;
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 5px 10px 5px 8px;
+  border: 1px solid var(--rule-2);
+  border-radius: 999px;
+  background: var(--paper);
+  letter-spacing: -0.005em;
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+  flex-shrink: 0;
+}
+.topbar-back .tb-arrow { font-size: 0.95rem; line-height: 1; transition: transform .25s cubic-bezier(.2,.7,.2,1); }
+.topbar-back:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+  background: var(--paper-3);
+  text-decoration: none;
+}
+.topbar-back:hover .tb-arrow { transform: translateX(-2px); }
+.topbar-back:focus-visible { outline: 2px solid var(--cyan-ink); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .topbar-back .tb-back-label { display: none; }
+  .topbar-back { padding: 5px 9px; }
+}
+
 .brand {
   display: inline-flex; align-items: center; gap: 11px;
   font-family: var(--mono); font-weight: 700;

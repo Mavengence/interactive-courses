@@ -161,8 +161,8 @@
   font-family: var(--mono); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em;
   display: inline-block; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px;
 }
-.do-dont .do .label { background: var(--ok); color: var(--paper); }
-.do-dont .dont .label { background: var(--bad); color: var(--paper); }
+.do-dont .do .label { background: var(--ok-ink); color: var(--paper); }
+.do-dont .dont .label { background: var(--bad-ink); color: var(--paper); }
 @media (max-width: 640px) { .do-dont { grid-template-columns: 1fr; } }
 
 .lesson-footer {

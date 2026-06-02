@@ -139,7 +139,7 @@
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
       Hero,
       {
-        accent: chapter.hex,
+        accent: chapter.ink,
         eyebrow: `Chapter ${chapter.n} \xB7 ${chapter.time}`,
         title: `Govern: privacy isn't an audit step. It's the <span class='accent'>deploy gate</span>.`,
         hook: `Every column that names a human, device, or contractor must declare what kind of identity it carries. ${N.access_gateway} reads that declaration at deploy time and refuses to ship a ${N.datasetspec} that has unannotated PII. You don't argue with it; you annotate and re-ship. This is the layer that makes the entire warehouse legally safe to query.`,

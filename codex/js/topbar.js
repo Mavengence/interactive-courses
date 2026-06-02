@@ -4,10 +4,15 @@
     const xp = window.Progress?.getXP() || 0;
     const isLesson = !!opts.lesson;
     const pathPrefix = isLesson ? '../' : '';
+    // Back to the catalogue (repo root). Works at repo-root and under /interactive-courses/.
+    const catalogueHref = location.pathname.includes('/lessons/') ? '../../' : '../';
     const el = document.createElement('div');
     el.className = 'topbar';
     el.innerHTML = `
       <div class="topbar-inner">
+        <a class="topbar-back" href="${catalogueHref}" aria-label="Back to all courses">
+          <span class="tb-arrow" aria-hidden="true">&larr;</span><span class="tb-back-label">All courses</span>
+        </a>
         <a class="brand" href="${pathPrefix}index.html" aria-label="Codex Course — home">
           <span class="mark" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 22 22">
