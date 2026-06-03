@@ -18,14 +18,16 @@ No signup. No install. No video. Open `index.html` and start learning — many l
 
 <br/>
 
-<a href="https://www.timloehr.me/interactive-courses/">
-  <img src="docs/screenshots/landing.jpg" alt="Interactive Courses — landing page" width="860"/>
+<a href="https://www.timloehr.me/interactive-courses/data-infrastructure/lessons/08-streaming.html">
+  <img src="docs/demo/kafka-consumer-groups.gif" alt="Live Kafka consumer-group simulator — events flow from producer to partitions to consumers, then a live rebalance" width="860"/>
 </a>
 
+<sub><em>One of 40+ live, in-browser simulators — here, a Kafka consumer group rebalancing in real time. No video, no setup: you drive it.</em></sub>
+
 <br/>
 <br/>
 
-### ▶ **[Open the live site →](https://www.timloehr.me/interactive-courses/)**
+### ▶ **[Open the live site →](https://www.timloehr.me/interactive-courses/)** &nbsp;·&nbsp; [Browse all 6 courses ↓](#-course-gallery)
 
 </div>
 
