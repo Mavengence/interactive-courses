@@ -218,6 +218,21 @@
     .card:hover .card-cta { color: var(--cta); gap: 12px; }
     .card:hover .card-cta .arrow { transform: translateX(4px); }
 
+    /* ─── Back to portfolio ─── */
+    .backhome {
+      position: absolute; top: 22px; left: 24px; z-index: 2;
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: var(--mono); font-size: 0.8rem; font-weight: 500;
+      color: var(--text-dim); text-decoration: none;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 100px; padding: 7px 13px;
+      transition: color .2s, border-color .2s, background .2s, transform .2s;
+    }
+    .backhome:hover { color: #fff; border-color: var(--border-hov); background: rgba(255,255,255,0.07); }
+    .backhome .arrow { transition: transform .2s; }
+    .backhome:hover .arrow { transform: translateX(-3px); }
+    @media (max-width: 560px) { .backhome { position: static; margin: 20px 0 -10px; } }
+
     /* ─── Footer ─── */
     footer { text-align: center; padding: 44px 0 0; border-top: 1px solid var(--border); margin-top: 72px; }
     .star-cta {
@@ -252,6 +267,7 @@
   <div class="bg-blobs" aria-hidden="true"><span></span><span></span><span></span></div>
 
   <div class="page">
+    <a class="backhome" href="https://www.timloehr.me/" aria-label="Back to timloehr.me"><span class="arrow" aria-hidden="true">←</span> timloehr.me</a>
     <header>
       <div class="header-eyebrow"><span class="dot"></span> timloehr.me</div>
       <h1>Learn the data &amp; AI stack <span class="grad">by doing</span></h1>
