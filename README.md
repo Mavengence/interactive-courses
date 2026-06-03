@@ -43,6 +43,32 @@ No signup. No install. No video. Open `index.html` and start learning — many l
 
 ---
 
+## ⚡ See it in action
+
+<div align="center">
+<table>
+<tr>
+<td width="33%" valign="top">
+  <a href="https://www.timloehr.me/interactive-courses/data-infrastructure/lessons/04-storage-formats.html"><img src="docs/demo/bloom-filter.gif" alt="Bloom filter simulator — bits light up as keys are added" width="100%"/></a>
+  <br/><sub><b>Bloom filter</b> — O(1) membership; bits light up as you add keys <em>(Data Infrastructure)</em></sub>
+</td>
+<td width="33%" valign="top">
+  <a href="https://www.timloehr.me/interactive-courses/data-infrastructure/lessons/02-cap-pacelc.html"><img src="docs/demo/cap-partition.gif" alt="CAP theorem simulator — cut the network cable, replicas diverge" width="100%"/></a>
+  <br/><sub><b>CAP, live</b> — cut the cable, watch replicas diverge <em>(Data Infrastructure)</em></sub>
+</td>
+<td width="33%" valign="top">
+  <a href="https://www.timloehr.me/interactive-courses/data-science/"><img src="docs/demo/bias-variance.gif" alt="Bias-variance tradeoff simulator — slide model complexity" width="100%"/></a>
+  <br/><sub><b>Bias–variance</b> — slide complexity, watch overfitting fan out <em>(Data Science)</em></sub>
+</td>
+</tr>
+</table>
+
+<sub><em>These aren't videos — open any course and drive them yourself.</em></sub>
+
+</div>
+
+---
+
 ## 📚 Course Gallery
 
 <table>
