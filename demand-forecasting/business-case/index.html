@@ -1,0 +1,3467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Business Case: Apple Demand Forecasting</title>
+  <style>
+    :root {
+      --ink: #15171a;
+      --muted: #626a75;
+      --line: #d9dee7;
+      --paper: #ffffff;
+      --bg: #f6f8fb;
+      --blue: #0b66e4;
+      --green: #167a5b;
+      --orange: #d56f18;
+      --red: #c93434;
+      --yellow: #f2c14e;
+      --shadow: 0 18px 50px rgba(21, 23, 26, 0.09);
+      --radius: 8px;
+      --mono: "SFMono-Regular", "Cascadia Code", "Liberation Mono", Menlo, monospace;
+      --sans: "Aptos", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(11,102,228,0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(11,102,228,0.04) 1px, transparent 1px),
+        var(--bg);
+      background-size: 28px 28px;
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 34px 22px 54px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 410px;
+      gap: 22px;
+      align-items: stretch;
+      min-height: 520px;
+    }
+
+    .hero-main,
+    .hero-side,
+    .section,
+    .panel,
+    .code-card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main {
+      padding: 38px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 8px;
+      background: linear-gradient(90deg, var(--red), var(--orange), var(--green), var(--blue));
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark svg { width: 22px; height: 22px; }
+
+    h1 {
+      margin: 36px 0 14px;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: 0.93;
+      letter-spacing: 0;
+      max-width: 860px;
+    }
+
+    .lede {
+      font-size: clamp(18px, 2vw, 24px);
+      line-height: 1.35;
+      color: #34383f;
+      max-width: 780px;
+      margin: 0 0 28px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 15px;
+      background: #fbfcff;
+      min-height: 104px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: clamp(24px, 3vw, 36px);
+      line-height: 1;
+    }
+
+    .stat span {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.25;
+    }
+
+    .hero-side {
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .side-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .side-title h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .warehouse-icon {
+      width: 44px;
+      height: 44px;
+      color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .workback {
+      display: grid;
+      gap: 10px;
+      position: relative;
+    }
+
+    .workback::before {
+      content: "";
+      position: absolute;
+      left: 15px;
+      top: 28px;
+      bottom: 28px;
+      width: 3px;
+      background: linear-gradient(var(--red), var(--blue));
+      border-radius: 999px;
+    }
+
+    .work-step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      position: relative;
+      animation: rise 520ms ease both;
+    }
+
+    .work-step:nth-child(2) { animation-delay: 80ms; }
+    .work-step:nth-child(3) { animation-delay: 160ms; }
+    .work-step:nth-child(4) { animation-delay: 240ms; }
+    .work-step:nth-child(5) { animation-delay: 320ms; }
+
+    .dot {
+      width: 34px;
+      height: 34px;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 8px 18px rgba(21, 23, 26, 0.16);
+      z-index: 1;
+    }
+
+    .work-copy {
+      padding: 12px 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .work-copy b {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .work-copy span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .section {
+      margin-top: 22px;
+      padding: 30px;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(260px, 0.55fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .kicker {
+      margin: 0 0 7px;
+      color: var(--blue);
+      font-weight: 850;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      line-height: 1.1;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .section-head p {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .two { grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .panel {
+      padding: 20px;
+      box-shadow: none;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .panel-head span,
+    .tiny {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .hierarchy {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .hierarchy div {
+      padding: 12px 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcff;
+      text-align: center;
+      min-height: 64px;
+      display: grid;
+      align-content: center;
+      gap: 3px;
+    }
+
+    .hierarchy b {
+      font-size: 12px;
+      line-height: 1.1;
+    }
+
+    .hierarchy span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 9px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .org {
+      min-height: 220px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      border-top: 6px solid var(--line);
+    }
+
+    .org.retail { border-top-color: var(--red); }
+    .org.logistics { border-top-color: var(--orange); }
+    .org.sdm { border-top-color: var(--blue); }
+
+    .org p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .org-metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .org-metric b {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .manual-ai {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      height: 100%;
+    }
+
+    .workload {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: #fbfcff;
+    }
+
+    .workload strong {
+      display: block;
+      font-size: 38px;
+      line-height: 1;
+      margin: 14px 0 8px;
+    }
+
+    .workload p { margin: 0; font-size: 14px; }
+
+    .code-card {
+      background: #101418;
+      border-color: #101418;
+      color: #ecf2f8;
+      box-shadow: none;
+      overflow: hidden;
+    }
+
+    .code-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      color: #b9c4d0;
+      font-size: 12px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.45;
+      tab-size: 2;
+    }
+
+    code { font-family: inherit; }
+    .ck { color: #7ab7ff; }
+    .cs { color: #9ee5b7; }
+    .cn { color: #f5ca64; }
+    .cm { color: #9aa5b1; }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .model-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: #fff;
+      min-height: 188px;
+    }
+
+    .model-card b {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .model-card p {
+      margin: 0 0 12px;
+      font-size: 14px;
+    }
+
+    .metric-line {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .decision-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: #fbfcff;
+    }
+
+    .decision-card strong {
+      display: block;
+      font-size: 34px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .decision-card p { margin: 0; font-size: 14px; }
+
+    .loop {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .loop div {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcff;
+      padding: 13px;
+      min-height: 96px;
+      position: relative;
+    }
+
+    .loop div::after {
+      content: "->";
+      position: absolute;
+      right: -14px;
+      top: 36px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .loop div:last-child::after { content: ""; }
+
+    .loop b { display: block; margin-bottom: 5px; }
+    .loop span { color: var(--muted); font-size: 12px; line-height: 1.25; }
+
+    svg.chart {
+      width: 100%;
+      height: 340px;
+      display: block;
+      overflow: visible;
+    }
+
+    svg.chart.short { height: 260px; }
+
+    .axis { stroke: #9aa5b1; stroke-width: 1.2; }
+    .gridline { stroke: #e7ebf1; stroke-width: 1; }
+    .label { fill: #66707d; font-size: 12px; font-family: var(--sans); }
+    .anno { fill: #15171a; font-size: 13px; font-weight: 800; font-family: var(--sans); }
+
+    .footer {
+      margin-top: 22px;
+      padding: 24px 30px;
+      border-radius: var(--radius);
+      background: var(--ink);
+      color: #fff;
+      display: grid;
+      grid-template-columns: minmax(0, 0.7fr) minmax(280px, 1fr);
+      gap: 24px;
+      align-items: center;
+    }
+
+    .footer h2 { color: #fff; font-size: 34px; }
+    .footer p { color: #cbd3dc; margin: 0; font-size: 18px; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .section-head,
+      .two,
+      .footer { grid-template-columns: 1fr; }
+
+      .hero { min-height: 0; }
+      .hero-stats,
+      .three,
+      .model-grid,
+      .decision,
+      .manual-ai,
+      .loop { grid-template-columns: 1fr 1fr; }
+
+      .hierarchy { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .page { padding: 14px 12px 34px; }
+      .hero-main, .hero-side, .section { padding: 20px; }
+      .hero-stats,
+      .three,
+      .model-grid,
+      .decision,
+      .manual-ai,
+      .loop,
+      .hierarchy { grid-template-columns: 1fr; }
+      .loop div::after { content: ""; }
+      table, thead, tbody, tr, th, td { display: block; width: 100%; }
+      thead { display: none; }
+      tr {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        margin-bottom: 10px;
+        padding: 8px;
+        background: #fff;
+      }
+      td {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        border-bottom: 0;
+        padding: 6px 4px;
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 800;
+      }
+      pre { font-size: 12px; }
+      svg.chart { height: 300px; }
+      .stat { min-height: 88px; }
+    }
+  
+    /* ===== section additions ===== */
+/* --- hero --- */
+/* --- Hero elevation (additive only; base tokens/classes untouched) --- */
+.hero h1 { letter-spacing: -0.018em; }
+
+.brand .sep { color: var(--muted); margin: 0 4px; }
+
+.side-sub {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.hero-stats { gap: 14px; }
+
+.hero-stats .stat {
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 18px;
+}
+
+.hero-stats .stat .tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.hero-stats .stat strong {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Semantic color law: red = the ask, blue = AI forecast, orange = supply cap */
+.stat.is-ask strong { color: var(--red); }
+.stat.is-forecast strong { color: var(--blue); }
+.stat.is-supply strong { color: var(--orange); }
+/* speed is a runtime, not a forecast: keep blue only as the tile accent so
+   blue stays uniquely the forecast's signature */
+.stat.is-speed strong { color: var(--ink); }
+.stat.is-speed { border-color: var(--blue); background: color-mix(in srgb, var(--blue) 7%, var(--paper)); }
+
+/* Two-tier ink: workback descriptions read as narration, not metadata */
+.work-copy span { color: #34383f; }
+
+@media (prefers-reduced-motion: reduce) {
+  .work-step { animation: none; }
+}
+/* --- sec1-data --- */
+/* Section 1 - Meet the data: blue chapter spine + masthead tracking */
+.section.s-data { border-top: 3px solid var(--blue); }
+.s-data h2 { letter-spacing: -0.018em; }
+.s-data .section-head p { color: #34383f; }
+.s-data .kicker { font-variant-numeric: tabular-nums; }
+.s-data .kpipe { color: var(--line); font-weight: 700; }
+
+/* planning grain: mark the cells where the decision is real */
+.s-data .grain-note { margin-top: 4px; }
+.s-data .hierarchy .grain-key {
+  border-color: var(--blue);
+  background: rgba(11, 102, 228, 0.06);
+}
+
+/* enriched per-store signals table */
+.signals-table th:first-child,
+.signals-table td:first-child { width: 20%; }
+.signals-table td.num,
+.signals-table th.num { font-variant-numeric: tabular-nums; }
+.po-low { color: var(--red); font-weight: 800; }
+/* categorical signal valence: green = good demand signal, red = risk (label carries meaning too) */
+.sig-good { color: var(--green); font-weight: 700; }
+.sig-risk { color: var(--red); font-weight: 700; }
+.tbl-caption { margin-top: 12px; }
+.tbl-caption b { color: var(--ink); }
+
+/* chart provenance + honest framing (mono metadata voice) */
+.honest-frame {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.provenance {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* four structure cards: color-coded to the semantic law (green stays reserved for allocation) */
+.pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.pattern {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.pattern.p-lead { border-top-color: var(--blue); }
+.pattern.p-season { border-top-color: #8b97a8; }
+.pattern.p-decay { border-top-color: var(--ink); }
+.pattern.p-censor { border-top-color: var(--red); }
+.pattern-tag {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pattern b {
+  display: block;
+  font-size: 16px;
+  margin: 6px 0 8px;
+  line-height: 1.14;
+}
+.pattern > p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #34383f;
+  line-height: 1.42;
+}
+.pattern-note {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.42;
+}
+.pattern-note b {
+  display: inline;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.pattern-note code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink);
+}
+
+/* bridge into the forecast (does not cross it yet) */
+.bridge {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius);
+  background: #fbfcff;
+  font-size: 15px;
+  color: #34383f;
+  line-height: 1.45;
+}
+.bridge b { color: var(--ink); }
+
+@media (max-width: 980px) {
+  .pattern-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 620px) {
+  .pattern-grid { grid-template-columns: 1fr; }
+}
+/* --- sec2-orgs --- */
+/* --- sec2-orgs elevation (scoped to .s-orgs) --- */
+
+/* description-list resets: label/value pairs use dl/dt/dd so AT gets the label<->value grouping */
+.s-orgs dl { margin: 0; }
+.s-orgs dt { margin: 0; }
+.s-orgs dd { margin: 0; }
+
+/* two-tier ink: narration reads near-ink, metadata stays muted */
+.s-orgs .section-head p { color: #34383f; }
+
+/* shared-input ribbon: one source, feeding the three colored orgs */
+.s-orgs .orgs-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 14px 18px 14px 20px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+/* left accent: three DISCRETE blocks (retail red / logistics orange / sdm blue) read as
+   one source splitting into three orgs, NOT the reserved masthead/footer rainbow */
+.s-orgs .orgs-source::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(
+    var(--red) 0 33.34%,
+    var(--orange) 33.34% 66.67%,
+    var(--blue) 66.67% 100%
+  );
+}
+.s-orgs .orgs-source-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.s-orgs .orgs-source-kick {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+}
+.s-orgs .orgs-source-head dd {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.s-orgs .orgs-source-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.s-orgs .sig-chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fbfcff;
+  white-space: nowrap;
+}
+.s-orgs .orgs-source-hint {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* org card: four aligned rows so footers line up across the three */
+.s-orgs .org {
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 300px;
+}
+.s-orgs .org-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.s-orgs .org-top h3 { margin: 0; }
+
+/* model/tool tag, tinted to each org's theme color */
+.s-orgs .org-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+  flex: none;
+}
+.s-orgs .org.retail .org-tag {
+  color: var(--red);
+  border-color: rgba(201, 52, 52, 0.35);
+  background: rgba(201, 52, 52, 0.06);
+}
+/* logistics tag text darkened to clear WCAG AA (~5.4:1); border/bg keep the orange tint */
+.s-orgs .org.logistics .org-tag {
+  color: #9c4e0e;
+  border-color: rgba(213, 111, 24, 0.35);
+  background: rgba(213, 111, 24, 0.07);
+}
+.s-orgs .org.sdm .org-tag {
+  color: var(--blue);
+  border-color: rgba(11, 102, 228, 0.30);
+  background: rgba(11, 102, 228, 0.06);
+}
+
+/* facet 1: the decision it owns */
+.s-orgs .org-facet { margin: 0; }
+.s-orgs .org-facet-label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+.s-orgs .org-facet dd {
+  font-size: 14px;
+  color: #34383f;
+  line-height: 1.45;
+}
+
+/* transform strip: shared input -> the org's outcome.
+   green = the committed number (1,050), blue = the AI forecast, ink = a place (not an allocation) */
+.s-orgs .org-flow {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  background: #fbfcff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  margin-top: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.s-orgs .org-flow b { font-weight: 700; }
+.s-orgs .org-flow .commit { color: var(--green); }
+.s-orgs .org-flow .ai { color: var(--blue); }
+.s-orgs .org-flow .dest { color: var(--ink); }
+
+/* facet 2 + 3: output and the metric it is scored on */
+.s-orgs .org-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  align-items: start;
+}
+.s-orgs .org-cell dt {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.s-orgs .org-cell dd {
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.s-orgs .org-cell dd.metric-val {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: #34383f;
+}
+
+@media (max-width: 620px) {
+  .s-orgs .orgs-source-hint { margin-left: 0; }
+  .s-orgs .org { min-height: 0; }
+  .s-orgs .org-foot { grid-template-columns: 1fr; }
+}
+/* --- sec3-manual --- */
+/* Section 3 - Why AI forecasting: substance elevation */
+.section.s-cost { border-top: 3px solid var(--orange); }
+.s-cost h2 { letter-spacing: -0.018em; }
+.s-cost .kicker { font-variant-numeric: tabular-nums; }
+.s-cost .kbar { color: var(--line); font-weight: 600; }
+.s-cost .section-head p { color: #34383f; }
+.s-cost .manual-ai { height: auto; }
+.s-cost .workload h4 { margin: 0 0 8px; font-size: 19px; line-height: 1.1; }
+.s-cost .workload p { color: #34383f; }
+.s-cost .workload strong { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.s-cost .workload.wl-ai { border-color: var(--blue); background: #f7faff; }
+.s-cost .wl-foot {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+.s-cost .cap-mono {
+  margin: 12px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.s-cost .fleet-panel { margin-top: 16px; }
+.s-cost .fleet-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 18px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.s-cost .fleet-legend span { display: inline-flex; align-items: center; }
+.s-cost .fleet-legend i {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+.s-cost .fleet-legend i.k-focus { background: var(--ink); }
+.s-cost .fleet-legend i.k-exception { background: var(--red); }
+.s-cost .fleet-legend i.k-fleet { background: #e7ebf1; }
+/* --- sec4-models --- */
+/* --- Section 4: model-choice elevation (additive; reuses base tokens/classes) --- */
+.model-rule {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 13px 18px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink);
+  border-radius: var(--radius);
+  background: rgba(11, 102, 228, 0.03);
+}
+.model-rule > span:last-child {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #34383f;
+}
+.rule-tag {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.ck-base { color: #6a7480; font-weight: 800; }
+.ck-ai { color: var(--blue); font-weight: 800; }
+
+.model-card {
+  display: flex;
+  flex-direction: column;
+  border-top: 6px solid var(--line);
+}
+.model-card.m-sdm { border-top-color: var(--blue); }
+.model-card.m-logistics { border-top-color: var(--orange); }
+.model-card.m-retail { border-top-color: var(--red); }
+
+.model-eyebrow {
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.model-card p { color: #34383f; }
+.model-decides {
+  font-size: 13px;
+  color: #34383f;
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+.model-decides strong { font-weight: 800; }
+
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 11px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+}
+.chip.base { color: #6a7480; border-color: rgba(139, 151, 168, 0.4); }
+.chip.ai { color: var(--blue); border-color: rgba(11, 102, 228, 0.35); background: rgba(11, 102, 228, 0.06); }
+.chip.opt { color: var(--green); border-color: rgba(22, 122, 91, 0.35); background: rgba(22, 122, 91, 0.06); }
+.verdict .arrow { color: var(--muted); font-weight: 800; font-size: 12px; }
+
+.code-prov {
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 12px;
+}
+.model-bridge{margin-top:18px;padding:13px 16px;border-left:3px solid var(--blue);background:#f3f7ff;border-radius:8px;font-size:15px;line-height:1.45;color:#26303c;}
+/* --- sec5-forecast --- */
+.section.s-forecast { border-top: 3px solid var(--blue); }
+.kicker-bar { color: var(--line); font-weight: 400; }
+.forecast-split { margin-top: 16px; }
+.decision-card strong { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.decision-card.committed { border-left: 4px solid var(--green); }
+.decision-card.committed strong { color: var(--green); }
+.decision-card.unmet { border-left: 4px solid var(--red); }
+.decision-card.unmet strong { color: var(--red); }
+.decision-eyebrow { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px; }
+.chart-note { margin: 12px 0 0; font-family: var(--mono); font-size: 11px; line-height: 1.45; color: var(--muted); }
+/* --- sec6-cost --- */
+.section.s-cost { border-top: 3px solid var(--orange); }
+
+.s-cost .kicker { font-variant-numeric: tabular-nums; }
+.s-cost .kicker .pipe { color: var(--line); font-weight: 600; }
+
+.s-cost .section-head p,
+.s-cost .decision-card p { color: #34383f; }
+
+.s-cost .cost-stack { display: grid; gap: 14px; }
+
+.s-cost .decision-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.s-cost .decision-card strong {
+  margin: 0;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.s-cost .decision-card p { margin: 0; }
+
+.s-cost .cost-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.s-cost .cost-over { border-left: 3px solid var(--orange); }
+.s-cost .cost-over strong { color: var(--orange); }
+.s-cost .cost-under { border-left: 3px solid var(--red); }
+.s-cost .cost-under strong { color: var(--red); }
+.s-cost .cost-tweak,
+.s-cost .cost-reserve { border-left: 3px solid var(--green); }
+.s-cost .cost-tweak strong,
+.s-cost .cost-reserve strong { color: var(--green); }
+
+.s-cost .cost-note { margin-top: 14px; }
+.s-cost .cap-mono { font-family: var(--mono); margin-top: 10px; line-height: 1.4; }
+/* --- sec7-metrics --- */
+.section.s-metrics { border-top: 3px solid var(--green); }
+.s-metrics h2 { letter-spacing: -0.018em; }
+.s-metrics .section-head p { color: #34383f; }
+.s-metrics .kicker { font-variant-numeric: tabular-nums; }
+.s-metrics .kicker .pipe { color: var(--line); }
+
+.s-metrics .grid.two { align-items: start; }
+
+.s-metrics table { margin-top: 2px; }
+.s-metrics tbody tr.total td { border-top: 2px solid var(--line); border-bottom: none; font-weight: 600; }
+
+.verdicts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.verdict { border: 1px solid var(--line); border-left-width: 4px; border-radius: var(--radius); padding: 11px 12px; background: #fbfcff; }
+.verdict b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.verdict strong { display: block; font-size: 25px; line-height: 1; margin: 4px 0 6px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.verdict span { display: block; font-size: 12px; line-height: 1.35; color: #34383f; }
+.verdict.good { border-left-color: var(--green); }
+.verdict.bad { border-left-color: var(--red); }
+.verdict.warn { border-left-color: var(--orange); }
+
+.s-metrics .callout { margin: 12px 0 0; padding: 10px 12px; border: 1px dashed var(--line); border-radius: var(--radius); background: #fff; color: #34383f; font-size: 12.5px; line-height: 1.4; }
+
+.why { display: grid; gap: 12px; }
+.why-item b { display: block; font-size: 14px; margin-bottom: 3px; }
+.why-item span { display: block; font-size: 13px; line-height: 1.4; color: #34383f; }
+.why-item.mape b { color: var(--red); }
+.why-item.mae b { color: var(--orange); }
+
+.metric-quad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+.mcard { border: 1px solid var(--line); border-top-width: 3px; border-top-color: var(--ink); border-radius: var(--radius); padding: 15px; background: #fff; display: flex; flex-direction: column; }
+.mcard b { display: block; font-size: 15px; margin-bottom: 6px; }
+.mcard .role { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 2px; }
+.mcard p { margin: 0 0 12px; font-size: 12.5px; line-height: 1.4; color: #34383f; flex: 1 1 auto; }
+.mcard .gate { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 9px; font-variant-numeric: tabular-nums; }
+.mcard .gval { color: var(--ink); font-weight: 700; white-space: nowrap; }
+
+.s-metrics .mono-cap { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 10px 0 0; }
+
+@media (max-width: 980px) { .metric-quad { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 620px) { .metric-quad, .verdicts { grid-template-columns: 1fr; } }
+/* --- sec8-loop --- */
+/* Section 8: close the loop (ending) + footer bookend */
+.section.s-monitor{border-top:3px solid var(--green)}
+.s-monitor .section-head p{color:#34383f}
+
+/* live monitoring panel: run streak + gate board */
+.run-streak{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0 0}
+.rs-dot{width:11px;height:11px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px rgba(22,122,91,.12)}
+.rs-dot.human{width:13px;height:13px;background:var(--ink);box-shadow:0 0 0 2px rgba(21,23,26,.16)}
+.run-legend{display:flex;gap:16px;margin:12px 0 0;font-size:11px;color:var(--muted)}
+.run-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.run-legend i.green{background:var(--green)}
+.run-legend i.ink{background:var(--ink)}
+.gate-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.gate-cell{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:#fbfcff;padding:12px}
+.gate-cell .g-k{display:block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.gate-cell .g-v{display:block;margin:8px 0 2px;font-size:23px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.gate-cell .g-t{display:block;padding-right:56px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.gate-cell .g-pass{position:absolute;bottom:11px;right:11px;font-size:10px;font-weight:800;letter-spacing:.04em;color:var(--green);border:1px solid rgba(22,122,91,.4);border-radius:999px;padding:2px 7px;line-height:1.2}
+.cap-mono{font-family:var(--mono);font-size:11px;color:var(--muted);margin:12px 0 0}
+
+/* elevated, closed 5-step loop */
+.loop-wrap{margin-top:16px}
+.loop{position:relative}
+.loop div{padding-top:15px}
+.loop-n{position:absolute;top:10px;right:12px;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:#b4bcc7}
+.loop b{font-size:15px}
+.loop-step-tag{display:block;margin-top:8px;padding-top:7px;width:100%;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--green)}
+.loop-return{margin-top:12px;display:flex;align-items:center;gap:12px;border:1px dashed rgba(22,122,91,.55);border-radius:var(--radius);background:rgba(22,122,91,.05);padding:11px 15px;color:var(--green);font-size:13px;font-weight:700;line-height:1.4}
+.loop-return .lr-hook{flex:0 0 auto;font-family:var(--mono);font-size:18px;font-weight:800}
+
+/* closing payoff numerals */
+.s-monitor .decision-card strong{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+/* footer: rainbow bookend + semantic colour spine */
+.footer{position:relative;overflow:hidden}
+.footer::before{content:"";position:absolute;inset:0 0 auto 0;height:8px;background:linear-gradient(90deg,var(--red),var(--orange),var(--green),var(--blue))}
+.footer h2{font-variant-numeric:tabular-nums;letter-spacing:-.018em}
+.footer-lede p{color:#cbd3dc;margin:8px 0 0;font-size:18px;line-height:1.45}
+.spine{display:flex;flex-wrap:wrap;align-items:center;gap:8px 7px}
+.spine .node{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700;color:#eef2f7}
+.spine .node::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c,#fff);flex:0 0 auto}
+.spine .sep{color:#7c8794;font-weight:800;font-family:var(--mono);font-size:13px}
+
+@media(max-width:980px){.gate-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  
+    /* ===== section additions ===== */
+/* --- s1-bigpicture --- */
+/* --- s1-bigpicture (intro / big picture) --- */
+.hero.s1-bigpicture { grid-template-columns: 1fr; min-height: 72vh; }
+.s1-main { justify-content: flex-start; gap: 12px; }
+.s1-kicker { margin: 20px 0 0; color: var(--blue); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+.s1-main h1 { margin: 8px 0 4px; }
+.s1-sub { margin: 0; max-width: 720px; }
+
+#systemMap { width: 100%; height: clamp(320px, 46vh, 480px); display: block; overflow: visible; margin: 10px 0 4px; }
+#systemMap text { font-family: var(--sans); }
+.sm-pill { fill: var(--ink); }
+.sm-feed { stroke: var(--ink); stroke-width: 1.8; }
+.sm-dep { stroke: var(--line); stroke-width: 1.6; stroke-dasharray: 6 7; }
+#systemMap .sm-arrow { fill: var(--ink); }
+.sm-title { fill: var(--ink); font-weight: 800; }
+.sm-sub { font-weight: 800; letter-spacing: 0.05em; }
+.sm-num { fill: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+.sm-supply-t { fill: #ffffff; font-weight: 800; }
+.sm-supply-n { fill: rgba(255, 255, 255, 0.72); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.s1-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.s1-legend span { display: inline-flex; align-items: center; }
+.s1-legend i { width: 20px; height: 0; margin-right: 8px; flex: 0 0 auto; }
+.s1-legend i.k-feed { border-top: 3px solid var(--ink); }
+.s1-legend i.k-dep { border-top: 2px dashed var(--line); }
+
+.s1-teeup { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; margin-top: 10px; padding: 8px 15px; border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: 999px; background: #fbfcff; font-size: 13px; font-weight: 700; color: #34383f; }
+.s1-teeup b { color: var(--blue); font-weight: 800; }
+
+@media (max-width: 620px) {
+  #systemMap { height: clamp(300px, 60vh, 420px); }
+}
+/* --- s2-zoom --- */
+.s2-zoom { display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.s2-head { max-width: 760px; margin: 0 auto; text-align: center; }
+.s2-kicker { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin: 0 0 10px; font-weight: 850; }
+.s2-title { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.05; color: var(--ink); margin: 0 0 12px; font-weight: 800; letter-spacing: -0.01em; }
+.s2-dek { font-size: clamp(15px, 1.7vw, 19px); line-height: 1.45; color: var(--muted); margin: 0; }
+.s2-stage { padding: 20px 22px; background: radial-gradient(120% 100% at 50% 0%, #fbfcff 0%, #ffffff 60%); }
+.s2-zoom svg.chart { height: 380px; }
+@media (max-width: 760px) {
+  .s2-title { font-size: 30px; }
+  .s2-zoom svg.chart { height: 340px; }
+}
+/* --- s4-excel --- */
+.s4-excel .s4x-pain {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 26px;
+  border-color: rgba(201, 52, 52, 0.28);
+  background: color-mix(in srgb, var(--red) 4%, #fff);
+}
+
+.s4-excel .s4x-bigstat { display: flex; flex-direction: column; gap: 8px; }
+.s4-excel .s4x-tag {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--red);
+}
+.s4-excel .s4x-bigstat strong {
+  font-size: clamp(52px, 7.5vw, 88px);
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.s4-excel .s4x-sub { font-size: 14px; color: var(--muted); }
+
+.s4-excel .s4x-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.s4-excel .s4x-chip {
+  color: var(--red);
+  border-color: rgba(201, 52, 52, 0.32);
+  background: rgba(201, 52, 52, 0.06);
+}
+
+.s4-excel .fleet-panel { display: flex; flex-direction: column; }
+.s4-excel .fleet-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 18px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.s4-excel .fleet-legend span { display: inline-flex; align-items: center; }
+.s4-excel .fleet-legend i {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+.s4-excel .fleet-legend i.k-focus { background: var(--ink); }
+.s4-excel .fleet-legend i.k-exception { background: var(--red); }
+.s4-excel .fleet-legend i.k-fleet { background: #e7ebf1; border: 1px solid #dbe0e8; }
+.s4-excel .cap-mono { line-height: 1.45; }
+
+@media (max-width: 760px) {
+  .s4-excel .grid.two { grid-template-columns: 1fr; }
+}
+/* --- s5-model --- */
+/* --- s5-model (NEW screen: model choice + evaluation) --- */
+.section.s5-model { border-top: 3px solid var(--blue); }
+.s5-model h2 { letter-spacing: -0.018em; }
+.s5-model .section-head p { color: #34383f; }
+.s5-model .kicker { font-variant-numeric: tabular-nums; }
+.s5-model .kbar { color: var(--line); font-weight: 400; }
+
+.s5-model .mc5-grid { grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.18fr); align-items: stretch; }
+
+.mc5-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "base arrow ai" "win win win";
+  gap: 14px 12px;
+  align-content: center;
+}
+.mc5-step {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line);
+  border-radius: var(--radius);
+  padding: 15px 16px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.mc5-step.base { grid-area: base; border-top-color: #8b97a8; }
+.mc5-step.ai { grid-area: ai; border-top-color: var(--blue); background: #f7faff; }
+.mc5-eyebrow { font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.mc5-step b { font-size: 18px; line-height: 1.1; letter-spacing: -0.01em; }
+.mc5-step.ai b { color: var(--blue); }
+.mc5-sub { font-family: var(--mono); font-size: 12px; color: #34383f; line-height: 1.35; }
+.mc5-arrow { grid-area: arrow; align-self: center; font-family: var(--mono); font-weight: 800; font-size: 20px; color: var(--muted); }
+
+.mc5-win {
+  grid-area: win;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 2px;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+}
+.mc5-metriclabel { font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.mc5-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 15px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.mc5-pill.base { color: #6a7480; border-color: rgba(139,151,168,0.45); }
+.mc5-pill.ai { color: var(--blue); border-color: rgba(11,102,228,0.4); background: rgba(11,102,228,0.06); }
+.mc5-winarrow { font-family: var(--mono); font-weight: 800; color: var(--muted); }
+
+.s5-model .bt-panel { display: flex; flex-direction: column; }
+.s5-model .bt-panel .chart { flex: 1 1 auto; }
+
+@media (max-width: 980px) {
+  .s5-model .mc5-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .mc5-flow { grid-template-columns: 1fr; grid-template-areas: "base" "arrow" "ai" "win"; }
+  .mc5-arrow { transform: rotate(90deg); justify-self: center; }
+}
+/* --- s6-snowflake --- */
+/* --- s6-snowflake (scoped to .s-snow) --- */
+.section.s-snow { border-top: 3px solid var(--blue); }
+.s-snow h2 { letter-spacing: -0.018em; }
+.s-snow .section-head p { color: #34383f; }
+
+/* two-card row shares one height so the flow diagram and query read as a pair */
+.s-snow .snow-top { align-items: stretch; }
+.s-snow .snow-caveats { margin-top: 16px; }
+
+/* three trap cards: number + color map back to the SVG lane endpoints
+   (orange freshness / red censored / ink leakage — all in-palette) */
+.s-snow .caveat {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.s-snow .caveat.c-fresh { border-top-color: var(--orange); }
+.s-snow .caveat.c-censor { border-top-color: var(--red); }
+.s-snow .caveat.c-leak { border-top-color: var(--ink); }
+
+.s-snow .cv-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.s-snow .cv-num {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 11px;
+}
+.s-snow .caveat.c-fresh .cv-num { background: var(--orange); }
+.s-snow .caveat.c-censor .cv-num { background: var(--red); }
+.s-snow .caveat.c-leak .cv-num { background: var(--ink); }
+
+.s-snow .caveat b {
+  display: block;
+  font-size: 16px;
+  line-height: 1.18;
+  margin: 11px 0 12px;
+  color: var(--ink);
+}
+
+/* guard note in code voice — echoes the dark query card, ties trap to the fix */
+.s-snow .cv-guard {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+/* --- s8-monitor --- */
+.section.s-monitor { border-top: 3px solid var(--blue); }
+.s-monitor h2 { letter-spacing: -0.018em; }
+.s-monitor .section-head p { color: #34383f; }
+
+/* compact 4-step loop */
+.s-monitor .loop { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
+.s-monitor .loop div {
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.s-monitor .loop .lp-n {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--blue);
+}
+.s-monitor .loop b { margin: 0; font-size: 15px; }
+.s-monitor .loop span { color: var(--muted); font-size: 12px; line-height: 1.3; }
+
+/* the loop closes on itself — green dashed = learn->refresh feedback (distinct from blue forward steps) */
+.s-monitor .loop-return {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 14px;
+  padding: 12px 15px;
+  border: 1px dashed rgba(22, 122, 91, 0.55);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  background: rgba(22, 122, 91, 0.05);
+  font-size: 14px;
+  color: #34383f;
+}
+.s-monitor .loop-return .hook {
+  font-size: 19px;
+  line-height: 1;
+  color: var(--green);
+  font-weight: 800;
+}
+.s-monitor .loop-return b { color: var(--ink); font-weight: 800; }
+
+/* one-glance: why WAPE, not MAPE */
+.s-monitor .why-wape {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.s-monitor .why-head {
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 11px;
+}
+.s-monitor .why-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.s-monitor .wchip {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+@media (max-width: 980px) {
+  .s-monitor .loop { grid-template-columns: 1fr 1fr; }
+  .s-monitor .loop div::after { content: ""; }
+}
+@media (max-width: 620px) {
+  .s-monitor .loop { grid-template-columns: 1fr; }
+}
+  
+    /* each screen is one viewport-height beat */
+    .screen{min-height:74vh;box-sizing:border-box}
+    .section.screen{display:flex;flex-direction:column;justify-content:center}
+  
+    /* ===== per-section additions ===== */
+/* s01-bigpicture */
+/* --- s01-bigpicture (screen-scoped) --- */
+.hero.s1-bigpicture { grid-template-columns: 1fr; min-height: 72vh; }
+.s1-main { justify-content: flex-start; gap: 12px; }
+.s1-kicker { margin: 20px 0 0; color: var(--blue); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+.s1-main h1 { margin: 8px 0 4px; }
+.s1-sub { margin: 0; max-width: 720px; }
+
+#systemMap { width: 100%; height: clamp(320px, 46vh, 480px); display: block; overflow: visible; margin: 10px 0 4px; }
+#systemMap text { font-family: var(--sans); }
+.sm-pill { fill: var(--ink); }
+.sm-feed { stroke: var(--ink); stroke-width: 1.8; }
+.sm-dep { stroke: var(--line); stroke-width: 1.6; stroke-dasharray: 6 7; }
+#systemMap .sm-arrow { fill: var(--ink); }
+.sm-title { fill: var(--ink); font-weight: 800; }
+.sm-sub { font-weight: 800; letter-spacing: 0.05em; }
+.sm-num { fill: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+.sm-supply-t { fill: #ffffff; font-weight: 800; }
+.sm-supply-n { fill: rgba(255, 255, 255, 0.72); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.s1-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.s1-legend span { display: inline-flex; align-items: center; }
+.s1-legend i { width: 20px; height: 0; margin-right: 8px; flex: 0 0 auto; }
+.s1-legend i.k-feed { border-top: 3px solid var(--ink); }
+.s1-legend i.k-dep { border-top: 2px dashed var(--line); }
+
+/* substance chips: the ask-vs-cap arithmetic the verbatim map does not spell out */
+.s1-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 0; }
+.s1-chip { display: inline-flex; align-items: baseline; gap: 9px; border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; background: #fff; }
+.s1-chip .mk { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; align-self: center; }
+.s1-chip.is-ask .mk { background: var(--red); }
+.s1-chip.is-cap .mk { width: 17px; height: 0; border-radius: 0; border-top: 3px dashed var(--orange); }
+.s1-chip.is-over .mk { width: 0; height: 0; border-radius: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid var(--red); }
+.s1-chip.is-over { border-color: color-mix(in srgb, var(--red) 45%, var(--line)); background: color-mix(in srgb, var(--red) 5%, #fff); }
+.s1-chip .tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.s1-chip .val { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+.s1-teeup { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; margin-top: 12px; padding: 8px 15px; border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: 999px; background: #fbfcff; font-size: 13px; font-weight: 700; color: #34383f; }
+.s1-teeup b { color: var(--blue); font-weight: 800; }
+
+@media (max-width: 620px) {
+  #systemMap { height: clamp(300px, 60vh, 420px); }
+}
+/* s02-zoom */
+/* s2-zoom screen (deck design system) */
+.s2-zoom { display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.s2-head { max-width: 760px; margin: 0 auto; text-align: center; }
+.s2-kicker { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); margin: 0 0 10px; font-weight: 850; }
+.s2-title { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.05; color: var(--ink); margin: 0 0 12px; font-weight: 800; letter-spacing: -0.01em; }
+.s2-dek { font-size: clamp(15px, 1.7vw, 19px); line-height: 1.45; color: var(--muted); margin: 0 auto; max-width: 680px; }
+.s2-stage { padding: 20px 22px 22px; background: radial-gradient(120% 100% at 50% 0%, #fbfcff 0%, #ffffff 60%); }
+.s2-zoom svg.chart { height: 380px; }
+
+/* substance thread: store ask, honest demand, hard cap. color follows the entity, numbers wear ink */
+.s2z-strip { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-top: 8px; }
+.s2z-chip { display: inline-flex; align-items: baseline; gap: 9px; padding: 9px 16px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-variant-numeric: tabular-nums; box-shadow: 0 1px 2px rgba(21,23,26,0.04); }
+.s2z-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; align-self: center; }
+.s2z-cap { width: 16px; height: 0; border-top: 2px dashed var(--orange); flex: 0 0 auto; align-self: center; }
+.s2z-lab { font-size: 13px; font-weight: 700; color: var(--muted); }
+.s2z-chip b { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.s2z-op { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+.s2z-note { text-align: center; margin: 13px auto 0; max-width: 600px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.s2z-note b { color: var(--ink); font-weight: 800; }
+
+@media (max-width: 760px) {
+  .s2-title { font-size: 30px; }
+  .s2-zoom svg.chart { height: 340px; }
+  .s2z-chip { padding: 8px 13px; }
+  .s2z-chip b { font-size: 19px; }
+  .s2z-op { display: none; }
+}
+/* s03-data */
+/* --- s03-data: Demand has structure (blue data-chapter spine; mirrors reference s-data, base tokens/classes untouched) --- */
+.section.s03-data { border-top: 3px solid var(--blue); }
+.s03-data h2 { letter-spacing: -0.018em; }
+.s03-data .kicker { font-variant-numeric: tabular-nums; }
+.s03-data .section-head p { color: #34383f; }
+.s03-chips { display: grid; gap: 10px; margin-top: 4px; }
+.s03-chip { border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: 8px; padding: 10px 13px; background: #fbfcff; }
+.s03-chip b { display: block; font-size: 14px; color: var(--ink); }
+.s03-chip span { font-size: 12.5px; color: var(--muted); }
+/* s04-excel */
+/* ===== s04-excel ===== */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 11px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+}
+.s4-excel .s4x-triptych {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.32fr) minmax(0, 0.86fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.s4-excel .s4x-pain {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  border-color: rgba(201, 52, 52, 0.28);
+  background: color-mix(in srgb, var(--red) 4%, #fff);
+}
+.s4-excel .s4x-bigstat { display: flex; flex-direction: column; gap: 8px; }
+.s4-excel .s4x-tag {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--red);
+}
+.s4-excel .s4x-bigstat strong {
+  font-size: clamp(46px, 6vw, 82px);
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.s4-excel .s4x-to {
+  font-size: 0.4em;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0;
+  vertical-align: 0.1em;
+}
+.s4-excel .s4x-sub { font-size: 14px; color: var(--muted); }
+.s4-excel .s4x-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.s4-excel .s4x-chip {
+  color: var(--red);
+  border-color: rgba(201, 52, 52, 0.32);
+  background: rgba(201, 52, 52, 0.06);
+}
+.s4-excel .deadline-panel,
+.s4-excel .fleet-panel { display: flex; flex-direction: column; }
+.s4-excel .deadline-panel svg.chart { flex: 1 1 auto; min-height: 300px; }
+.s4-excel .fleet-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.s4-excel .fleet-legend span { display: inline-flex; align-items: center; }
+.s4-excel .fleet-legend i {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+.s4-excel .fleet-legend i.k-focus { background: var(--ink); }
+.s4-excel .fleet-legend i.k-exception { background: var(--red); }
+.s4-excel .fleet-legend i.k-fleet { background: #e7ebf1; border: 1px solid #dbe0e8; }
+.s4-excel .cap-mono {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin: 12px 0 0;
+  line-height: 1.45;
+}
+@media (max-width: 980px) {
+  .s4-excel .s4x-triptych { grid-template-columns: 1fr; }
+}
+/* s05-overunder */
+/* --- s05-overunder (Stakes: over vs under, consequences only) --- */
+.section.s-overunder { border-top: 3px solid var(--red); }
+.s-overunder h2 { letter-spacing: -0.018em; }
+.s-overunder .section-head p { color: #34383f; }
+
+.s-overunder .ou-panel { display: flex; flex-direction: column; }
+.s-overunder svg.chart.ou-chart { height: 238px; }
+
+.s-overunder .ou-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.s-overunder .ou-col {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 14px 16px;
+}
+.s-overunder .ou-col.ou-over { border-top-color: var(--orange); }
+.s-overunder .ou-col.ou-under { border-top-color: var(--red); }
+
+.s-overunder .ou-col-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 11px;
+}
+.s-overunder .ou-col-head i { width: 11px; height: 11px; border-radius: 3px; flex: 0 0 auto; }
+.s-overunder .ou-over .ou-col-head i { background: var(--orange); }
+.s-overunder .ou-under .ou-col-head i { background: var(--red); }
+
+.s-overunder .ou-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.s-overunder .ou-col li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.s-overunder .ou-col li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.s-overunder .ou-over li::before { background: var(--orange); }
+.s-overunder .ou-under li::before { background: var(--red); }
+
+.s-overunder .ou-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #34383f;
+}
+.s-overunder .ou-note b { color: var(--ink); }
+
+@media (max-width: 620px) {
+  .s-overunder .ou-cols { grid-template-columns: 1fr; }
+}
+/* s06-model */
+/* --- s06-model (NEW screen: model choice, baseline vs AI on WAPE) --- */
+.section.s06-model { border-top: 3px solid var(--blue); }
+.s06-model h2 { letter-spacing: -0.018em; }
+.s06-model .section-head p { color: #34383f; }
+
+.s06-model .mdl-grid { grid-template-columns: minmax(0, 1.12fr) minmax(280px, 0.88fr); align-items: stretch; }
+.s06-model .mdl-chart { display: flex; flex-direction: column; }
+.s06-model .mdl-chart .chart { flex: 1 1 auto; }
+
+.s06-model .mdl-why { display: flex; flex-direction: column; justify-content: center; }
+.s06-model .mdl-why-head { font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
+.s06-model .mdl-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.s06-model .mdl-chip { border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: var(--radius); background: #fff; padding: 13px 14px; }
+.s06-model .mdl-chip b { display: block; font-size: 14px; line-height: 1.18; margin-bottom: 5px; color: var(--ink); }
+.s06-model .mdl-chip span { display: block; font-family: var(--mono); font-size: 11.5px; line-height: 1.35; color: var(--muted); }
+
+.s06-model .mdl-not { margin: 16px 0 0; padding-top: 13px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.45; color: #34383f; }
+.s06-model .mdl-not b { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink); font-weight: 850; }
+
+@media (max-width: 980px) { .s06-model .mdl-grid { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .s06-model .mdl-chips { grid-template-columns: 1fr; } }
+/* s07-seasonality */
+/* === s07-seasonality: calendar features + leakage guard === */
+.section.s-cal { border-top: 3px solid var(--blue); }
+.s-cal h2 { letter-spacing: -0.018em; }
+.s-cal .section-head p { color: #34383f; }
+
+.s-cal .chart.tall { height: 420px; }
+.s-cal .honest-frame { margin-top: 10px; }
+
+.s-cal .cal-risk {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: #34383f;
+  line-height: 1.4;
+}
+.s-cal .cal-risk::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: rgba(201, 52, 52, 0.12);
+  border: 1.6px solid var(--red);
+  flex: 0 0 auto;
+}
+
+@media (max-width: 620px) {
+  .s-cal .chart.tall { height: 380px; }
+}
+/* s08-snowflake */
+/* --- s08-snowflake (scoped to .s-snow) --- */
+.section.s-snow { border-top: 3px solid var(--blue); }
+.s-snow h2 { letter-spacing: -0.018em; }
+.s-snow .section-head p { color: #34383f; }
+
+/* flow diagram and query share one height so they read as a pair */
+.s-snow .snow-top { align-items: stretch; }
+.s-snow .snow-caveats { margin-top: 16px; }
+
+/* three trap cards: all are the SAME kind of thing (risk), so all wear red
+   like the SVG hazard endpoints; the number badge + name tell them apart */
+.s-snow .caveat {
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--red);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.s-snow .cv-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.s-snow .cv-num {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+}
+
+.s-snow .caveat b {
+  display: block;
+  font-size: 16px;
+  line-height: 1.18;
+  margin: 11px 0 12px;
+  color: var(--ink);
+}
+
+/* guard note in code voice, ties each trap to its fix */
+.s-snow .cv-guard {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+/* s09-eval */
+/* --- s09-eval (Evaluate: rolling-origin backtest + beat the baseline on WAPE) --- */
+.section.s09-eval { border-top: 3px solid var(--blue); }
+.s09-eval h2 { letter-spacing: -0.018em; }
+.s09-eval .section-head p { color: #34383f; }
+
+.s09-eval .ev-backtest,
+.s09-eval .ev-metric { display: flex; flex-direction: column; }
+.s09-eval .ev-backtest .chart,
+.s09-eval .ev-metric .chart { flex: 0 0 auto; }
+
+/* left: rolling-origin mechanic as a compact step flow */
+.s09-eval .ev-flow {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.s09-eval .ev-node {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fbfcff;
+  white-space: nowrap;
+}
+.s09-eval .ev-node-out {
+  border-color: var(--blue);
+  background: rgba(11, 102, 228, 0.06);
+}
+.s09-eval .ev-arrow {
+  font-family: var(--mono);
+  font-weight: 800;
+  color: var(--muted);
+}
+.s09-eval .ev-guard {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--red);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.s09-eval .ev-guard .ev-x { color: var(--red); font-weight: 800; }
+
+/* right: quantile band checks + why WAPE */
+.s09-eval .ev-band {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.s09-eval .ev-band-head {
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.s09-eval .ev-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.s09-eval .ev-chip {
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--ink);
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.s09-eval .ev-chip b {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.s09-eval .ev-wape {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--blue);
+  border-radius: var(--radius);
+  background: #fbfcff;
+}
+
+@media (max-width: 620px) {
+  .s09-eval .ev-chips { grid-template-columns: 1fr; }
+}
+.ev-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 10px; }
+.ev-tile { border: 1px solid var(--line); border-radius: 8px; padding: 11px 13px; background: #fff; }
+.ev-tile b { display: block; font-size: 30px; line-height: 1; margin: 3px 0 4px; font-variant-numeric: tabular-nums; }
+.ev-tile .ev-tk { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.ev-tile .ev-ts { font-size: 12px; color: var(--muted); line-height: 1.25; }
+.ev-tile.ev-good { border-left: 3px solid var(--green); } .ev-tile.ev-good b { color: var(--green); }
+.ev-tile.ev-bad { border-left: 3px solid var(--red); } .ev-tile.ev-bad b { color: var(--red); }
+/* s10-forecast */
+.section.s-forecast { border-top: 3px solid var(--blue); }
+.s-forecast .section-head p { color: #34383f; }
+.s-forecast .grid.two { align-items: start; }
+
+.s-forecast .fc-consq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+.s-forecast .fc-c {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.s-forecast .fc-over { border-left: 3px solid var(--orange); }
+.s-forecast .fc-under { border-left: 3px solid var(--red); }
+.s-forecast .fc-k {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.s-forecast .fc-k::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.s-forecast .fc-over .fc-k::before { background: var(--orange); }
+.s-forecast .fc-under .fc-k::before { background: var(--red); }
+.s-forecast .fc-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+@media (max-width: 720px) {
+  .s-forecast .fc-consq { grid-template-columns: 1fr; }
+}
+/* s11-monitor */
+/* s11-monitor: close the loop (gate, drift, retrain, learn) */
+.section.s11-monitor { border-top: 3px solid var(--green); }
+.s11-monitor h2 { letter-spacing: -0.018em; }
+.s11-monitor .section-head p { color: #34383f; }
+
+.s11-monitor .mon-grid { align-items: stretch; }
+.s11-monitor .mon-chart { display: flex; flex-direction: column; }
+.s11-monitor #driftChart { flex: 1 1 auto; height: clamp(300px, 40vh, 372px); }
+
+.s11-monitor .mon-side { display: flex; flex-direction: column; }
+
+/* daily gate: 2x2 cells, green left border + green check = PASS */
+.s11-monitor .mon-gate { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.s11-monitor .mgc {
+  position: relative;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  background: rgba(22, 122, 91, 0.045);
+  padding: 11px 12px;
+}
+.s11-monitor .mgc-k { display: block; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.s11-monitor .mgc-v { display: block; margin: 7px 0 1px; font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; color: var(--ink); }
+.s11-monitor .mgc-t { display: block; font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.s11-monitor .mgc-p {
+  position: absolute; top: 11px; right: 11px;
+  font-size: 10px; font-weight: 800; letter-spacing: .04em;
+  color: var(--green);
+  border: 1px solid rgba(22, 122, 91, .4);
+  border-radius: 999px; padding: 2px 8px 2px 7px; line-height: 1.2;
+}
+.s11-monitor .mgc-p::before { content: "\2713"; margin-right: 3px; }
+
+/* compact 4-step loop */
+.s11-monitor .mon-loop { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.s11-monitor .mls { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: #fbfcff; }
+.s11-monitor .mls-n { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--blue); }
+.s11-monitor .mls b { font-size: 14px; }
+.s11-monitor .mls span:last-child { color: var(--muted); font-size: 11.5px; line-height: 1.3; }
+
+/* the loop closes on itself: learn feeds tomorrow's refresh */
+.s11-monitor .mon-return {
+  margin-top: 10px;
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 14px;
+  border: 1px dashed rgba(22, 122, 91, .55);
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius);
+  background: rgba(22, 122, 91, .05);
+  font-size: 13.5px; color: #34383f;
+}
+.s11-monitor .mon-return .mr-hook { font-size: 18px; line-height: 1; color: var(--green); font-weight: 800; }
+.s11-monitor .mon-return b { color: var(--ink); font-weight: 800; }
+
+@media (max-width: 900px) { .s11-monitor .mon-grid { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .s11-monitor .mon-gate, .s11-monitor .mon-loop { grid-template-columns: 1fr; } }
+
+    /* ===================== ONE-PAPER SCROLL JOURNEY ===================== */
+    html { scroll-behavior: smooth; }
+    body { overflow-x: hidden; }
+    .paper { max-width: 1160px; margin: 0 auto; padding: 34px 26px 160px; }
+
+    /* undo the slide-like viewport blocks: cards flow at natural height */
+    .screen { min-height: 0 !important; }
+    .section.screen { display: block !important; justify-content: initial !important; }
+    .hero.screen { min-height: 0 !important; }
+
+    /* editorial rhythm: generous, connected, not choppy */
+    .paper > .section { margin-top: 46px; scroll-margin-top: 24px; }
+    .paper > .hero { margin: 8px 0 0; }
+
+    /* a connecting hairline + node between beats, so it reads as one journey */
+    .paper > .section { position: relative; }
+    .paper > .section::before {
+      content: ""; position: absolute; left: 50%; top: -34px; width: 2px; height: 22px;
+      background: linear-gradient(var(--line), transparent); transform: translateX(-50%); }
+
+    /* reading progress = continuous single document (not slide count) */
+    .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px;
+      background: rgba(21,23,26,0.06); z-index: 60; }
+    .read-progress > span { display: block; height: 100%; width: 0;
+      background: linear-gradient(90deg, var(--red), var(--orange), var(--green), var(--blue)); }
+
+    /* scroll-reveal: the story unfolds as you scroll.
+       Progressive enhancement: hidden state applies ONLY once JS adds .reveal-on,
+       so if JS is off/errors the whole paper still shows. */
+    .paper.reveal-on > .section, .paper.reveal-on > .hero {
+      opacity: 0; transform: translateY(26px);
+      transition: opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1); }
+    .paper.reveal-on > .reveal-in { opacity: 1; transform: none; }
+
+    /* scroll cue under the hero */
+    .scroll-cue { text-align: center; margin: 30px 0 0; color: var(--muted);
+      font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 800; }
+    .scroll-cue .chev { display: block; margin: 9px auto 0; width: 16px; height: 16px;
+      border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+      transform: rotate(45deg); animation: cue 1.8s ease-in-out infinite; }
+    @keyframes cue { 0%,100% { transform: rotate(45deg) translate(0,0); opacity: .6; }
+      50% { transform: rotate(45deg) translate(3px,3px); opacity: 1; } }
+
+    /* back-to-top */
+    .to-top { position: fixed; right: 20px; bottom: 20px; width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; z-index: 55;
+      display: grid; place-items: center; font-size: 19px; box-shadow: 0 5px 16px rgba(21,23,26,0.12);
+      opacity: 0; pointer-events: none; transition: opacity .3s ease, transform .15s ease; }
+    .to-top.show { opacity: 1; pointer-events: auto; }
+    .to-top:hover { transform: translateY(-2px); border-color: var(--blue); }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .paper > .section, .paper > .hero { opacity: 1; transform: none; transition: none; }
+      .scroll-cue .chev { animation: none; }
+    }
+    @media (max-width: 700px) { .paper { padding: 24px 16px 120px; } .paper > .section { margin-top: 36px; } }
+
+  </style>
+</head>
+<body>
+  <div class="read-progress"><span></span></div>
+  <main class="paper">
+<header class="hero screen s1-bigpicture">
+  <div class="hero-main s1-main">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.05 12.53c-.02-2.02 1.65-2.99 1.72-3.04-.94-1.37-2.4-1.56-2.92-1.58-1.24-.13-2.42.73-3.05.73-.63 0-1.6-.71-2.63-.69-1.35.02-2.6.79-3.3 2-1.41 2.44-.36 6.06 1.01 8.04.67.97 1.47 2.06 2.52 2.02 1.01-.04 1.39-.65 2.62-.65 1.22 0 1.57.65 2.63.63 1.09-.02 1.78-.99 2.44-1.96.77-1.12 1.09-2.21 1.11-2.27-.02-.01-2.13-.82-2.15-3.25zM15.03 6.6c.56-.68.94-1.62.83-2.56-.81.03-1.79.54-2.37 1.21-.52.6-.98 1.56-.86 2.48.9.07 1.83-.46 2.4-1.13z"/></svg>
+      </div>
+      <span>New iPhone launch <span class="sep" aria-hidden="true">|</span> Macedonia</span>
+    </div>
+    <p class="s1-kicker">System</p>
+    <h1>One launch, three numbers.</h1>
+    <p class="lede s1-sub">Retail asks, Logistics plans capacity, SDM forecasts demand, and all three collide.</p>
+    <svg id="systemMap" class="sysmap" role="img" aria-label="System map: one scarce launch supply of 1,050 feeds three interdependent teams. Retail Ops owns the store request 610/470/290, Logistics owns the capacity plan, and SDM owns the country demand of 1,180 (p50)."></svg>
+    <div class="s1-legend" aria-hidden="true">
+      <span><i class="k-feed"></i>supply feeds in</span>
+      <span><i class="k-dep"></i>mutual dependence</span>
+    </div>
+    <div class="s1-chips">
+      <span class="s1-chip is-ask"><i class="mk" aria-hidden="true"></i><span class="tag">Retail ask</span><span class="val">1,370</span></span>
+      <span class="s1-chip is-cap"><i class="mk" aria-hidden="true"></i><span class="tag">Supply cap</span><span class="val">1,050</span></span>
+      <span class="s1-chip is-over"><i class="mk" aria-hidden="true"></i><span class="tag">Ask over cap</span><span class="val">320</span></span>
+    </div>
+    <div class="s1-teeup"><span>Zoom in on</span> <b>SDM -&gt;</b></div>
+  </div>
+</header>
+    <div class="scroll-cue">scroll the journey<span class="chev" aria-hidden="true"></span></div>
+<section class="section screen s2-zoom" aria-labelledby="s2z-title">
+  <div class="s2-head">
+    <p class="s2-kicker">Focus</p>
+    <h2 class="s2-title" id="s2z-title">Zoom in: just SDM</h2>
+    <p class="s2-dek">Supply and Demand Management rations one capped supply across stores, once a model finds the honest demand behind each ask.</p>
+  </div>
+  <div class="panel s2-stage">
+    <svg class="chart" id="systemFocusChart" role="img" aria-label="System map zoomed into SDM; Retail and Logistics dimmed to the background, SDM enlarged and in focus under a 1,050 supply cap"></svg>
+    <div class="s2z-strip" role="list" aria-label="The thread: store ask 1,370, the model's honest demand 1,180, versus the hard supply cap 1,050">
+      <span class="s2z-chip" role="listitem"><i class="s2z-dot" style="background:var(--red)"></i><span class="s2z-lab">store ask</span><b>1,370</b></span>
+      <span class="s2z-op" aria-hidden="true">-&gt;</span>
+      <span class="s2z-chip" role="listitem"><i class="s2z-dot" style="background:var(--blue)"></i><span class="s2z-lab">honest demand</span><b>1,180</b></span>
+      <span class="s2z-op" aria-hidden="true">vs</span>
+      <span class="s2z-chip s2z-chip-cap" role="listitem"><i class="s2z-cap" aria-hidden="true"></i><span class="s2z-lab">hard cap</span><b>1,050</b></span>
+    </div>
+    <p class="s2z-note">Even honest demand tops the cap, so <b>SDM must ration the 1,050</b>.</p>
+  </div>
+</section>
+
+<section class="section screen s03-data">
+  <div class="section-head">
+    <div>
+      <p class="kicker">The data</p>
+      <h2>The three Macedonia stores.</h2>
+    </div>
+    <p>Different sizes, different signals. Preorders lead demand, and a stockout hides the real demand.</p>
+  </div>
+  <div class="grid two">
+    <div class="panel">
+      <div class="panel-head"><h3>Request vs preorders</h3><span>launch week, 3 stores</span></div>
+      <svg id="storeDataChart" class="chart short" role="img" aria-label="Three Macedonia stores by size: Skopje requests 610 with 392 preorders, East Gate 470 with 288, Bitola 290 with 121; preorders track and lead demand."></svg>
+      <p class="cap-mono">preorders lead demand -> the earliest real signal per store</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>What the data can and cannot say</h3></div>
+      <div class="s03-chips">
+        <div class="s03-chip"><b>Preorders lead</b><span>they arrive before launch and predict demand</span></div>
+        <div class="s03-chip"><b>Sales != demand</b><span>a stockout censors true demand</span></div>
+        <div class="s03-chip"><b>Spike, then decay</b><span>demand peaks in launch week, then falls</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section screen s4-excel" aria-label="The old way: manual Excel misses the launch window">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Legacy</p>
+      <h2>Manual Excel misses the window.</h2>
+    </div>
+    <p>Six to eight hours to refresh one country by hand, with a dozen countries to launch.</p>
+  </div>
+
+  <div class="s4x-triptych">
+    <div class="panel s4x-pain">
+      <div class="s4x-bigstat">
+        <span class="s4x-tag">per country, per cycle</span>
+        <strong>6 <span class="s4x-to">to</span> 8h</strong>
+        <span class="s4x-sub">one planner, by hand</span>
+      </div>
+      <div class="s4x-chips">
+        <span class="chip s4x-chip">slow</span>
+        <span class="chip s4x-chip">never backtested</span>
+        <span class="chip s4x-chip">stale at cutoff</span>
+      </div>
+    </div>
+
+    <div class="panel deadline-panel">
+      <div class="panel-head">
+        <h3>Cumulative manual hours</h3>
+        <span>one planner, every country</span>
+      </div>
+      <svg id="deadlineChart" class="chart" role="img" aria-label="Cumulative manual hours climb about seven per country and cross a dashed launch cutoff after only three of twelve countries, so most countries are still stale when the launch decision is due" aria-describedby="s4xDeadlineCap"></svg>
+      <p class="cap-mono" id="s4xDeadlineCap">past the cutoff: 9 of 12 countries (75%) still stale</p>
+    </div>
+
+    <div class="panel fleet-panel">
+      <div class="panel-head">
+        <h3>Breaks at fleet scale</h3>
+        <span>country &times; store &times; SKU</span>
+      </div>
+      <div class="fleet-legend">
+        <span><i class="k-focus" aria-hidden="true"></i>Macedonia: 3 stores</span>
+        <span><i class="k-exception" aria-hidden="true"></i>exception, by hand</span>
+        <span><i class="k-fleet" aria-hidden="true"></i>the fleet</span>
+      </div>
+      <svg id="fleetChart" class="chart short" role="img" aria-label="Fleet scale: three Macedonia stores marked dark, a few red exception cells a human reviews, inside hundreds of grey fleet cells" aria-describedby="s4xFleetCap"></svg>
+      <p class="cap-mono" id="s4xFleetCap">one spreadsheet, hundreds of cells</p>
+    </div>
+  </div>
+</section>
+
+<section class="section screen s-overunder" aria-labelledby="s5-ou-title">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Stakes</p>
+      <h2 id="s5-ou-title">What if the number is wrong?</h2>
+    </div>
+    <p>Over and under are both costly, and at a launch they are not equal.</p>
+  </div>
+
+  <div class="panel ou-panel">
+    <div class="panel-head">
+      <h3>Two ways to miss the number</h3>
+      <span>consequences only</span>
+    </div>
+    <svg id="overUnderChart" class="chart ou-chart" role="img" aria-label="Diverging schematic: overforecast consequences point left in orange, underforecast consequences point right in red, and the red under bar is drawn longer because at a launch under usually hurts more."></svg>
+    <div class="ou-cols">
+      <div class="ou-col ou-over">
+        <div class="ou-col-head"><i aria-hidden="true"></i>Over</div>
+        <ul>
+          <li>excess stock</li>
+          <li>tied capital</li>
+          <li>markdowns</li>
+          <li>units another country needs</li>
+        </ul>
+      </div>
+      <div class="ou-col ou-under">
+        <div class="ou-col-head"><i aria-hidden="true"></i>Under</div>
+        <ul>
+          <li>stockout in peak week</li>
+          <li>lost sales</li>
+          <li>customers to a competitor</li>
+          <li>unhappy stores</li>
+        </ul>
+      </div>
+    </div>
+    <p class="ou-note">Excess stock redeploys (at a cost); a launch stockout is a <b>sale gone</b>.</p>
+  </div>
+</section>
+
+<section class="section screen s06-model" aria-label="The model: baseline versus AI on WAPE">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Model</p>
+      <h2>Beat the baseline or don't ship.</h2>
+    </div>
+    <p>One global LightGBM quantile model across all stores and SKUs, benchmarked on WAPE against SeasonalNaive.</p>
+  </div>
+
+  <div class="grid two mdl-grid">
+    <div class="panel mdl-chart">
+      <div class="panel-head">
+        <h3>Baseline vs the model</h3>
+        <span>WAPE, backtested</span>
+      </div>
+      <svg id="modelWapeChart" class="chart" role="img" aria-label="Two WAPE bars from a backtest: SeasonalNaive baseline at 21 percent in grey, the LightGBM quantile model at 12 percent in blue, 9 pts lower."></svg>
+    </div>
+
+    <div class="panel mdl-why">
+      <div class="mdl-why-head">Why this model</div>
+      <div class="mdl-chips" role="list">
+        <div class="mdl-chip" role="listitem"><b>Many features, nonlinear</b><span>preorders, calendar, price</span></div>
+        <div class="mdl-chip" role="listitem"><b>Quantile objective</b><span>p10/p50/p90, three fits</span></div>
+        <div class="mdl-chip" role="listitem"><b>Cross-learns thin stores</b><span>Bitola borrows the country</span></div>
+        <div class="mdl-chip" role="listitem"><b>Fast at fleet scale</b><span>scales to hundreds of cells</span></div>
+      </div>
+      <p class="mdl-not"><b>Not</b> ARIMA/ETS (per-series, cold on a new launch) or deep nets (data-hungry, overkill).</p>
+    </div>
+  </div>
+</section>
+
+<section class="section screen s-cal" aria-labelledby="s7-cal-title">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Calendar</p>
+      <h2 id="s7-cal-title">Seasonality, events, and dates.</h2>
+    </div>
+    <p>Launch phase, holidays, paydays, and promos are known ahead, so they become features.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Feature calendar</h3>
+      <span>weeks around launch</span>
+    </div>
+    <svg id="calendarChart" class="chart tall" role="img" aria-label="Feature calendar across eight weeks around the iPhone launch. A quiet blue demand line stays flat before launch, spikes in launch week, then decays with a small holiday bump. Below, three feature lanes grouped into two bands: known-future signals are solid green markers (a launch-phase countdown with post-launch lag, paydays, a Macedonia holiday, a planned promo); not-known signals are open red rings (weather, competitor). A leakage guard reads: use only what is known at forecast time."></svg>
+    <p class="honest-frame">Weekly units, illustrative shape.</p>
+    <p class="cal-risk">Competitor moves and weather stay risks, not features, at this horizon.</p>
+  </div>
+</section>
+
+<section class="section screen s-snow">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Source</p>
+      <h2>Sourced from Snowflake, mind the traps.</h2>
+    </div>
+    <p>That 12% only holds if the source is right.</p>
+  </div>
+
+  <div class="grid two snow-top">
+    <div class="panel">
+      <div class="panel-head"><h3>One pull, three traps</h3><span>planning schema</span></div>
+      <svg id="pipelineChart" class="chart short" role="img" aria-label="One Snowflake pull fanning into three data traps: freshness, censored demand, and leakage"></svg>
+    </div>
+    <div class="code-card">
+      <div class="code-head"><span>launch_signals.sql</span><span>Macedonia</span></div>
+      <pre><code><span class="cm">-- grain: store x week, as-of run</span>
+<span class="ck">select</span> week, store, retail_request, preorders,
+  sell_through, on_hand, eta, stockout_flag, asof_ts
+<span class="ck">from</span> analytics.planning.iphone_launch_signals
+<span class="ck">where</span> country = <span class="cs">'Macedonia'</span>;</code></pre>
+    </div>
+  </div>
+
+  <div class="grid three snow-caveats" role="list">
+    <div class="caveat c-fresh" role="listitem">
+      <div class="cv-tag"><span class="cv-num">01</span> Freshness</div>
+      <b>Data lags the decision</b>
+      <div class="cv-guard">assert fresh within 2h</div>
+    </div>
+    <div class="caveat c-censor" role="listitem">
+      <div class="cv-tag"><span class="cv-num">02</span> Censored</div>
+      <b>Sales &ne; demand at stockout</b>
+      <div class="cv-guard">reconstruct from sell_through</div>
+    </div>
+    <div class="caveat c-leak" role="listitem">
+      <div class="cv-tag"><span class="cv-num">03</span> Leakage</div>
+      <b>Known at forecast time only</b>
+      <div class="cv-guard">only cols known at run_ts</div>
+    </div>
+  </div>
+</section>
+
+<section class="section screen s09-eval" aria-label="Evaluate: rolling-origin backtest and beating the baseline on WAPE">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Evaluate</p>
+      <h2>Prove it, then measure it.</h2>
+    </div>
+    <p>Rolling-origin backtest against the baseline, scored with WAPE.</p>
+  </div>
+
+  <div class="grid two">
+    <div class="panel ev-backtest">
+      <div class="panel-head">
+        <h3>Rolling-origin backtest</h3>
+        <span>walk-forward, 4 folds</span>
+      </div>
+      <svg id="backtestChart" class="chart short" role="img" aria-label="Rolling-origin backtest: the train window grows while the test window slides forward across four folds; the split origin rolls right."></svg>
+      <div class="ev-flow" role="list" aria-label="Rolling-origin mechanic">
+        <span class="ev-node" role="listitem">Train past</span>
+        <span class="ev-arrow" aria-hidden="true">-&gt;</span>
+        <span class="ev-node" role="listitem">Predict forward</span>
+        <span class="ev-arrow" aria-hidden="true">-&gt;</span>
+        <span class="ev-node" role="listitem">Slide, refit</span>
+        <span class="ev-arrow" aria-hidden="true">-&gt;</span>
+        <span class="ev-node ev-node-out" role="listitem">Average WAPE</span>
+      </div>
+      <div class="ev-guard"><span class="ev-x" aria-hidden="true">&#10007;</span> Never random k-fold, it leaks the future</div>
+    </div>
+
+    <div class="panel ev-metric">
+      <div class="panel-head">
+        <h3>Why WAPE, not MAPE</h3>
+        <span>same forecast, two readings</span>
+      </div>
+      <div class="ev-tiles">
+        <div class="ev-tile ev-good"><span class="ev-tk">WAPE</span><b>12%</b><span class="ev-ts">volume-weighted, honest</span></div>
+        <div class="ev-tile ev-bad"><span class="ev-tk">MAPE</span><b>29%</b><span class="ev-ts">blows up on the 290-unit store</span></div>
+      </div>
+      <div class="ev-band">
+        <div class="ev-band-head">Band checks</div>
+        <div class="ev-chips" role="list">
+          <span class="ev-chip" role="listitem"><b>bias</b> +2.4% slight over</span>
+          <span class="ev-chip" role="listitem"><b>coverage</b> 80% band holds ~80%</span>
+          <span class="ev-chip" role="listitem"><b>pinball</b> scores p10/p50/p90</span>
+        </div>
+      </div>
+      <div class="ev-wape">WAPE is scale-free; MAPE explodes on zero weeks, MAE cannot compare stores.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section screen s-forecast" aria-label="The payoff: more demand than phones">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Payoff</p>
+      <h2>More demand than phones.</h2>
+    </div>
+    <p>The 1,050 commit splits across the three stores; the 320 ask over cap stays visible.</p>
+  </div>
+
+  <div class="grid two">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Country forecast vs cap</h3>
+        <span>launch horizon</span>
+      </div>
+      <svg id="sdmForecastChart" class="chart" role="img" aria-label="Macedonia demand fan chart: request and AI p50 with an 80 percent band against a flat 1,050 supply cap, showing 320 units of store request above the cap"></svg>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Store split</h3>
+        <span>3 Macedonia stores</span>
+      </div>
+      <svg id="sdmStoreChart" class="chart" role="img" aria-label="store allocation chart comparing request, AI forecast, and committed allocation for three Macedonia stores"></svg>
+    </div>
+  </div>
+</section>
+
+<section class="section screen s11-monitor" aria-label="Close the loop: keep the forecast honest day after day">
+  <div class="section-head">
+    <div>
+      <p class="kicker">Monitor</p>
+      <h2>Keep it honest, day after day.</h2>
+    </div>
+    <p>Refresh, gate, watch drift, retrain on a trigger, then learn.</p>
+  </div>
+
+  <div class="grid two mon-grid">
+    <div class="panel mon-chart">
+      <div class="panel-head">
+        <h3>Drift watch, retrain trigger</h3>
+        <span>input drift leads, error confirms</span>
+      </div>
+      <svg id="driftChart" class="chart" role="img" aria-label="Weekly WAPE climbs from 11 percent and breaches the 14 percent gate at week 6. An input-drift flag leads it at week 5. A retrain resets error to about 11 percent (10.9) at week 7."></svg>
+    </div>
+
+    <div class="panel mon-side">
+      <div class="panel-head">
+        <h3>Daily gate</h3>
+        <span>freshness live, accuracy on last close</span>
+      </div>
+      <div class="mon-gate" role="list" aria-label="Daily gate: four checks, all passing">
+        <div class="mgc" role="listitem">
+          <span class="mgc-k">Freshness</span>
+          <span class="mgc-v">1.2h</span>
+          <span class="mgc-t">&lt; 2h</span>
+          <span class="mgc-p">PASS</span>
+        </div>
+        <div class="mgc" role="listitem">
+          <span class="mgc-k">WAPE</span>
+          <span class="mgc-v">12%</span>
+          <span class="mgc-t">&lt; 14%</span>
+          <span class="mgc-p">PASS</span>
+        </div>
+        <div class="mgc" role="listitem">
+          <span class="mgc-k">|Bias|</span>
+          <span class="mgc-v">2.4%</span>
+          <span class="mgc-t">&lt; 5%</span>
+          <span class="mgc-p">PASS</span>
+        </div>
+        <div class="mgc" role="listitem">
+          <span class="mgc-k">Coverage</span>
+          <span class="mgc-v">81%</span>
+          <span class="mgc-t">&gt; 80%</span>
+          <span class="mgc-p">PASS</span>
+        </div>
+      </div>
+
+      <div class="mon-loop" role="list" aria-label="Daily loop: refresh, forecast, gate, learn">
+        <div class="mls" role="listitem"><span class="mls-n">01</span><b>Refresh</b><span>sales, stock, preorders</span></div>
+        <div class="mls" role="listitem"><span class="mls-n">02</span><b>Forecast</b><span>baseline + AI, ~45m</span></div>
+        <div class="mls" role="listitem"><span class="mls-n">03</span><b>Gate</b><span>4 checks, hold or escalate</span></div>
+        <div class="mls" role="listitem"><span class="mls-n">04</span><b>Learn</b><span>sell-through, overrides</span></div>
+      </div>
+      <div class="mon-return">
+        <span class="mr-hook" aria-hidden="true">&#8617;</span>
+        <span><b>Learn</b> feeds tomorrow</span>
+      </div>
+    </div>
+  </div>
+</section>
+  </main>
+  <button class="to-top" id="toTop" aria-label="Back to top">&#8593;</button>
+
+  <script>
+
+    function svgEl(name, attrs = {}) {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+      for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+      return node;
+    }
+    function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+    function box(svg, margin = { top: 24, right: 24, bottom: 44, left: 58 }) {
+      const rect = svg.getBoundingClientRect();
+      const w = Math.max(rect.width || 700, 300);
+      const h = Math.max(rect.height || 300, 240);
+      svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      return { w, h, margin, innerW: w - margin.left - margin.right, innerH: h - margin.top - margin.bottom };
+    }
+    function scale(d0, d1, r0, r1) { const d = d1 - d0 || 1; return v => r0 + ((v - d0) / d) * (r1 - r0); }
+    function addText(svg, text, x, y, attrs = {}) {
+      const t = svgEl("text", { x, y, class: "label", ...attrs });
+      t.textContent = text; svg.appendChild(t); return t;
+    }
+    function money(v) { return `${Math.round(v / 1000)}k EUR`; }
+    function linePath(data, x, y, key) { return data.map((d, i) => `${i ? "L" : "M"}${x(i)},${y(d[key])}`).join(" "); }
+    function areaPath(data, x, y) {
+      const top = data.map((d, i) => `${i ? "L" : "M"}${x(i)},${y(d.upper)}`).join(" ");
+      const bottom = data.slice().reverse().map((d, i) => `L${x(data.length - 1 - i)},${y(d.lower)}`).join(" ");
+      return `${top} ${bottom} Z`;
+    }
+
+    // systemMap
+// chart: systemMap (s1-bigpicture)
+function renderSystemMap() {
+  var svg = document.getElementById("systemMap");
+  if (!svg) return;
+  clear(svg);
+  var b = box(svg, { top: 14, right: 14, bottom: 14, left: 14 });
+  var L = b.margin.left, T = b.margin.top, IW = b.innerW, IH = b.innerH;
+
+  var defs = svgEl("defs");
+  var marker = svgEl("marker", { id: "sm-feed", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" });
+  marker.appendChild(svgEl("path", { d: "M0,0 L10,5 L0,10 z", class: "sm-arrow" }));
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+
+  var nodeW = Math.min(226, Math.max(126, IW * 0.30));
+  var nodeH = Math.min(94, Math.max(72, IH * 0.22));
+  var pillW = Math.min(258, Math.max(168, IW * 0.34));
+  var pillH = 56;
+  var pad = 4;
+
+  var supply = { x: L + IW / 2, y: T + pillH / 2 + 2 };
+  var midY = T + IH * 0.46;
+  var botY = T + IH - nodeH / 2 - pad;
+  var retail = { x: L + nodeW / 2 + pad, y: midY, color: "#c93434" };
+  var logi = { x: L + IW - nodeW / 2 - pad, y: midY, color: "#d56f18" };
+  var sdm = { x: L + IW / 2, y: botY, color: "#0b66e4", emph: true };
+  var teams = [retail, logi, sdm];
+
+  [[retail, logi], [retail, sdm], [logi, sdm]].forEach(function (e) {
+    svg.appendChild(svgEl("line", { x1: e[0].x, y1: e[0].y, x2: e[1].x, y2: e[1].y, class: "sm-dep" }));
+  });
+
+  teams.forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: supply.x, y1: supply.y + pillH / 2, x2: t.x, y2: t.y - nodeH / 2 - 9, class: "sm-feed", "marker-end": "url(#sm-feed)" }));
+  });
+
+  var px = supply.x - pillW / 2, py = supply.y - pillH / 2;
+  svg.appendChild(svgEl("rect", { x: px, y: py, width: pillW, height: pillH, rx: 12, ry: 12, class: "sm-pill" }));
+  addText(svg, "Scarce launch supply", supply.x, supply.y - 4, { class: "sm-supply-t", "text-anchor": "middle", "font-size": "13.5" });
+  addText(svg, "1,050", supply.x, supply.y + 15, { class: "sm-supply-n", "text-anchor": "middle", "font-size": "15" });
+
+  function drawNode(t, title, owned, value, valFont) {
+    var x = t.x - nodeW / 2, y = t.y - nodeH / 2;
+    svg.appendChild(svgEl("rect", { x: x, y: y, width: nodeW, height: nodeH, rx: 13, ry: 13, fill: t.emph ? "#f4f8ff" : "#ffffff", stroke: t.color, "stroke-width": t.emph ? 3 : 2 }));
+    svg.appendChild(svgEl("circle", { cx: x + 15, cy: y + 15, r: 4.5, fill: t.color }));
+    if (value) {
+      addText(svg, title, t.x, t.y - 15, { class: "sm-title", "text-anchor": "middle", "font-size": "15.5" });
+      addText(svg, owned, t.x, t.y + 2, { class: "sm-sub", "text-anchor": "middle", "font-size": "10.5", fill: t.color });
+      addText(svg, value, t.x, t.y + 22, { class: "sm-num", "text-anchor": "middle", "font-size": String(valFont || 15.5) });
+    } else {
+      addText(svg, title, t.x, t.y - 6, { class: "sm-title", "text-anchor": "middle", "font-size": "15.5" });
+      addText(svg, owned, t.x, t.y + 14, { class: "sm-sub", "text-anchor": "middle", "font-size": "10.5", fill: t.color });
+    }
+  }
+
+  drawNode(retail, "Retail Ops", "STORE REQUEST", "610 / 470 / 290", 13);
+  drawNode(logi, "Logistics", "CAPACITY PLAN", null);
+  drawNode(sdm, "SDM", "COUNTRY DEMAND", "1,180 (p50)", 15);
+}
+    // systemFocusChart
+function renderSystemFocus() {
+  const svg = document.getElementById("systemFocusChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 34, right: 30, bottom: 26, left: 30 });
+  const L = b.margin.left, R = b.w - b.margin.right, T = b.margin.top, Bt = b.h - b.margin.bottom;
+  const cx = (L + R) / 2;
+  const sideW = Math.max(96, Math.min(158, b.innerW * 0.22));
+  const sideH = Math.max(64, Math.min(92, b.innerH * 0.32));
+  const sideY = T;
+  const sides = [
+    { x: L, label: "Retail", role: "the shelf", color: "#c93434" },
+    { x: R - sideW, label: "Logistics", role: "the lanes", color: "#d56f18" }
+  ];
+  const fw = Math.max(240, Math.min(400, b.innerW * 0.54));
+  const fh = Math.max(150, Math.min(196, b.innerH * 0.52));
+  const fx = cx - fw / 2, fy = Bt - fh;
+  const tl = sides[0].x + sideW * 0.5, tr = sides[1].x + sideW * 0.5, ty = sideY + sideH;
+  svg.appendChild(svgEl("path", { d: `M${tl},${ty} L${tr},${ty} L${fx + fw},${fy} L${fx},${fy} Z`, fill: "rgba(11,102,228,0.05)", stroke: "none" }));
+  svg.appendChild(svgEl("line", { x1: tl, y1: ty, x2: fx, y2: fy, stroke: "#bcd0f2", "stroke-width": 1.4, "stroke-dasharray": "3 6" }));
+  svg.appendChild(svgEl("line", { x1: tr, y1: ty, x2: fx + fw, y2: fy, stroke: "#bcd0f2", "stroke-width": 1.4, "stroke-dasharray": "3 6" }));
+  sides.forEach(function (s) {
+    svg.appendChild(svgEl("rect", { x: s.x, y: sideY, width: sideW, height: sideH, rx: 12, fill: "#f1f3f8", stroke: "#dbe1ea", "stroke-width": 1 }));
+    svg.appendChild(svgEl("rect", { x: s.x, y: sideY, width: sideW, height: 4, rx: 2, fill: s.color, opacity: 0.4 }));
+    addText(svg, s.label, s.x + sideW / 2, sideY + sideH / 2 - 2, { class: "", "text-anchor": "middle", style: "fill:#626a75;font-size:16px;font-weight:800;font-family:var(--sans)" });
+    addText(svg, s.role, s.x + sideW / 2, sideY + sideH / 2 + 18, { class: "", "text-anchor": "middle", style: "fill:#626a75;font-size:12px;font-family:var(--sans)" });
+  });
+  svg.appendChild(svgEl("rect", { x: fx - 11, y: fy - 11, width: fw + 22, height: fh + 22, rx: 20, fill: "none", stroke: "#0b66e4", "stroke-width": 1.8, "stroke-dasharray": "8 7", opacity: 0.55 }));
+  svg.appendChild(svgEl("rect", { x: fx + 3, y: fy + 7, width: fw, height: fh, rx: 16, fill: "#dbe4f5" }));
+  svg.appendChild(svgEl("rect", { x: fx, y: fy, width: fw, height: fh, rx: 16, fill: "#ffffff", stroke: "#0b66e4", "stroke-width": 2 }));
+  addText(svg, "SDM", cx, fy + fh * 0.42, { class: "", "text-anchor": "middle", style: "fill:#0b66e4;font-size:46px;font-weight:800;letter-spacing:0.5px;font-family:var(--sans)" });
+  addText(svg, "Country demand → allocation", cx, fy + fh * 0.42 + 28, { class: "", "text-anchor": "middle", style: "fill:#4a5561;font-size:14px;font-weight:600;font-family:var(--sans)" });
+  const cw = 118, chh = 26, cxx = cx - cw / 2, cyy = fy + fh - chh - 16;
+  svg.appendChild(svgEl("rect", { x: cxx, y: cyy, width: cw, height: chh, rx: 13, fill: "#fdf1e3", stroke: "#d56f18", "stroke-width": 1.2 }));
+  addText(svg, "1,050 cap", cx, cyy + chh / 2 + 4, { class: "", "text-anchor": "middle", style: "fill:#a9550f;font-size:13px;font-weight:800;font-family:var(--sans)" });
+  const mx = fx + 30, my = fy + 30, mr = 11;
+  svg.appendChild(svgEl("circle", { cx: mx, cy: my, r: mr, fill: "none", stroke: "#0b66e4", "stroke-width": 2.4 }));
+  svg.appendChild(svgEl("line", { x1: mx + mr * 0.72, y1: my + mr * 0.72, x2: mx + mr * 1.5, y2: my + mr * 1.5, stroke: "#0b66e4", "stroke-width": 2.4, "stroke-linecap": "round" }));
+}
+    // storeDataChart
+// chart: storeDataChart (s03-data) - 3-store request vs preorders
+function renderStoreData() {
+  var svg = document.getElementById("storeDataChart");
+  if (!svg) return;
+  clear(svg);
+  var data = [
+    { short: "Skopje", request: 610, pre: 392 },
+    { short: "East Gate", request: 470, pre: 288 },
+    { short: "Bitola", request: 290, pre: 121 }
+  ];
+  var red = "#c93434", slate = "#64748b";
+  var b = box(svg, { top: 30, right: 52, bottom: 32, left: 92 });
+  var x = scale(0, 700, b.margin.left, b.w - b.margin.right);
+  var row = b.innerH / data.length, barH = 15, gap = 6;
+  [0, 350, 700].forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: x(t), x2: x(t), y1: b.margin.top, y2: b.h - b.margin.bottom, class: "gridline" }));
+    addText(svg, t, x(t), b.h - 13, { "text-anchor": "middle" });
+  });
+  data.forEach(function (d, i) {
+    var y0 = b.margin.top + i * row + (row - (barH * 2 + gap)) / 2;
+    addText(svg, d.short, b.margin.left - 12, y0 + barH + 2, { "text-anchor": "end", style: "fill:var(--ink);font-weight:800;font-size:13px" });
+    svg.appendChild(svgEl("rect", { x: b.margin.left, y: y0, width: Math.max(2, x(d.request) - b.margin.left), height: barH, rx: 4, fill: red }));
+    addText(svg, d.request, x(d.request) + 7, y0 + barH - 3, { class: "anno" });
+    svg.appendChild(svgEl("rect", { x: b.margin.left, y: y0 + barH + gap, width: Math.max(2, x(d.pre) - b.margin.left), height: barH, rx: 4, fill: slate }));
+    addText(svg, d.pre, x(d.pre) + 7, y0 + barH + gap + barH - 3, { style: "fill:var(--muted);font-size:12px;font-weight:700" });
+  });
+  var lx = b.margin.left, ly = b.margin.top - 13;
+  [["request", red], ["preorders", slate]].forEach(function (it, i) {
+    svg.appendChild(svgEl("rect", { x: lx + i * 104, y: ly - 9, width: 12, height: 12, rx: 3, fill: it[1] }));
+    addText(svg, it[0], lx + i * 104 + 17, ly + 1, {});
+  });
+}
+    // fleetChart
+const s3Fleet = { focus: 3 };
+function renderFleetScaleChart() {
+  const svg = document.getElementById("fleetChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 16, right: 20, bottom: 16, left: 20 });
+  const cell = 16, gap = 6;
+  const cols = Math.max(4, Math.floor((b.innerW + gap) / (cell + gap)));
+  const rows = Math.max(4, Math.floor((b.innerH + gap) / (cell + gap)));
+  const total = cols * rows;
+  const exceptions = Math.max(2, Math.round(total * 0.03));
+  const exc = new Set();
+  let seed = 7;
+  while (exc.size < exceptions && exc.size < total - s3Fleet.focus) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    exc.add(s3Fleet.focus + (seed % (total - s3Fleet.focus)));
+  }
+  const gw = cols * (cell + gap) - gap;
+  const gh = rows * (cell + gap) - gap;
+  const x0 = b.margin.left + Math.max(0, (b.innerW - gw) / 2);
+  const y0 = b.margin.top + Math.max(0, (b.innerH - gh) / 2);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      let fill = "#e7ebf1", stroke = "#dbe0e8";
+      if (i < s3Fleet.focus) { fill = "#15171a"; stroke = "#15171a"; }
+      else if (exc.has(i)) { fill = "#c93434"; stroke = "#c93434"; }
+      svg.appendChild(svgEl("rect", { x: x0 + c * (cell + gap), y: y0 + r * (cell + gap), width: cell, height: cell, rx: 3, fill, stroke, "stroke-width": 1 }));
+    }
+  }
+}
+    // deadlineChart
+const deadlineData = [
+  { markets: 0,  hours: 0  },
+  { markets: 3,  hours: 21 },
+  { markets: 6,  hours: 42 },
+  { markets: 9,  hours: 63 },
+  { markets: 12, hours: 84 }
+];
+
+function renderDeadline() {
+  const svg = document.getElementById("deadlineChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 30, right: 30, bottom: 48, left: 46 });
+  const red = "#c93434", orange = "#d56f18", ink = "#15171a";
+  const cutoff = 21, crossMarkets = 3, maxMarkets = 12, maxH = 90;
+  const x = scale(0, maxMarkets, b.margin.left, b.w - b.margin.right);
+  const y = scale(0, maxH, b.h - b.margin.bottom, b.margin.top);
+
+  // y gridlines + ticks
+  [0, 30, 60, 90].forEach(function (v) {
+    const yy = y(v);
+    svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: yy, y2: yy, class: "gridline" }));
+    addText(svg, v, b.margin.left - 10, yy + 4, { "text-anchor": "end" });
+  });
+  addText(svg, "hours", b.margin.left - 10, b.margin.top - 12, { "text-anchor": "start", "font-size": 11 });
+
+  // ONE shaded emphasis: the stale region (countries never refreshed before the cutoff)
+  const crossX = x(crossMarkets);
+  svg.appendChild(svgEl("rect", { x: crossX, y: b.margin.top, width: (b.w - b.margin.right) - crossX, height: (b.h - b.margin.bottom) - b.margin.top, fill: red, opacity: 0.06 }));
+
+  // cumulative manual-hours burden: one clean red line, no fill under it
+  const lineD = deadlineData.map(function (d, i) { return (i ? "L" : "M") + x(d.markets) + "," + y(d.hours); }).join(" ");
+  svg.appendChild(svgEl("path", { d: lineD, fill: "none", stroke: red, "stroke-width": 2.4, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+
+  // cutoff reference line (orange dashed = a hard cap on available time)
+  const cy = y(cutoff);
+  svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: cy, y2: cy, stroke: ink, "stroke-width": 2, "stroke-dasharray": "6 5" }));
+  addText(svg, "launch cutoff 21h", b.w - b.margin.right, cy - 8, { "text-anchor": "end", style: "fill:" + ink + ";font-weight:800" });
+
+  // endpoint marker + label (the full-sweep burden)
+  const ex = x(maxMarkets), ey = y(84);
+  svg.appendChild(svgEl("circle", { cx: ex, cy: ey, r: 4.5, fill: red }));
+  addText(svg, "84h to finish", ex - 8, ey + 4, { "text-anchor": "end", style: "fill:" + ink + ";font-weight:800" });
+
+  // crossing marker + the one teaching annotation (event + consequence at the mark)
+  const kx = x(crossMarkets), ky = y(cutoff);
+  svg.appendChild(svgEl("line", { x1: kx, y1: ky - 9, x2: kx, y2: ky - 26, stroke: ink, "stroke-width": 1 }));
+  addText(svg, "3 in, out of time", kx, ky - 34, { "text-anchor": "middle", class: "anno" });
+  svg.appendChild(svgEl("circle", { cx: kx, cy: ky, r: 6.5, fill: "#fff", stroke: red, "stroke-width": 2.6 }));
+  svg.appendChild(svgEl("circle", { cx: kx, cy: ky, r: 2.6, fill: red }));
+
+  // x axis
+  const axisY = b.h - b.margin.bottom;
+  svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: axisY, y2: axisY, class: "axis" }));
+  [0, 3, 6, 9, 12].forEach(function (v) { addText(svg, v, x(v), axisY + 18, { "text-anchor": "middle" }); });
+  addText(svg, "countries refreshed", (b.margin.left + b.w - b.margin.right) / 2, axisY + 35, { "text-anchor": "middle", "font-size": 11 });
+}
+    // overUnderChart
+function renderOverUnder(){
+  var svg = document.getElementById("overUnderChart");
+  if (!svg) return;
+  clear(svg);
+  var b = box(svg, { top: 16, right: 36, bottom: 34, left: 36 });
+  var L = b.margin.left, R = b.w - b.margin.right;
+  var cx = (L + R) / 2;
+  var half = Math.max(80, (b.innerW / 2) - 14);
+  var overLen = half * 0.66, underLen = half * 0.88;
+  var yBar = 110, barH = 34, y0 = yBar - barH / 2, y1 = yBar + barH / 2, r = 6, gap = 3;
+  var overEnd = cx - overLen, uEnd = cx + underLen;
+
+  // horizontal bar with the OUTER end rounded (the data-end), inner end flat at the spine
+  function barPath(inner, outer, side) {
+    if (side === "right") {
+      return "M" + inner + "," + y0 + " H" + (outer - r) + " Q" + outer + "," + y0 + " " + outer + "," + (y0 + r) + " V" + (y1 - r) + " Q" + outer + "," + y1 + " " + (outer - r) + "," + y1 + " H" + inner + " Z";
+    }
+    return "M" + inner + "," + y0 + " H" + (outer + r) + " Q" + outer + "," + y0 + " " + outer + "," + (y0 + r) + " V" + (y1 - r) + " Q" + outer + "," + y1 + " " + (outer + r) + "," + y1 + " H" + inner + " Z";
+  }
+
+  // neutral spine = the number; green anchor = the good case (on target)
+  svg.appendChild(svgEl("line", { x1: cx, y1: 24, x2: cx, y2: y1 + 42, stroke: "#d9dee7", "stroke-width": 1.4, "stroke-dasharray": "4 5" }));
+  svg.appendChild(svgEl("circle", { cx: cx, cy: 34, r: 6, fill: "#167a5b" }));
+  addText(svg, "on target", cx, 16, { "text-anchor": "middle", style: "fill:#15171a;font-weight:800;font-size:12px;font-family:var(--sans)" });
+
+  // OVER bar (orange, left) and UNDER bar (red, right), a 3px surface gap at the spine
+  svg.appendChild(svgEl("path", { d: barPath(cx - gap, overEnd, "left"), fill: "#d56f18" }));
+  svg.appendChild(svgEl("path", { d: barPath(cx + gap, uEnd, "right"), fill: "#c93434" }));
+
+  // identity labels in ink (the colored bar carries the hue, the word stays neutral)
+  addText(svg, "OVER", overEnd, y0 - 13, { "text-anchor": "start", style: "fill:#15171a;font-weight:850;font-size:18px;font-family:var(--sans)" });
+  addText(svg, "UNDER", uEnd, y0 - 13, { "text-anchor": "end", style: "fill:#15171a;font-weight:850;font-size:18px;font-family:var(--sans)" });
+
+  // ONE teaching annotation on the asymmetry, pointing at the UNDER tip that earns it
+  svg.appendChild(svgEl("circle", { cx: uEnd, cy: y1, r: 2.6, fill: "#15171a" }));
+  svg.appendChild(svgEl("line", { x1: uEnd, y1: y1, x2: uEnd, y2: y1 + 30, stroke: "#15171a", "stroke-width": 1.1 }));
+  addText(svg, "at a launch, under hurts more", uEnd, y1 + 45, { "text-anchor": "end", class: "anno", "font-size": "13.5" });
+
+  // recessive encoding note so bar length reads as cost, never as how often we miss
+  addText(svg, "longer = costlier miss", cx, y1 + 66, { "text-anchor": "middle" });
+}
+    // modelWapeChart
+// chart: modelWapeChart (s06-model)
+const modelWape = [
+  { label: "SeasonalNaive", value: 21, color: "#8b97a8" },
+  { label: "LightGBM quantile", value: 12, color: "#0b66e4" }
+];
+
+function renderModel() {
+  const svg = document.getElementById("modelWapeChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 54, right: 34, bottom: 54, left: 52 });
+  const maxY = 25;
+  const y = scale(0, maxY, b.h - b.margin.bottom, b.margin.top);
+  const baseY = b.h - b.margin.bottom;
+  const plotW = b.w - b.margin.left - b.margin.right;
+  const barW = Math.min(118, plotW * 0.24);
+  const cx = [b.margin.left + plotW * 0.30, b.margin.left + plotW * 0.70];
+
+  // recessive gridlines (skip 0: the axis draws the zero baseline) + y ticks
+  [10, 20].forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: y(t), y2: y(t), class: "gridline" }));
+  });
+  [0, 10, 20].forEach(function (t) {
+    addText(svg, t + "%", b.margin.left - 10, y(t) + 4, { "text-anchor": "end" });
+  });
+  // crisp zero baseline
+  svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: baseY, y2: baseY, class: "axis" }));
+
+  // bars start at 0 with a rounded data-end; grey = baseline, blue = the model
+  modelWape.forEach(function (d, i) {
+    const topY = y(d.value);
+    svg.appendChild(svgEl("rect", { x: cx[i] - barW / 2, y: topY, width: barW, height: baseY - topY, rx: 4, fill: d.color }));
+    addText(svg, d.value + "%", cx[i], topY - 12, { "text-anchor": "middle", class: "anno", "font-size": "20" });
+    addText(svg, d.label, cx[i], baseY + 24, { "text-anchor": "middle" });
+  });
+
+  // ONE teaching annotation: the slope of improvement, baseline level -> model
+  const gTop = y(21), aTop = y(12), dropX = cx[1] + barW / 2 + 10;
+  svg.appendChild(svgEl("line", { x1: cx[0], x2: dropX, y1: gTop, y2: gTop, stroke: "#8b97a8", "stroke-width": 1.4, "stroke-dasharray": "4 4", opacity: 0.85 }));
+  svg.appendChild(svgEl("line", { x1: dropX, x2: dropX, y1: gTop, y2: aTop - 6, stroke: "#15171a", "stroke-width": 1.6, "stroke-dasharray": "4 4" }));
+  svg.appendChild(svgEl("path", { d: "M" + dropX + "," + aTop + " l -5 -9 l 10 0 z", fill: "#15171a" }));
+  const dropLabelX = dropX + 10, dropOver = dropLabelX + 70 > b.w - b.margin.right;
+  addText(svg, "9 pts lower", dropOver ? b.w - b.margin.right : dropLabelX, (gTop + aTop) / 2 + 4, { "text-anchor": dropOver ? "end" : "start", class: "anno", "font-size": "12" });
+
+  // scale-polarity cue (lower is counterintuitive), recessive, by the y-axis
+  addText(svg, "lower is better", b.margin.left, b.margin.top - 22, { "text-anchor": "start", class: "label", "font-size": "11" });
+}
+    // calendarChart
+function renderCalendar() {
+  const svg = document.getElementById("calendarChart");
+  if (!svg) return;
+  clear(svg);
+
+  const weeks = [
+    { wk: "W-4", demand: 0 },
+    { wk: "W-3", demand: 0 },
+    { wk: "W-2", demand: 0 },
+    { wk: "W-1", demand: 0 },
+    { wk: "Launch", demand: 360 },
+    { wk: "W+1", demand: 175 },
+    { wk: "W+2", demand: 210 },
+    { wk: "W+3", demand: 120 }
+  ];
+
+  const b = box(svg, { top: 46, right: 38, bottom: 34, left: 110 });
+  const n = weeks.length, launch = 4, maxY = 400;
+  const L = b.margin.left, R = b.w - b.margin.right, T = b.margin.top;
+  const x = scale(0, n - 1, L, R);
+  const demandBase = T + Math.round(b.innerH * 0.30);
+  const yD = scale(0, maxY, demandBase, T);
+
+  const blue = "#0b66e4", green = "#167a5b", red = "#c93434", ink = "#15171a";
+
+  const laneTop = demandBase + 30;
+  const laneBot = b.h - b.margin.bottom;
+  const laneNames = ["Launch phase", "Events", "Weather, rival"];
+  const laneH = (laneBot - laneTop) / 3;
+
+  // neutral launch guide aligns the demand spike with the lane markers
+  svg.appendChild(svgEl("line", { x1: x(launch), x2: x(launch), y1: T - 6, y2: laneBot, stroke: ink, "stroke-width": 1, opacity: 0.12 }));
+
+  // demand gridlines + y labels
+  [0, 100, 200, 300, 400].forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: L, x2: R, y1: yD(t), y2: yD(t), class: "gridline" }));
+    addText(svg, t, L - 10, yD(t) + 4, { "text-anchor": "end" });
+  });
+
+  // quiet demand backdrop: thin blue line, flat before launch, spike, decay + holiday bump
+  let lineD = "";
+  weeks.forEach(function (d, i) { lineD += (i ? " L" : "M") + x(i) + "," + yD(d.demand); });
+  svg.appendChild(svgEl("path", { d: lineD, fill: "none", stroke: blue, "stroke-width": 2 }));
+  weeks.forEach(function (d, i) {
+    if (d.demand > 0) svg.appendChild(svgEl("circle", { cx: x(i), cy: yD(d.demand), r: i === launch ? 5.5 : 4, fill: blue }));
+  });
+  addText(svg, "launch spike", x(4.18), yD(320), { "text-anchor": "start", style: "fill:" + blue + ";font-weight:800;font-size:12px" });
+
+  // key (top-left, over the empty pre-launch demand region): names every encoding
+  const kx = L + 4, ky = T + 6;
+  svg.appendChild(svgEl("line", { x1: kx, y1: ky, x2: kx + 16, y2: ky, stroke: blue, "stroke-width": 2.5 }));
+  addText(svg, "demand", kx + 22, ky + 4, { "text-anchor": "start" });
+  svg.appendChild(svgEl("circle", { cx: kx + 8, cy: ky + 18, r: 5, fill: green }));
+  addText(svg, "known-future", kx + 22, ky + 22, { "text-anchor": "start" });
+  svg.appendChild(svgEl("circle", { cx: kx + 8, cy: ky + 36, r: 5.5, fill: "#fff", stroke: red, "stroke-width": 2 }));
+  addText(svg, "not known", kx + 22, ky + 40, { "text-anchor": "start" });
+
+  // grouping bands: green = known-future, red = not known
+  svg.appendChild(svgEl("rect", { x: L, y: laneTop, width: R - L, height: laneH * 2 - 1, fill: "rgba(22,122,91,0.05)" }));
+  svg.appendChild(svgEl("rect", { x: L, y: laneTop + laneH * 2 + 1, width: R - L, height: laneH - 1, fill: "rgba(201,52,52,0.05)" }));
+  svg.appendChild(svgEl("line", { x1: L, x2: R, y1: laneTop + laneH * 2, y2: laneTop + laneH * 2, class: "gridline" }));
+
+  laneNames.forEach(function (name, k) {
+    const cy = laneTop + laneH * (k + 0.5);
+    addText(svg, name, L - 12, cy + 4, { "text-anchor": "end", style: "fill:" + ink + ";font-weight:700;font-size:12.5px" });
+  });
+
+  // lane 0: launch phase, weeks-to-launch ramp (lead) + post-launch lag + event diamond
+  const cy0 = laneTop + laneH * 0.5;
+  svg.appendChild(svgEl("path", { d: "M" + x(0) + "," + (cy0 + 7) + " L" + x(launch) + "," + (cy0 - 7) + " L" + x(launch) + "," + (cy0 + 7) + " Z", fill: "rgba(22,122,91,0.18)", stroke: green, "stroke-width": 1.2 }));
+  svg.appendChild(svgEl("path", { d: "M" + x(launch) + "," + (cy0 - 7) + " L" + x(launch + 2) + "," + cy0 + " L" + x(launch) + "," + (cy0 + 7) + " Z", fill: "rgba(22,122,91,0.10)", stroke: green, "stroke-width": 1 }));
+  const dz = 6;
+  svg.appendChild(svgEl("path", { d: "M" + x(launch) + "," + (cy0 - dz) + " L" + (x(launch) + dz) + "," + cy0 + " L" + x(launch) + "," + (cy0 + dz) + " L" + (x(launch) - dz) + "," + cy0 + " Z", fill: green }));
+  addText(svg, "weeks to/from launch", x(1.9), cy0 - 11, { "text-anchor": "middle", style: "fill:" + green + ";font-size:11px;font-weight:700" });
+
+  // lane 1: events, paydays + Macedonia holiday + planned promo (all known-future / green)
+  const cy1 = laneTop + laneH * 1.5;
+  [1, 5].forEach(function (i) { svg.appendChild(svgEl("circle", { cx: x(i), cy: cy1, r: 4.5, fill: green })); });
+  addText(svg, "payday", x(1), cy1 - 10, { "text-anchor": "middle", style: "fill:" + green + ";font-size:11px;font-weight:700" });
+  svg.appendChild(svgEl("circle", { cx: x(6), cy: cy1, r: 5.5, fill: green }));
+  addText(svg, "Macedonia holiday", x(6), cy1 - 11, { "text-anchor": "middle", style: "fill:" + green + ";font-size:11px;font-weight:700" });
+  const px = x(3);
+  svg.appendChild(svgEl("line", { x1: px, y1: cy1 - 11, x2: px, y2: cy1 + 9, stroke: green, "stroke-width": 2 }));
+  svg.appendChild(svgEl("path", { d: "M" + px + "," + (cy1 - 11) + " L" + (px + 14) + "," + (cy1 - 6) + " L" + px + "," + (cy1 - 1) + " Z", fill: green }));
+  addText(svg, "promo", px + 18, cy1 - 3, { "text-anchor": "start", style: "fill:" + green + ";font-size:11px;font-weight:700" });
+
+  // lane 2: weather / competitor, NOT known ahead (open red rings) + the one teaching annotation
+  const cy2 = laneTop + laneH * 2.5;
+  [4, 5, 7].forEach(function (i) {
+    svg.appendChild(svgEl("circle", { cx: x(i), cy: cy2, r: 6, fill: "#fff", stroke: red, "stroke-width": 2 }));
+  });
+  const guardFs = b.w < 560 ? 11 : 12.5;
+  addText(svg, "LEAKAGE GUARD", x(0), cy2 - 11, { "text-anchor": "start", style: "fill:" + red + ";font-size:10px;font-weight:800;letter-spacing:0.07em" });
+  const guardTxt = "use only what is known at forecast time";
+  addText(svg, guardTxt, x(0), cy2 + 7, { "text-anchor": "start", style: "fill:" + ink + ";font-size:" + guardFs + "px;font-weight:800" });
+  const txtEnd = x(0) + guardTxt.length * guardFs * 0.52;
+  if (x(4) - 12 > txtEnd + 8) {
+    svg.appendChild(svgEl("line", { x1: txtEnd + 8, y1: cy2, x2: x(4) - 12, y2: cy2, stroke: ink, "stroke-width": 1, opacity: 0.45 }));
+  }
+
+  // week labels
+  weeks.forEach(function (d, i) {
+    addText(svg, d.wk, x(i), b.h - 12, { "text-anchor": "middle", style: i === launch ? "fill:" + ink + ";font-weight:800" : "" });
+  });
+}
+    // pipelineChart
+const pipelineTraps = [
+  { idx: "01", name: "Freshness" },
+  { idx: "02", name: "Censored" },
+  { idx: "03", name: "Leakage" }
+];
+
+function renderPipeline() {
+  const svg = document.getElementById("pipelineChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 22, right: 118, bottom: 22, left: 24 });
+  const midY = b.margin.top + b.innerH / 2;
+  const srcX = b.margin.left, srcW = 112, srcH = 96;
+  const srcY = midY - srcH / 2;
+  const neutral = "#9aa5b1";   // recessive plumbing (matches the deck's axis grey)
+  const risk = "#c93434";      // deck semantics: red = risk / trap
+  const ink = "#15171a", muted = "#626a75";
+
+  // Snowflake source node: light + thin, same language as the deck's system-map nodes
+  svg.appendChild(svgEl("rect", { x: srcX, y: srcY, width: srcW, height: srcH, rx: 13, ry: 13, fill: "#f6f8fb", stroke: neutral, "stroke-width": 2 }));
+  svg.appendChild(svgEl("circle", { cx: srcX + 14, cy: srcY + 14, r: 4.5, fill: muted }));
+  const gcx = srcX + srcW / 2, gcy = srcY + 34, gr = 13;
+  for (let k = 0; k < 6; k++) {
+    const a = (Math.PI / 3) * k;
+    svg.appendChild(svgEl("line", { x1: gcx, y1: gcy, x2: gcx + Math.cos(a) * gr, y2: gcy + Math.sin(a) * gr, stroke: neutral, "stroke-width": 2, "stroke-linecap": "round" }));
+  }
+  addText(svg, "Snowflake", gcx, srcY + srcH - 26, { "text-anchor": "middle", style: "fill:" + ink + ";font-weight:800;font-size:14px" });
+  addText(svg, "source", gcx, srcY + srcH - 11, { "text-anchor": "middle", style: "fill:" + muted + ";font-size:11px" });
+
+  // one neutral pull fans out to three traps (origin is grey, NEVER forecast-blue)
+  const originX = srcX + srcW + 8;
+  const endpointX = b.w - b.margin.right;   // hazard x derived from the box margin
+  const cxc = originX + (endpointX - originX) * 0.42;
+  const laneGap = b.innerH / 3;
+  const ys = pipelineTraps.map(function (t, i) { return b.margin.top + laneGap * (i + 0.5); });
+  svg.appendChild(svgEl("circle", { cx: originX, cy: midY, r: 3.6, fill: muted }));
+  pipelineTraps.forEach(function (t, i) {
+    const ty = ys[i];
+    const d = "M" + originX + "," + midY + " C" + cxc + "," + midY + " " + cxc + "," + ty + " " + (endpointX - 20) + "," + ty;
+    svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: neutral, "stroke-width": 2.2 }));
+  });
+
+  // teaching annotation on the key point, thin leader to the branch point
+  const fanMidX = (originX + endpointX) / 2, annoY = b.margin.top + 12;
+  svg.appendChild(svgEl("line", { x1: fanMidX - 20, y1: annoY + 6, x2: originX + 6, y2: midY - 6, stroke: "#d0d6de", "stroke-width": 1 }));
+  addText(svg, "one pull, three traps", fanMidX, annoY, { "text-anchor": "middle", style: "fill:" + ink + ";font-weight:800;font-size:13px" });
+
+  // endpoints: one red hazard mark carries identity; name + index wear ink/muted
+  pipelineTraps.forEach(function (t, i) {
+    const ty = ys[i], s = 13;
+    const tri = "M" + endpointX + "," + (ty - s) + " L" + (endpointX - s * 0.92) + "," + (ty + s * 0.72) + " L" + (endpointX + s * 0.92) + "," + (ty + s * 0.72) + " Z";
+    svg.appendChild(svgEl("path", { d: tri, fill: risk, "stroke-linejoin": "round" }));
+    addText(svg, "!", endpointX, ty + s * 0.55, { "text-anchor": "middle", style: "fill:#ffffff;font-weight:800;font-size:13px" });
+    addText(svg, t.name, endpointX + 22, ty - 1, { "text-anchor": "start", style: "fill:" + ink + ";font-weight:800;font-size:14px" });
+    addText(svg, t.idx, endpointX + 22, ty + 15, { "text-anchor": "start", style: "fill:" + muted + ";font-size:11px;font-variant-numeric:tabular-nums" });
+  });
+}
+    // backtestChart
+function renderBacktest() {
+  const svg = document.getElementById("backtestChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 40, right: 22, bottom: 36, left: 34 });
+  const weeks = 14, folds = 4, testLen = 2, firstEnd = 6;
+  const blue = "#0b66e4", ink = "#15171a", trainFill = "#d7dde6";
+  const x = scale(0, weeks, b.margin.left, b.w - b.margin.right);
+  const rowH = b.innerH / folds;
+  const barH = Math.min(22, rowH - 16);
+
+  // legend: train swatch + test swatch, and the roll direction
+  svg.appendChild(svgEl("rect", { x: b.margin.left, y: b.margin.top - 26, width: 16, height: 9, rx: 2, fill: trainFill }));
+  addText(svg, "train", b.margin.left + 22, b.margin.top - 18, { "text-anchor": "start" });
+  svg.appendChild(svgEl("rect", { x: b.margin.left + 76, y: b.margin.top - 26, width: 16, height: 9, rx: 2, fill: blue }));
+  addText(svg, "test", b.margin.left + 98, b.margin.top - 18, { "text-anchor": "start" });
+  addText(svg, "origin rolls forward", b.w - b.margin.right, b.margin.top - 18, { "text-anchor": "end", style: "fill:#15171a;font-weight:700" });
+
+  const origins = [];
+  for (let f = 0; f < folds; f++) {
+    const trainEnd = firstEnd + f * testLen;
+    const testEnd = Math.min(trainEnd + testLen, weeks);
+    const yTop = b.margin.top + f * rowH + (rowH - barH) / 2;
+    const midY = yTop + barH / 2;
+    svg.appendChild(svgEl("rect", { x: x(0), y: yTop, width: x(trainEnd) - x(0), height: barH, rx: 3, fill: trainFill }));
+    svg.appendChild(svgEl("rect", { x: x(trainEnd), y: yTop, width: x(testEnd) - x(trainEnd), height: barH, rx: 3, fill: blue }));
+    svg.appendChild(svgEl("line", { x1: x(trainEnd), x2: x(trainEnd), y1: yTop - 5, y2: yTop + barH + 5, stroke: ink, "stroke-width": 1.6 }));
+    addText(svg, f + 1, b.margin.left - 9, midY + 4, { "text-anchor": "end" });
+    origins.push([x(trainEnd), midY]);
+  }
+
+  // dashed connector threading the origins as the split rolls forward
+  const connD = origins.map(function (p, i) { return (i ? "L" : "M") + p[0] + "," + p[1]; }).join(" ");
+  svg.appendChild(svgEl("path", { d: connD, fill: "none", stroke: ink, "stroke-width": 1.4, "stroke-dasharray": "4 4", opacity: 0.6 }));
+  const last = origins[origins.length - 1];
+  svg.appendChild(svgEl("path", { d: "M" + last[0] + "," + (last[1] + 9) + " l -4 -7 l 8 0 z", fill: ink, opacity: 0.75 }));
+
+  // x axis in weeks
+  const axisY = b.h - b.margin.bottom + 6;
+  svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: axisY, y2: axisY, class: "axis" }));
+  addText(svg, 0, b.margin.left, axisY + 16, { "text-anchor": "start" });
+  addText(svg, 14, b.w - b.margin.right, axisY + 16, { "text-anchor": "end" });
+  addText(svg, "weeks", (b.margin.left + b.w - b.margin.right) / 2, axisY + 17, { "text-anchor": "middle" });
+}
+    // sdmForecastChart
+const sdmForecastWeeks = [
+  { week: "W-4", request: 760, ai: 700, lower: 620, upper: 810, supply: 1050 },
+  { week: "W-3", request: 880, ai: 810, lower: 710, upper: 930, supply: 1050 },
+  { week: "W-2", request: 1010, ai: 940, lower: 820, upper: 1080, supply: 1050 },
+  { week: "W-1", request: 1180, ai: 1090, lower: 930, upper: 1250, supply: 1050 },
+  { week: "Launch", request: 1370, ai: 1180, lower: 980, upper: 1320, supply: 1050 },
+  { week: "W+1", request: 1210, ai: 1110, lower: 920, upper: 1280, supply: 1050 },
+  { week: "W+2", request: 980, ai: 930, lower: 790, upper: 1080, supply: 1050 }
+];
+
+function renderSdmForecast() {
+  const svg = document.getElementById("sdmForecastChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 34, right: 86, bottom: 54, left: 62 });
+  const maxY = 1500, n = sdmForecastWeeks.length, launch = 4, cap = 1050;
+  const capInk = "#8f4a0f";
+  const x = scale(0, n - 1, b.margin.left, b.w - b.margin.right);
+  const y = scale(0, maxY, b.h - b.margin.bottom, b.margin.top);
+
+  function tag(text, tx, ty, color, anchor, size, weight) {
+    addText(svg, text, tx, ty, { style: "fill:" + color + ";font-weight:" + (weight || 800) + ";font-size:" + (size || 12) + "px", "text-anchor": anchor || "start" });
+  }
+  function aboveCapPath(key) {
+    const segs = []; let cur = null;
+    for (let i = 0; i < n; i++) {
+      const v = sdmForecastWeeks[i][key], prev = i ? sdmForecastWeeks[i - 1][key] : v, above = v > cap;
+      if (above && !cur) { cur = []; if (i > 0) cur.push([i - 1 + (cap - prev) / (v - prev), cap]); cur.push([i, v]); }
+      else if (above) { cur.push([i, v]); }
+      else if (cur) { cur.push([i - 1 + (cap - prev) / (v - prev), cap]); segs.push(cur); cur = null; }
+    }
+    if (cur) segs.push(cur);
+    return segs.map(function (seg) {
+      const f = seg[0], l = seg[seg.length - 1];
+      const top = seg.map(function (p, j) { return (j ? "L" : "M") + x(p[0]) + "," + y(p[1]); }).join(" ");
+      return "M" + x(f[0]) + "," + y(cap) + " " + top.replace(/^M/, "L") + " L" + x(l[0]) + "," + y(cap) + " Z";
+    }).join(" ");
+  }
+
+  [0, 500, 1000, 1500].forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: y(t), y2: y(t), class: "gridline" }));
+    addText(svg, t.toLocaleString("en-US"), b.margin.left - 10, y(t) + 4, { "text-anchor": "end" });
+  });
+
+  svg.appendChild(svgEl("path", { d: areaPath(sdmForecastWeeks, x, y), fill: "rgba(11,102,228,0.14)" }));
+  svg.appendChild(svgEl("path", { d: aboveCapPath("request"), fill: "rgba(201,52,52,0.10)" }));
+
+  svg.appendChild(svgEl("line", { x1: x(0), x2: x(n - 1), y1: y(cap), y2: y(cap), stroke: "#d56f18", "stroke-width": 2.5, "stroke-dasharray": "7 6" }));
+
+  svg.appendChild(svgEl("path", { d: linePath(sdmForecastWeeks, x, y, "request"), fill: "none", stroke: "#c93434", "stroke-width": 3 }));
+  svg.appendChild(svgEl("path", { d: linePath(sdmForecastWeeks, x, y, "ai"), fill: "none", stroke: "#0b66e4", "stroke-width": 3 }));
+
+  sdmForecastWeeks.forEach(function (d, i) {
+    addText(svg, d.week, x(i), b.h - 24, { "text-anchor": "middle", style: i === launch ? "font-weight:800;fill:#15171a" : "" });
+  });
+
+  addText(svg, "80% band", b.margin.left + 6, y(620) + 18, { "text-anchor": "start" });
+
+  tag("SUPPLY CAP", b.w - b.margin.right + 8, y(cap) - 4, capInk, "start", 11, 800);
+  tag("1,050", b.w - b.margin.right + 8, y(cap) + 14, capInk, "start", 14, 800);
+
+  const lx = x(launch);
+  svg.appendChild(svgEl("circle", { cx: lx, cy: y(1370), r: 4, fill: "#c93434" }));
+  svg.appendChild(svgEl("circle", { cx: lx, cy: y(1180), r: 4, fill: "#0b66e4" }));
+
+  tag("1,370 ask", lx + 10, y(1370) + 4, "#c93434", "start", 12, 800);
+  tag("1,180 p50", lx + 10, y(1180) + 4, "#0b66e4", "start", 12, 800);
+
+  const bx = lx - 28;
+  svg.appendChild(svgEl("line", { x1: bx, x2: bx, y1: y(1370), y2: y(cap), stroke: "#c93434", "stroke-width": 1.5 }));
+  svg.appendChild(svgEl("line", { x1: bx - 4, x2: bx + 4, y1: y(1370), y2: y(1370), stroke: "#c93434", "stroke-width": 1.5 }));
+  svg.appendChild(svgEl("line", { x1: bx - 4, x2: bx + 4, y1: y(cap), y2: y(cap), stroke: "#c93434", "stroke-width": 1.5 }));
+  tag("320", bx - 7, (y(1370) + y(cap)) / 2 - 2, "#c93434", "end", 14, 800);
+  addText(svg, "ask over cap", bx - 7, (y(1370) + y(cap)) / 2 + 13, { "text-anchor": "end" });
+
+  const leg = [["request", "#c93434"], ["AI p50", "#0b66e4"], ["supply cap", "#d56f18"]];
+  let lp = b.margin.left;
+  leg.forEach(function (row) {
+    svg.appendChild(svgEl("rect", { x: lp, y: b.margin.top - 20, width: 20, height: 6, rx: 2, fill: row[1] }));
+    addText(svg, row[0], lp + 26, b.margin.top - 15, { "text-anchor": "start" });
+    lp += 32 + row[0].length * 6.6;
+  });
+}
+    // sdmStoreChart
+const sdmStores = [
+  { name: "Skopje City Mall", short: "Skopje", request: 610, ai: 540, allocation: 500 },
+  { name: "East Gate Mall", short: "East Gate", request: 470, ai: 410, allocation: 370 },
+  { name: "Bitola Retail", short: "Bitola", request: 290, ai: 230, allocation: 180 }
+];
+
+function renderSdmStore() {
+  const svg = document.getElementById("sdmStoreChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 46, right: 34, bottom: 44, left: 132 });
+  const narrow = b.w < 480;
+  if (narrow) b.margin.left = 96;
+  const x = scale(0, 650, b.margin.left, b.w - b.margin.right);
+  const row = b.innerH / sdmStores.length;
+
+  [0, 300, 600].forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: x(t), x2: x(t), y1: b.margin.top, y2: b.h - b.margin.bottom, class: "gridline" }));
+    addText(svg, t, x(t), b.h - 14, { "text-anchor": "middle" });
+  });
+
+  const leg = [["request", "#c93434"], ["AI", "#0b66e4"], ["allocation", "#167a5b"]];
+  let lp = b.margin.left;
+  leg.forEach(function (r) {
+    svg.appendChild(svgEl("rect", { x: lp, y: b.margin.top - 24, width: 20, height: 6, rx: 2, fill: r[1] }));
+    addText(svg, r[0], lp + 26, b.margin.top - 19, { "text-anchor": "start" });
+    lp += 32 + r[0].length * 6.6;
+  });
+
+  sdmStores.forEach(function (d, i) {
+    const y0 = b.margin.top + i * row + 6;
+    addText(svg, d.short, b.margin.left - 12, y0 + 20, { "text-anchor": "end", style: "fill:#15171a;font-weight:700;font-size:13px" });
+    [[d.request, "#c93434", 0], [d.ai, "#0b66e4", 20], [d.allocation, "#167a5b", 40]].forEach(function (bar) {
+      svg.appendChild(svgEl("rect", { x: b.margin.left, y: y0 + bar[2], width: Math.max(x(bar[0]) - b.margin.left, 0), height: 14, rx: 3, fill: bar[1] }));
+      addText(svg, bar[0], Math.min(x(bar[0]) + 6, b.w - b.margin.right - 2), y0 + bar[2] + 11, { class: "anno" });
+    });
+  });
+}
+    // driftChart
+// chart: driftChart (s11-monitor): error drift vs the gate, input-drift flag, retrain trigger
+const monitorDrift = {
+  labels: ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9"],
+  wape: [11.0, 11.5, 12.1, 12.8, 13.6, 14.5, 10.9, 11.4, 12.0],
+  gate: 14, yMin: 10, yMax: 16.5, breach: 5, reset: 6, flag: 4
+};
+
+function renderMonitor() {
+  const svg = document.getElementById("driftChart");
+  if (!svg) return;
+  clear(svg);
+  const b = box(svg, { top: 48, right: 46, bottom: 32, left: 42 });
+  const d = monitorDrift, n = d.wape.length;
+  const x = scale(0, n - 1, b.margin.left, b.w - b.margin.right);
+  const y = scale(d.yMin, d.yMax, b.h - b.margin.bottom, b.margin.top);
+  const baseY = b.h - b.margin.bottom;
+  const gy = y(d.gate);
+  const ink = "#2b3038", muted = "#4a5561", blue = "#0b66e4", red = "#c93434";
+
+  // tint ONLY where error exceeds the gate (data-driven exceedance, not a full-width band)
+  function aboveGatePath() {
+    const segs = []; let cur = null;
+    for (let i = 0; i < n; i++) {
+      const v = d.wape[i], prev = i ? d.wape[i - 1] : v, above = v > d.gate;
+      if (above && !cur) { cur = []; if (i > 0) cur.push([i - 1 + (d.gate - prev) / (v - prev), d.gate]); cur.push([i, v]); }
+      else if (above) { cur.push([i, v]); }
+      else if (cur) { cur.push([i - 1 + (d.gate - prev) / (v - prev), d.gate]); segs.push(cur); cur = null; }
+    }
+    if (cur) segs.push(cur);
+    return segs.map(function (seg) {
+      const f = seg[0], l = seg[seg.length - 1];
+      const top = seg.map(function (p, j) { return (j ? "L" : "M") + x(p[0]) + "," + y(p[1]); }).join(" ");
+      return "M" + x(f[0]) + "," + y(d.gate) + " " + top.replace(/^M/, "L") + " L" + x(l[0]) + "," + y(d.gate) + " Z";
+    }).join(" ");
+  }
+
+  // y grid + labels; 16% gives the breach a reference above it
+  [10, 12, 14, 16].forEach(function (t) {
+    svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: y(t), y2: y(t), class: "gridline" }));
+    addText(svg, t + "%", b.margin.left - 8, y(t) + 4, { "text-anchor": "end" });
+  });
+
+  // week ticks
+  d.labels.forEach(function (lb, i) { addText(svg, lb, x(i), baseY + 18, { "text-anchor": "middle" }); });
+
+  // exceedance wash under the single breach
+  svg.appendChild(svgEl("path", { d: aboveGatePath(), fill: "rgba(201,52,52,0.10)" }));
+
+  // gate reference: neutral ink dashed (matches metricChart; orange stays reserved for the supply cap)
+  svg.appendChild(svgEl("line", { x1: b.margin.left, x2: b.w - b.margin.right, y1: gy, y2: gy, stroke: ink, "stroke-width": 2, "stroke-dasharray": "6 5" }));
+  addText(svg, "gate 14%", b.w - b.margin.right, gy - 7, { "text-anchor": "end", fill: muted, "font-size": 11, style: "font-weight:700" });
+
+  // error line: blue = the model's WAPE over time
+  const pts = d.wape.map(function (v) { return { v: v }; });
+  svg.appendChild(svgEl("path", { d: linePath(pts, x, y, "v"), fill: "none", stroke: blue, "stroke-width": 2.4, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+
+  // input-drift flag at W5: the LEADING signal, one week before the error breach (neutral event marker)
+  const fx = x(d.flag), fy = y(d.wape[d.flag]);
+  svg.appendChild(svgEl("path", { d: "M" + fx + "," + (fy - 4.5) + " l 4.5,4.5 l -4.5,4.5 l -4.5,-4.5 z", fill: "#fff", stroke: muted, "stroke-width": 1.5 }));
+  svg.appendChild(svgEl("line", { x1: fx, x2: fx, y1: fy + 9, y2: fy + 24, stroke: muted, "stroke-width": 1.2 }));
+  addText(svg, "input drift", fx, fy + 38, { "text-anchor": "middle", fill: muted, "font-size": 10.5, style: "font-weight:700" });
+
+  // retrain event: neutral ink vertical between breach and reset (retrain is the FIX, never red)
+  const rx = (x(d.breach) + x(d.reset)) / 2;
+  svg.appendChild(svgEl("line", { x1: rx, x2: rx, y1: b.margin.top - 2, y2: baseY, stroke: ink, "stroke-width": 1.6, "stroke-dasharray": "5 4" }));
+
+  // healthy points: subtle blue dots
+  d.wape.forEach(function (v, i) {
+    if (i === d.breach || i === d.reset) return;
+    svg.appendChild(svgEl("circle", { cx: x(i), cy: y(v), r: 3.5, fill: blue }));
+  });
+  // breach: the one FAIL (red)
+  svg.appendChild(svgEl("circle", { cx: x(d.breach), cy: y(d.wape[d.breach]), r: 7, fill: red, stroke: "#fff", "stroke-width": 2 }));
+  // reset: error returns to healthy after retrain (hollow ring, equal weight to the breach)
+  svg.appendChild(svgEl("circle", { cx: x(d.reset), cy: y(d.wape[d.reset]), r: 6, fill: "#fff", stroke: blue, "stroke-width": 2.4 }));
+
+  // direct value labels in ink (the dots carry the color)
+  addText(svg, "14.5%", x(d.breach), y(d.wape[d.breach]) - 13, { "text-anchor": "middle", class: "anno", "font-size": 12 });
+  addText(svg, "10.9%", x(d.reset), y(d.wape[d.reset]) + 20, { "text-anchor": "middle", class: "anno", "font-size": 12 });
+
+  // ONE teaching annotation on the key point, ink, with a thin leader to the breach
+  const annoY = b.margin.top - 18;
+  addText(svg, "sustained drift -> retrain", rx, annoY, { "text-anchor": "middle", class: "anno", "font-size": 12.5 });
+  svg.appendChild(svgEl("path", { d: "M" + (rx - 44) + "," + (annoY + 5) + " Q" + (x(d.breach) - 12) + "," + (annoY + 14) + " " + x(d.breach) + "," + (y(d.wape[d.breach]) - 22), fill: "none", stroke: "#8b97a8", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+}
+
+    function renderAll() {
+      try { renderSystemMap(); } catch (e) { console.error('render renderSystemMap', e); }
+      try { renderSystemFocus(); } catch (e) { console.error('render renderSystemFocus', e); }
+      try { renderStoreData(); } catch (e) { console.error('render renderStoreData', e); }
+      try { renderFleetScaleChart(); } catch (e) { console.error('render renderFleetScaleChart', e); }
+      try { renderDeadline(); } catch (e) { console.error('render renderDeadline', e); }
+      try { renderOverUnder(); } catch (e) { console.error('render renderOverUnder', e); }
+      try { renderModel(); } catch (e) { console.error('render renderModel', e); }
+      try { renderCalendar(); } catch (e) { console.error('render renderCalendar', e); }
+      try { renderPipeline(); } catch (e) { console.error('render renderPipeline', e); }
+      try { renderBacktest(); } catch (e) { console.error('render renderBacktest', e); }
+      try { renderSdmForecast(); } catch (e) { console.error('render renderSdmForecast', e); }
+      try { renderSdmStore(); } catch (e) { console.error('render renderSdmStore', e); }
+      try { renderMonitor(); } catch (e) { console.error('render renderMonitor', e); }
+    }
+
+    window.addEventListener("load", renderAll);
+    window.addEventListener("resize", () => window.requestAnimationFrame(renderAll));
+
+    /* ===================== SCROLL JOURNEY UX ===================== */
+    (function () {
+      var bar = document.querySelector('.read-progress > span');
+      var toTop = document.getElementById('toTop');
+      function onScroll() {
+        var h = document.documentElement;
+        var max = h.scrollHeight - h.clientHeight;
+        if (bar) bar.style.width = (max > 0 ? (h.scrollTop / max * 100) : 0) + '%';
+        if (toTop) toTop.classList.toggle('show', h.scrollTop > 640);
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      if (toTop) toTop.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+      var paper = document.querySelector('.paper');
+      var items = document.querySelectorAll('.paper > .section, .paper > .hero');
+      if (paper && 'IntersectionObserver' in window) {
+        paper.classList.add('reveal-on');
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add('reveal-in');
+              io.unobserve(e.target);
+              window.requestAnimationFrame(renderAll);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+        items.forEach(function (el) { io.observe(el); });
+      } else {
+        items.forEach(function (el) { el.classList.add('reveal-in'); });
+      }
+    })();
+
+  </script>
+</body>
+</html>

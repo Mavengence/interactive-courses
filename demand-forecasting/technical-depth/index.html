@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="./vendor/fonts-inter.css" rel="stylesheet">
+<style>
+  :root{
+    --ink:#080809;--sub:#65686C;--faint:#B0B3B8;--line:#E2E5E9;--soft:#F2F4F7;--white:#fff;
+    --blue:#0866FF;--blueDk:#0064D1;--blueLt:#EBF5FF;--blueOnDark:#6AA8FF;
+    --navy:#061729;--navy2:#092D4E;--ink2:#0B0C0E;
+    --red:#FA2E3E;--orange:#F68628;--teal:#0A7E8C;--rust:#C2410C;--gold:#D2A34A;--paper:#F6F1E7;
+    --pad-top:76px;--pad-bottom:70px;--pad-x:108px;
+  }
+  *{box-sizing:border-box}
+  section{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:0}
+  section.vx-slide{padding:var(--pad-top) var(--pad-x) var(--pad-bottom);display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--white);color:var(--ink)}
+  section.vx-slide.dark{background:linear-gradient(135deg,#061729 0%,#092D4E 56%,#061C24 100%);color:var(--white)}
+  section.vx-slide.paper{background:var(--paper);color:var(--ink)}
+  section.vx-slide.ink{background:var(--ink2);color:var(--white)}
+  section.vx-slide:not([data-label="Cover"])::after{content:attr(data-footer);position:absolute;left:var(--pad-x);bottom:28px;font-size:14px;font-weight:850;letter-spacing:1.6px;text-transform:uppercase;color:currentColor;opacity:.30;pointer-events:none;z-index:6}
+  section.vx-slide:not([data-label="Cover"])::before{content:attr(data-slide);position:absolute;right:var(--pad-x);bottom:25px;font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:currentColor;opacity:.38;pointer-events:none;z-index:6;font-variant-numeric:tabular-nums}
+  h1,h2,h3,p{margin:0}
+  .vx-kicker{font-size:22px;font-weight:850;letter-spacing:2px;text-transform:uppercase;margin:0 0 18px;color:var(--blue)}
+  .dark .vx-kicker,.ink .vx-kicker{color:var(--blueOnDark)}
+  .vx-title{font-size:76px;font-weight:890;line-height:1.02;margin:0;max-width:1320px;text-wrap:balance}
+  .vx-lead{font-size:32px;line-height:1.28;color:var(--sub);margin:20px 0 0;max-width:1340px;font-weight:560}
+  .dark .vx-lead,.ink .vx-lead{color:#C5D3E2}
+  .vx-artifact{flex:1;min-height:0;margin-top:34px}
+  .vx-icon{width:30px;height:30px;background:var(--blue);display:block;-webkit-mask:var(--icon) center/contain no-repeat;mask:var(--icon) center/contain no-repeat;flex:none}
+  .vx-lock img{display:block;width:188px;height:auto;object-fit:contain;filter:drop-shadow(0 10px 30px rgba(0,0,0,.45))}
+  .topbar{position:absolute;left:var(--pad-x);right:var(--pad-x);top:42px;display:flex;align-items:center;justify-content:space-between;gap:28px;z-index:2}
+  .pills{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.20);border-radius:999px;padding:9px 14px;color:#D8E6F5;font-size:16px;font-weight:850;background:rgba(255,255,255,.06);white-space:nowrap}
+  .pill.light{border-color:var(--line);color:var(--ink);background:#fff}
+  .pill:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blueOnDark)}
+  .pill.light:before{background:var(--teal)}
+  .cover-grid{display:grid;grid-template-columns:minmax(0,1fr) 560px;gap:70px;align-items:center;height:100%;position:relative;z-index:1}
+  .cover-title{font-size:104px;font-weight:920;line-height:.96;color:#fff;max-width:940px;text-wrap:balance}
+  .cover-sub{font-size:34px;line-height:1.32;color:#D7E2EF;margin-top:28px;max-width:880px;font-weight:620}
+  .cover-credit{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:18px;letter-spacing:.04em;color:#8FB3D6;margin-top:26px;font-weight:750}
+  .signal-console{border:1px solid rgba(255,255,255,.20);background:rgba(255,255,255,.08);border-radius:14px;padding:30px;display:grid;gap:16px;box-shadow:0 28px 70px rgba(0,0,0,.18)}
+  .signal-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:18px;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:18px}
+  .signal-row .num{width:58px;height:58px;border-radius:10px;background:#fff;color:var(--blue);display:grid;place-items:center;font-size:25px;font-weight:900;font-variant-numeric:tabular-nums}
+  .signal-row b{display:block;font-size:25px;color:#fff;margin-bottom:4px}.signal-row span{display:block;font-size:19px;color:#B9C6D6;line-height:1.28}
+  .bio{display:grid;grid-template-rows:auto 1fr;gap:38px;flex:1;min-height:0}
+  .bio-head{display:grid;grid-template-columns:158px minmax(0,1fr) auto;gap:36px;align-items:center}
+  .bio-shot{width:158px;height:158px;border-radius:50%;border:2px solid rgba(90,160,255,.5);overflow:hidden;background:rgba(255,255,255,.05)}
+  .bio-id h2{font-size:58px;line-height:1;color:#fff;font-weight:900}.bio-id .role{font-size:26px;color:var(--blueOnDark);font-weight:750;margin-top:12px}
+  .bio-id p:last-child{font-size:20px;line-height:1.4;color:#B8CBE0;margin-top:12px;max-width:720px;font-weight:500}
+  .bio-links{display:grid;gap:11px;justify-items:end}.bio-chip{display:inline-flex;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);border-radius:999px;padding:10px 17px;font-size:17px;font-weight:750;color:#D8E6F5;white-space:nowrap}
+  .bio-cols{display:grid;grid-template-columns:1fr 1fr;gap:56px;min-height:0;align-content:center}.bio-col h3{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--blueOnDark);font-weight:900;margin:0 0 22px}
+  .bio-tl{position:relative;display:grid;gap:20px;padding-left:28px}.bio-tl:before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:rgba(90,160,255,.28)}
+  .bio-item{position:relative}.bio-item:before{content:"";position:absolute;left:-28px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--blueOnDark);box-shadow:0 0 0 4px rgba(90,160,255,.16)}
+  .bio-item b{display:block;font-size:23px;color:#fff;line-height:1.2;font-weight:780}.bio-item .org{font-size:18px;color:var(--blueOnDark);font-weight:720;margin-top:1px}.bio-item .meta{font-size:16px;color:#9FB4CB;margin-top:2px}
+  .agenda-list{display:grid;gap:12px;align-content:center;height:100%;border-top:1px solid rgba(255,255,255,.16);padding-top:16px}
+  .agenda-row{display:grid;grid-template-columns:74px minmax(0,1fr) 150px;gap:28px;align-items:center;border-bottom:1px solid rgba(255,255,255,.15);padding:17px 8px}
+  .agenda-row .n{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:28px;font-weight:850;color:var(--blueOnDark)}
+  .agenda-row b{font-size:31px;color:#fff;font-weight:760;line-height:1}.agenda-row span{display:block;font-size:18px;color:#9FB4CB;margin-top:6px}.agenda-row .t{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:18px;font-weight:760;color:#D8E6F5;text-align:right}
+  .card-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;height:100%;align-items:stretch}.card-row.four{grid-template-columns:repeat(4,1fr)}.card-row.five{grid-template-columns:repeat(5,1fr)}
+  .vx-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:28px;display:flex;flex-direction:column;gap:14px;min-height:0;position:relative;overflow:hidden}
+  .vx-card:before{content:"";position:absolute;left:0;top:0;right:0;height:6px;background:var(--blue)}
+  .vx-card.teal:before{background:var(--teal)}.vx-card.gold:before{background:var(--gold)}.vx-card.rust:before{background:var(--rust)}.vx-card.red:before{background:var(--red)}
+  .vx-card b{font-size:32px;line-height:1.04;color:var(--ink)}.vx-card span{font-size:21px;line-height:1.32;color:var(--sub)}
+  .dark-card{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(255,255,255,.075);padding:26px;display:flex;flex-direction:column;gap:12px}
+  .dark-card b{font-size:30px;line-height:1.05;color:#fff}.dark-card span{font-size:20px;line-height:1.3;color:#B8CBE0}
+  .mini-chart{height:160px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(255,255,255,.05);padding:16px}
+  .mini-chart svg{width:100%;height:100%;display:block}.line-h{fill:none;stroke:#BBD7FF;stroke-width:4;stroke-linecap:round}.line-f{fill:none;stroke:var(--blueOnDark);stroke-width:4;stroke-dasharray:8 7;stroke-linecap:round}.today{stroke:var(--blueOnDark);stroke-width:2;stroke-dasharray:5 7}
+  .ladder{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;align-items:end;height:100%}.rung{border:1px solid var(--line);border-radius:12px;background:#fff;padding:20px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;min-height:160px}.rung:nth-child(1){height:42%}.rung:nth-child(2){height:50%}.rung:nth-child(3){height:58%}.rung:nth-child(4){height:68%}.rung:nth-child(5){height:80%}.rung:nth-child(6){height:92%;border-color:var(--blue);background:var(--blueLt)}
+  .rung .n{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;font-weight:850;color:var(--faint)}.rung b{font-size:24px;line-height:1.04}.rung span{font-size:16px;color:var(--sub);line-height:1.25}
+  .benefit-map{display:grid;grid-template-columns:1.1fr repeat(3,1fr);grid-template-rows:1fr 1fr;gap:18px;height:100%}.benefit-core{grid-row:1/3;border:1px solid rgba(90,160,255,.35);border-radius:16px;background:rgba(90,160,255,.12);padding:34px;display:flex;flex-direction:column;justify-content:center;gap:18px;color:#fff}.benefit-core b{font-size:42px;line-height:1}.benefit-core span{font-size:22px;color:#C5D3E2;line-height:1.3}
+  .func-map{display:grid;grid-template-columns:180px 190px 210px 1fr 190px;grid-template-rows:1fr 1fr 1fr;gap:18px;align-items:center;height:100%}
+  .func-node{border:1px solid var(--line);border-radius:999px;background:#fff;min-height:112px;display:grid;place-items:center;text-align:center;padding:20px;font-size:27px;font-weight:860;color:var(--ink);box-shadow:0 16px 44px -34px rgba(8,8,9,.65)}
+  .func-node.hot{background:var(--blue);border-color:var(--blue);color:#fff}.func-node.accent{background:var(--gold);border-color:var(--gold);color:#fff}.func-node.end{background:var(--teal);border-color:var(--teal);color:#fff}
+  .func-line{height:4px;background:var(--line);position:relative}.func-line:after{content:"";position:absolute;right:-2px;top:-5px;width:13px;height:13px;border-top:4px solid var(--line);border-right:4px solid var(--line);transform:rotate(45deg)}
+  .feedback{border:1px dashed rgba(90,160,255,.55);border-radius:12px;padding:14px;text-align:center;font-size:16px;font-weight:800;color:#BBD7FF;background:rgba(90,160,255,.08)}
+  .decision-matrix{display:grid;grid-template-columns:1.1fr repeat(4,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;height:100%}.decision-matrix div{padding:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;align-items:center}.decision-matrix b{font-size:23px}.decision-matrix span{font-size:18px;color:var(--sub);line-height:1.3}.decision-matrix .head{background:var(--navy);color:#fff;font-weight:850}.decision-matrix .note{background:var(--blueLt);color:var(--blueDk);font-weight:850}
+  .conflict-map{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;height:100%;align-items:stretch}.conflict-map .vx-card{justify-content:center;text-align:center}.conflict-total{border:1px solid rgba(250,46,62,.35);background:rgba(250,46,62,.10);border-radius:14px;padding:28px;display:flex;flex-direction:column;justify-content:center;text-align:center}.conflict-total b{font-size:34px;color:#fff}.conflict-total span{font-size:20px;color:#F4C8CE;line-height:1.32;margin-top:10px}
+  .human-loop{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;height:100%;align-items:stretch}.human-loop .dark-card{justify-content:center}.human-loop .gate{border-color:rgba(10,126,140,.45);background:rgba(10,126,140,.14)}
+  .cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;height:100%;align-items:stretch}.cycle-step{border:1px solid var(--line);border-radius:12px;background:#fff;padding:22px;display:flex;flex-direction:column;gap:10px}.cycle-step .n{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:14px;font-weight:900;color:var(--blue)}.cycle-step b{font-size:24px;line-height:1.06}.cycle-step span{font-size:17px;line-height:1.28;color:var(--sub)}
+  .lanes{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;height:100%}.lane{border:1px solid var(--line);border-radius:14px;background:#fff;padding:28px;display:flex;flex-direction:column;gap:16px}.lane h3{font-size:34px}.lane-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lane-chip{border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:16px;font-size:20px;font-weight:760;line-height:1.18}
+  .batch-board{display:grid;grid-template-columns:1fr 1fr;gap:24px;height:100%;align-items:stretch}.batch-col{border:1px solid var(--line);border-radius:14px;background:#fff;padding:30px;display:flex;flex-direction:column;gap:20px}.batch-col h3{font-size:38px}.batch-col .steps{display:grid;gap:12px}.batch-col .steps span{border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:14px 16px;font-size:20px;font-weight:750}
+  .schema{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;height:100%;align-content:center}.schema-cell{border:1px solid var(--line);border-radius:12px;background:#fff;padding:18px 12px;min-height:190px;display:flex;flex-direction:column;justify-content:center;text-align:center;gap:8px}.schema-cell b{font-size:20px;line-height:1.05}.schema-cell span{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:15px;color:var(--sub)}
+  .decomp{display:grid;grid-template-columns:1.2fr repeat(5,1fr);gap:14px;height:100%;align-items:stretch}.decomp-plot{border:1px solid var(--line);border-radius:14px;background:#fff;padding:22px;display:flex;align-items:center}.decomp-plot svg{width:100%;height:100%}.decomp-item{border:1px solid var(--line);border-radius:14px;background:#fff;padding:22px;display:flex;flex-direction:column;justify-content:center;gap:12px}.decomp-item b{font-size:26px}.decomp-item span{font-size:18px;line-height:1.28;color:var(--sub)}
+  .check-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;height:100%;align-items:stretch}.check{border:1px solid var(--line);border-radius:12px;background:#fff;padding:22px;display:flex;flex-direction:column;justify-content:center;gap:8px}.check b{font-size:24px}.check span{font-size:17px;line-height:1.28;color:var(--sub)}
+  .questions{display:grid;grid-template-columns:1fr 1fr;gap:22px;height:100%}.q-col{border:1px solid var(--line);border-radius:14px;background:#fff;padding:30px;display:flex;flex-direction:column;gap:18px}.q-col h3{font-size:34px}.q-col p{font-size:24px;line-height:1.25;font-weight:720;color:var(--ink);padding:16px 0;border-top:1px solid var(--line)}
+  .replay{display:grid;grid-template-rows:repeat(4,1fr);gap:16px;height:100%;padding:10px 0}.replay-row{display:grid;grid-template-columns:170px minmax(0,1fr) 180px;align-items:center;gap:18px}.replay-row .lab{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:18px;font-weight:850;color:var(--sub)}.bar{height:34px;border-radius:10px;background:linear-gradient(90deg,#FFF4D6 0 72%,#FFD2D6 72% 84%,#fff 84%);border:1px solid var(--line);position:relative}.bar i{position:absolute;top:0;bottom:0;width:4px;background:var(--red);border-radius:4px}.replay-row .score{font-size:20px;font-weight:850;color:var(--teal)}
+  .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;height:100%}.metric{border:1px solid var(--line);border-radius:14px;background:#fff;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:12px}.metric b{font-size:28px}.metric span{font-size:18px;line-height:1.28;color:var(--sub)}
+  .select-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;height:100%;align-items:center}.select-step{border:1px solid var(--line);border-radius:14px;background:#fff;padding:22px;min-height:240px;display:flex;flex-direction:column;justify-content:center;gap:10px}.select-step b{font-size:24px}.select-step span{font-size:17px;line-height:1.28;color:var(--sub)}.select-step.final{border-color:var(--blue);background:var(--blueLt)}
+  .contract{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;height:100%;align-items:stretch}.contract-col{border:1px solid var(--line);border-radius:14px;background:#fff;padding:28px;display:flex;flex-direction:column;gap:16px}.contract-col h3{font-size:32px}.contract-col span{border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:14px;font-size:18px;font-weight:720;color:var(--sub)}
+  .go-loop{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;height:100%;align-items:stretch}.loop-list{display:grid;grid-template-columns:1fr 1fr;gap:14px}.loop-list div{border:1px solid rgba(255,255,255,.18);border-radius:12px;background:rgba(255,255,255,.075);padding:20px}.loop-list b{display:block;font-size:23px;color:#fff}.loop-list span{font-size:17px;line-height:1.28;color:#B8CBE0}.verdict{border:1px solid rgba(10,126,140,.45);border-radius:14px;background:rgba(10,126,140,.14);padding:30px;display:flex;flex-direction:column;justify-content:center;gap:18px}.verdict b{font-size:42px;line-height:1;color:#fff}.verdict span{font-size:22px;line-height:1.34;color:#D6ECEF}
+  .appx-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:26px}.appx-head h2{font-size:70px;line-height:1.02;font-weight:860}.appx-head .pill{font-size:18px}
+  .appx-code{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--white)}
+  .appx-code .abar{display:flex;align-items:center;gap:12px;padding:11px 18px;background:var(--soft);border-bottom:1px solid var(--line)}
+  .appx-code .adots{display:inline-flex;gap:7px}.appx-code .adots i{width:11px;height:11px;border-radius:50%;background:rgba(8,8,9,.14)}
+  .appx-code .afn{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:16px;font-weight:700;letter-spacing:.3px;color:var(--sub)}
+  .appx-code pre{margin:0;padding:20px 24px;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:21px;line-height:1.55;color:var(--ink);white-space:pre;overflow-x:auto;tab-size:2}
+  .k{color:var(--blue);font-weight:700}.s{color:var(--teal)}.f{color:var(--orange)}.c{color:var(--faint);font-style:italic}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+  @media (prefers-reduced-motion:no-preference){
+    [data-deck-active] [data-anim]{animation:rise .55s cubic-bezier(.23,1,.32,1) both}
+    [data-deck-active] [data-anim="2"]{animation-delay:.065s}[data-deck-active] [data-anim="3"]{animation-delay:.13s}[data-deck-active] [data-anim="4"]{animation-delay:.195s}
+    [data-deck-active] .draw{stroke-dasharray:1;animation:draw .7s cubic-bezier(.23,1,.32,1) both}
+  }
+  @media (prefers-reduced-motion:reduce){[data-anim],.draw{animation:none!important}}
+  /* Interactive companion slides: two-column learning layout.
+     LEFT rail = identical framing structure on every slide; RIGHT = a fixed-size
+     widget box (same measured box on all 9). Footer/page-tag stay hidden. */
+  .vx-slide.vx-interactive{display:grid;grid-template-columns:33% minmax(0,1fr);column-gap:58px;align-items:start;align-content:center;padding-top:60px;padding-bottom:52px}
+  .vx-interactive .vx-rail{display:flex;flex-direction:column;min-width:0;padding-top:4px}
+  .vx-interactive .vx-kicker{font-size:16px;letter-spacing:1.7px;margin:0 0 12px}
+  .vx-interactive .vx-title{font-size:37px;line-height:1.08;max-width:none;margin:0}
+  .vx-interactive .vx-rail-intro{font-size:20px;line-height:1.36;color:var(--sub);margin:18px 0 0;font-weight:560;max-width:none}
+  .vx-interactive .vx-frame{display:flex;flex-direction:column;gap:17px;margin-top:26px;border-top:1px solid var(--line);padding-top:24px}
+  .vx-interactive .vx-fblock{display:grid;grid-template-columns:96px minmax(0,1fr);gap:20px;align-items:baseline}
+  .vx-interactive .vx-flabel{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:13px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);line-height:1.5}
+  .vx-interactive .vx-fbody{font-size:18px;line-height:1.38;color:var(--ink);font-weight:520;margin:0}
+  .vx-interactive .vx-fbody em{font-style:normal;color:var(--blue);font-weight:680}
+  .vx-interactive .vx-artifact{height:760px;margin:0;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+  .vx-interactive .vx-artifact>*{width:100%}
+  .vx-interactive .fl-note{display:none!important}
+  .vx-interactive::after,.vx-interactive::before{display:none}
+</style>
+<script>
+  window.FL_PALETTE = {
+    ink:'#080809', sub:'#65686C', faint:'#B0B3B8',
+    grid:'rgba(8,8,9,0.06)', divider:'rgba(8,8,9,0.14)', line:'rgba(8,8,9,0.30)',
+    white:'#FFFFFF', canvas:'#F7F9FC', soft:'#F2F4F7',
+    blue:'#0866FF', blueDk:'#0064D1', blueLt:'rgba(8,102,255,0.12)', blue20:'rgba(8,102,255,0.22)',
+    orange:'#F68628', orangeDk:'#DD7419', orangeLt:'rgba(246,134,40,0.16)',
+    red:'#FA2E3E', redDk:'#E02636', redLt:'rgba(250,46,62,0.14)',
+    teal:'#0A7E8C', tealLt:'rgba(10,126,140,0.14)'
+  };
+</script>
+<style>
+  .fl-root{font-family:'Inter',-apple-system,sans-serif!important;color:#080809!important}
+  .fl-card{background:#fff!important;border:1px solid #E2E5E9!important;border-radius:16px!important;box-shadow:0 1px 2px rgba(8,8,9,.05)!important}
+  .fl-controls{border-top:1px solid #E2E5E9!important}.fl-ctl-label{font-family:'Inter',sans-serif!important;color:#65686C!important;letter-spacing:.5px!important}
+  .fl-ctl-val{font-family:ui-monospace,'SF Mono',Menlo,monospace!important;color:#0866FF!important}
+  input[type=range].fl-range{background:#E2E5E9!important;border-radius:9999px!important}
+  input[type=range].fl-range::-webkit-slider-thumb{width:22px!important;height:22px!important;border-radius:50%!important;background:#0866FF!important}
+  .fl-seg{background:#F2F4F7!important;border:1px solid #E2E5E9!important;border-radius:12px!important}.fl-seg button{font-family:'Inter',sans-serif!important;color:#65686C!important;border-radius:9px!important}
+  .fl-seg button[aria-pressed=true]{background:#0866FF!important;color:#fff!important}.fl-chip{border:1px solid #D0D4DA!important;font-family:'Inter',sans-serif!important;color:#080809!important;border-radius:12px!important}
+  .fl-chip[aria-pressed=true]{background:rgba(8,102,255,.10)!important;border-color:#0866FF!important;color:#0064D1!important}
+  .fl-btn{background:#0866FF!important;color:#fff!important;font-family:'Inter',sans-serif!important;border-radius:12px!important;letter-spacing:.5px!important}
+  .fl-metric{background:#F2F4F7!important;border:1px solid #E2E5E9!important;border-radius:12px!important}.fl-note{color:#65686C!important}.fl-note b{color:#080809!important}
+</style>
+<script src="./forecast-lab.js"></script>
+<script src="./forecast-lab.widgets.js"></script>
+<script src="./presenter-overlay.js"></script>
+<script>
+  function hideAuthoringRail(){
+    var el = document.querySelector('deck-stage');
+    if (el && !el.hasAttribute('no-rail')) el.setAttribute('no-rail', '');
+  }
+  hideAuthoringRail();
+  new MutationObserver(hideAuthoringRail).observe(document.documentElement,{childList:true,subtree:true});
+</script>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" no-rail>
+
+  <section class="vx-slide dark" data-label="Cover" data-slide="01/10" data-footer="AI Demand Forecasting | demand forecasting workshop" data-time-budget="1" data-speaker-notes="This companion deck is nine live models, not slides. Each is a widget the room can play with: pull demand apart, add known drivers, aggregate the hierarchy, change the cadence, hold out a window, argue the error metric, price the buffer, read glass-box vs black-box, and watch the winning model change with the data. Narrate from your own deck; open these to make an idea tangible." style="padding:124px var(--pad-x) 78px;justify-content:center;isolation:isolate;">
+    <div class="topbar"><div class="vx-lock"></div><div class="pills"><span class="pill">Time-series structure</span><span class="pill">Evaluation</span><span class="pill">Production trust</span></div></div>
+    <div class="cover-grid">
+      <div>
+        <p data-anim class="vx-kicker">AI Forecasting for Real Business Decisions</p>
+        <h1 data-anim="2" class="cover-title">Forecasting only matters when a decision changes.</h1>
+        <p data-anim="3" class="cover-sub">Nine live models to play with — from pulling demand apart to the production trust gate.</p>
+        <p data-anim="3" class="cover-credit">Hosted by Tim Löhr · Data Engineer at Meta</p>
+      </div>
+      <div data-anim="4" class="signal-console">
+        <div class="mini-chart"><svg viewBox="0 0 430 140" preserveAspectRatio="none"><line class="today" x1="180" y1="10" x2="180" y2="130"></line><path class="line-h draw" pathLength="1" d="M10 94 C 58 80, 88 102, 128 76 C 150 62, 168 70, 180 64"></path><path class="line-f" d="M180 64 C 238 42, 286 82, 342 46 C 374 26, 402 38, 420 28"></path></svg></div>
+        <div class="signal-row"><div class="num">01</div><div><b>Estimate</b><span>reality before reality is known</span></div></div>
+        <div class="signal-row"><div class="num">02</div><div><b>Decide</b><span>owner, policy, horizon, cost of error</span></div></div>
+        <div class="signal-row"><div class="num">03</div><div><b>Ship</b><span>baseline, acceptance, monitoring, feedback</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Demand has structure" data-slide="02/10" data-footer="Time series | trend season noise" data-speaker-notes="Every demand line is a sum of pieces. Toggle trend, seasonality and noise on and off so the room sees what the model has to capture — the slow trend and the repeating season — and what it can only average over: the noise. Show the pieces to make the composition explicit.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Time-series structure</p>
+      <h2 data-anim="2" class="vx-title">Pull demand apart into trend, season, and noise.</h2>
+      <p data-anim="3" class="vx-rail-intro">Every demand line is really three things added together — separate them before you model.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">Read any series as trend + seasonality + noise, and know which parts a model can actually predict.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">You model the trend and season; the noise you can only buffer for — chasing it is overfitting.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">The foundation for every slide after — next we add signal, choose a level, then measure what's left.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-decompose data="retail" h="622"></fc-decompose></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Known future drivers" data-slide="03/10" data-footer="Signal | known-future drivers" data-speaker-notes="The best lever on accuracy is often not a fancier model — it is telling the model what you already know is coming. Promotions, price, launches, holidays sit on next quarter's calendar. Feed them in as regressors and error drops hard — here from about 22% WAPE to about 2%. Toggle each driver live. Then the punchline: it only works if the driver is known AT FORECAST TIME. That is why weather stays greyed — it moves demand but you can't put next month's rain in this month's forecast.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Exogenous regressors</p>
+      <h2 data-anim="2" class="vx-title">The future you already know.</h2>
+      <p data-anim="3" class="vx-rail-intro">The biggest accuracy win is often telling the model what you already know is coming.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">Add known-future events — promo, price, launch, holiday — as inputs and watch error fall.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">A driver only helps if it's known <em>at forecast time</em> — otherwise it's leakage, or noise you can't use, like weather.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">Decomposition read the past; drivers inject the known future onto the same series.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-drivers data="canon" h="432"></fc-drivers></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Granularity and hierarchy" data-slide="04/10" data-footer="Structure | granularity and hierarchy" data-speaker-notes="Pull the level selector left to right. A single SKU sits near 20% WAPE with a jagged actual; step to Family and the wiggles partly cancel to about 8%; step to Total and it collapses near 5% — a 75% error cut, with the forecast now hugging the line. Higher levels forecast better because idiosyncratic noise averages out. Then the reconciliation toggle: bottom-up and top-down agree at the total but top-down's fixed share is wrong below it. Aggregate to forecast, disaggregate to act.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Where you forecast is a choice</p>
+      <h2 data-anim="2" class="vx-title">Forecast where it's reliable, act where it hurts.</h2>
+      <p data-anim="3" class="vx-rail-intro">The same demand exists at many levels — SKU, family, region, total.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">See why higher levels forecast more accurately — and why you must still act at the SKU.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">Bottom-up keeps detail but is noisy; top-down is stable but its fixed share is wrong lower down.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">Drivers worked on one series; here we choose which level of the tree to trust.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-hierarchy data="canon" h="380"></fc-hierarchy></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Horizon and cadence" data-slide="05/10" data-footer="Workflow | cadence sets the model and the action" data-speaker-notes="Same demand, three grains. Resample daily to weekly and monthly and three things move together: the curve smooths, the point count collapses, and the percent error drops. But note the trade. Daily keeps the weekend and promo timing you replenish, staff and dispatch on. Weekly cancels day-of-week and suits ordering. Monthly is smooth and easy to hit — the S and OP and budget grain — but it can't tell you which week inside the month demand lands. Cadence is chosen by the decision, not by whichever grain scores the lowest error.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Industry workflow</p>
+      <h2 data-anim="2" class="vx-title">Daily, weekly, or monthly changes the data, the model, and the action.</h2>
+      <p data-anim="3" class="vx-rail-intro">Daily, weekly or monthly isn't given — it's a choice.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">See how the grain changes the data shape, the model that fits, and the action it drives.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">Coarser is smoother and lower % error, but you lose the within-period timing you act on.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">Hierarchy aggregated across products; cadence aggregates across time.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-cadence data="retail" h="300"></fc-cadence></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Forecasting windows" data-slide="06/10" data-footer="Evaluation | train and test windows" data-speaker-notes="Slide the train/test split. A model looks great when you leave it almost no future to prove itself on — one lucky cut flatters it. Honest evaluation holds out unseen time and scores the forecast on the part the model never saw. This is the setup for backtesting: the window you evaluate on decides whether you are measuring skill or luck.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Evaluation</p>
+      <h2 data-anim="2" class="vx-title">Test on the future you are pretending you can't see.</h2>
+      <p data-anim="3" class="vx-rail-intro">A forecast's error only counts if it's measured on data the model never saw.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">Hold out unseen time and see how one lucky split can flatter a weak model.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">A single split can lie; rolling over many windows gives an honest, stable read.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">This is how you'd fairly test every choice from the earlier slides.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-backtest data="retail" h="486"></fc-backtest></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Error metrics" data-slide="07/10" data-footer="Evaluation | which error number" data-speaker-notes="One error, three verdicts. Drag an actual point and watch MAE, RMSE and MAPE disagree. RMSE punishes the one big miss because it squares errors; MAPE explodes when true demand is small because it divides by it. There is no single right metric — pick the one whose penalty matches the cost of being wrong for your decision, and read bias alongside it so a drift doesn't hide.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Evaluation</p>
+      <h2 data-anim="2" class="vx-title">One error, three verdicts.</h2>
+      <p data-anim="3" class="vx-rail-intro">One set of errors can produce several different verdicts.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">See how MAE, RMSE and MAPE disagree, and pick the one that matches your cost of error.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">RMSE punishes big misses; MAPE explodes on small demand — there's no universal best.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">Backtest is <em>when</em> you measure; metrics is <em>what</em> you measure.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-metrics data="retail" h="580"></fc-metrics></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Uncertainty, buffers, and trust" data-slide="08/10" data-footer="Decision | range and buffer policy" data-speaker-notes="A forecast range is a business input, not a hedge. Pick a coverage promise, reveal reality, and see whether you were calibrated — well-calibrated, cautious, or over-confident. The buffer is the policy response to asymmetric risk: the build point moves toward the more expensive error. This is where a number becomes a decision.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Uncertainty and buffers</p>
+      <h2 data-anim="2" class="vx-title">Use the range to choose the business action.</h2>
+      <p data-anim="3" class="vx-rail-intro">A forecast is a range, and the range is a business input — not a hedge.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">Pick a coverage, reveal reality, and size the buffer to the more expensive error.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">Wider bands are safer but cost inventory; the build point moves toward the costlier miss.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">This is where a forecast finally becomes a decision — the payoff of everything before.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-uncertainty data="retail" h="502"></fc-uncertainty></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Explainability" data-slide="09/10" data-footer="Trust | glass-box vs black-box" data-speaker-notes="Toggle Glass-box to Black-box live. The boosted trees fit a touch better on the holdout — around 6.7% vs 8.5% — so the trade-off is real, not a straw man. Then click a forecast point: on the glass box every number reads as base plus trend plus season and lands on the prediction; on the black box the same panel goes dark — no readable attribution, hundreds of interacting trees. Model choice is an explainability choice. When a buyer, auditor or regulator asks why this number, or when you need to override it, the readable model is worth its small accuracy cost.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Explainability</p>
+      <h2 data-anim="2" class="vx-title">Whichever model you pick is also a choice about <em>why</em>.</h2>
+      <p data-anim="3" class="vx-rail-intro">Every model is also a choice about whether you can say <em>why</em>.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">Compare a readable glass-box against an opaque black-box on the same series.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">The black box edges the error, but you can't audit, override or defend its number.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">Metrics scored accuracy; this scores trust — which sometimes matters more.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-explain data="canon" h="236"></fc-explain></div>
+  </section>
+
+  <section class="vx-slide paper vx-interactive" data-label="Model showdown" data-slide="10/10" data-footer="Model choice | no model wins everywhere" data-speaker-notes="Close the loop. Pick two methods and a dataset, backtest both, and the winner is outlined. Then switch the dataset — retail, energy, app users — and watch the champion change. No method wins everywhere; you choose on the target decision and your own data, not in the abstract. This is why the honest workflow you just walked through matters more than any single model.">
+    <div class="vx-rail">
+      <p data-anim class="vx-kicker">Model choice</p>
+      <h2 data-anim="2" class="vx-title">No model wins everywhere.</h2>
+      <p data-anim="3" class="vx-rail-intro">No single method wins everywhere — the champion changes with the data.</p>
+      <div data-anim="4" class="vx-frame">
+        <div class="vx-fblock"><span class="vx-flabel">Objective</span><p class="vx-fbody">Pick two models and a dataset, then switch the data and watch the winner flip.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Why</span><p class="vx-fbody">Don't choose a model in the abstract; choose on your decision and your data.</p></div>
+        <div class="vx-fblock"><span class="vx-flabel">Connects</span><p class="vx-fbody">Closes the loop — the honest workflow of backtest + metrics beats betting on one model.</p></div>
+      </div>
+    </div>
+    <div data-anim="4" class="vx-artifact"><fc-compare data="retail" h="240"></fc-compare></div>
+  </section>
+
+</x-import>
+</x-dc>
+</body>
+</html>

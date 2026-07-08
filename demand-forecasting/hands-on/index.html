@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Demand Forecasting — Hands-on | Demand Decision Lab</title>
+<meta name="description" content="Three live business forecasting scenarios: Amazon zip-code Last Mile planning, Apple MacBook demand handoff bullwhip, and Meta fast user-demand trust gates." />
+<meta name="theme-color" content="#0B1622" />
+<link rel="icon" href="data:," />
+<style>
+  :root{
+    color-scheme:light;
+    --paper:#f4f0e7;
+    --card:#fffdf7;
+    --ink:#101014;
+    --muted:#5e5b55;
+    --soft:#ece6d8;
+    --line:#d8d0bf;
+    --navy:#081826;
+    --navy2:#0e2436;
+    --blue:#245cff;
+    --case-accent:#245cff;
+    --case-accent-2:#0b8f99;
+    --case-surface:#fffdf7;
+    --cyan:#0b8f99;
+    --green:#0a7d52;
+    --rust:#bd3f10;
+    --red:#d11f1f;
+    --gold:#c8952d;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"Helvetica Neue",Arial,sans-serif;
+    --ease:cubic-bezier(.23,1,.32,1);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden}
+  body{
+    min-height:100vh;
+    min-height:100dvh;
+    background:
+      linear-gradient(115deg,rgba(36,92,255,.12) 0 1px,transparent 1px 64%),
+      radial-gradient(circle at 14% 18%,rgba(11,143,153,.12),transparent 27%),
+      linear-gradient(90deg,rgba(16,16,20,.045) 1px,transparent 1px),
+      linear-gradient(0deg,rgba(16,16,20,.045) 1px,transparent 1px),
+      var(--paper);
+    background-size:auto,auto,36px 36px,36px 36px,auto;
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  body.dark{
+    --paper:#081826;
+    --card:#0f2333;
+    --ink:#eef6ff;
+    --muted:#a7b8c8;
+    --soft:#142d42;
+    --line:#25455f;
+    background:
+      radial-gradient(circle at 84% 20%,rgba(36,92,255,.20),transparent 32%),
+      linear-gradient(115deg,rgba(126,189,255,.14) 0 1px,transparent 1px 64%),
+      linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px),
+      linear-gradient(0deg,rgba(255,255,255,.045) 1px,transparent 1px),
+      var(--paper);
+    background-size:auto,auto,36px 36px,36px 36px,auto;
+  }
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  body[data-company=amazon]{
+    --case-accent:#ff9900;
+    --case-accent-2:#146eb4;
+    --case-surface:#fff9ed;
+  }
+  body[data-company=apple]{
+    --case-accent:#111111;
+    --case-accent-2:#7d8a99;
+    --case-surface:#ffffff;
+  }
+  body[data-company=meta]{
+    --case-accent:#0866ff;
+    --case-accent-2:#00c2ff;
+    --case-surface:#0f2333;
+  }
+  .shell{height:100dvh;display:grid;grid-template-rows:74px minmax(0,1fr) 44px}
+  .bar{
+    display:grid;
+    grid-template-columns:minmax(310px,.9fr) minmax(260px,1fr) auto;
+    gap:20px;
+    align-items:center;
+    padding:10px clamp(18px,3vw,42px);
+    border-bottom:1px solid var(--line);
+    background:color-mix(in srgb,var(--paper) 93%,transparent);
+    backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .mark{flex:0 0 auto;width:190px;height:54px;border-radius:6px;background:#fff;border:1px solid rgba(0,0,0,.08);display:grid;place-items:center;padding:6px 12px;overflow:visible}
+  .mark img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+  body.dark .mark{background:#fff}
+  .brand b{display:block;font-size:17px;line-height:1}
+  .brand span{display:block;margin-top:3px;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .center-rail{min-width:0;display:block}
+  .progress{height:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-items:center}
+  .step{
+    height:34px;
+    border-radius:5px;
+    border:1px solid color-mix(in srgb,var(--line) 84%,transparent);
+    background:color-mix(in srgb,var(--line) 20%,transparent);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .step:before{content:"";position:absolute;inset:0;transform:scaleX(0);transform-origin:left;background:var(--case-accent);transition:transform .42s var(--ease)}
+  .step.done:before,.step.current:before{transform:scaleX(1)}
+  .step span{position:relative;z-index:1;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:92%}
+  .step.done span,.step.current span{color:#fff}
+  .jump{display:flex;gap:6px}
+  .jump button{
+    width:40px;height:40px;border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--muted);
+    font-family:var(--mono);font-weight:900;cursor:pointer;
+  }
+  .jump button.current{background:var(--case-accent);color:#fff;border-color:var(--case-accent)}
+  main{min-height:0;overflow:hidden;padding:clamp(10px,1.4vh,20px) clamp(16px,2.4vw,34px)}
+  .act{display:none;height:100%;min-height:0}
+  .act.active{
+    display:grid;
+    grid-template-columns:minmax(280px,.66fr) minmax(600px,2.2fr);
+    grid-template-rows:minmax(0,.55fr) auto minmax(0,1fr);
+    gap:12px clamp(14px,1.4vw,22px);
+    align-items:center;
+    animation:actIn .42s var(--ease) both;
+  }
+  @keyframes actIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+  .eyebrow{grid-column:1;grid-row:1;color:var(--case-accent);font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;align-self:end;display:grid;gap:8px}
+  /* case mark = the real brand logo on a consistent light plate: fixed height, top-left,
+     each mark keeps its intrinsic aspect ratio (width:auto) so nothing is stretched */
+  .case-mark{height:34px;border-radius:7px;border:1px solid rgba(15,17,17,.12);display:inline-flex;align-items:center;justify-content:flex-start;padding:0 12px;background:#ffffff;box-shadow:0 12px 26px -20px rgba(6,36,63,.55)}
+  .case-mark .brand-svg{width:auto;display:block;flex:0 0 auto}
+  .case-mark .brand-amazon{height:19px}
+  .case-mark .brand-apple{height:22px}
+  .case-mark .brand-meta{height:18px}
+  .eyebrow .case-line{display:block}
+  body.dark .eyebrow{color:#7ebdff}
+  h2{grid-column:1;grid-row:2;margin:0;font-size:clamp(28px,2.7vw,44px);line-height:.92;letter-spacing:0;font-weight:950;text-wrap:balance;align-self:start}
+  .lead{grid-column:1;grid-row:3;align-self:start;margin:0;max-width:28ch;color:var(--muted);font-size:clamp(15px,1.15vw,22px);line-height:1.28;font-weight:620}
+  .lead p{margin:0 0 12px}
+  .lead .chip{display:inline-flex;margin:0 8px 8px 0;padding:4px 8px;border:1px solid color-mix(in srgb,var(--case-accent) 42%,var(--line));border-radius:4px;color:var(--case-accent);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;vertical-align:middle}
+  body.dark .lead .chip{color:#7ebdff}
+  /* learning framework: WHAT WE PREDICT / MANUAL today vs AI advantage / OBJECTIVE */
+  .framework{display:grid;gap:0;margin-top:12px}
+  .fw{padding:6px 0;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent)}
+  .fw:first-child{border-top:0;padding-top:2px}
+  .fw b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:900;margin-bottom:2px;color:var(--muted)}
+  .fw span{display:block;font-size:12.5px;line-height:1.29;color:var(--ink);font-weight:600}
+  .fw-predict b{color:var(--case-accent)}
+  .fw-manual b,.fw-manual span{color:var(--muted)}
+  .fw-manual span{font-weight:540}
+  .fw-ai{border-top:0;margin-left:-12px;padding:6px 9px;border-left:3px solid var(--case-accent);background:linear-gradient(90deg,color-mix(in srgb,var(--case-accent) 13%,transparent),transparent);border-radius:0 6px 6px 0}
+  .fw-ai b{color:var(--case-accent)}
+  .fw-obj b{color:var(--ink)}
+  body.dark .fw-predict b,body.dark .fw-ai b{color:#7ebdff}
+  .act[data-company=apple] .stage .hs-card{border-color:#d4d4d8;background:#ffffff;box-shadow:0 22px 70px -52px rgba(0,0,0,.45)}
+  .act[data-company=amazon] .stage .hs-card{border-color:rgba(255,153,0,.42);background:#fff8ed;box-shadow:0 22px 70px -52px rgba(17,24,32,.6)}
+  .act[data-company=meta] .stage .hs-card{border-color:#25455f}
+  .stage{
+    grid-column:2;
+    grid-row:1 / 4;
+    align-self:center;
+    min-height:0;
+    max-height:100%;
+    width:100%;
+    max-width:min(100%,1180px);
+    margin:0 auto;
+    overflow:hidden;
+    animation:stageIn .52s var(--ease) .04s both;
+  }
+  @keyframes stageIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+  .hint{
+    display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:8px 16px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(10px);
+    color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  }
+  .hint button{border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--ink);font-family:var(--mono);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;cursor:pointer}
+  .hint .disclaimer{text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:10px;font-weight:500;opacity:.6;max-width:44ch;line-height:1.2;text-align:center}
+  @media (max-width:1150px){.hint .disclaimer{display:none}}
+  kbd{border:1px solid var(--line);border-bottom-width:3px;border-radius:4px;background:var(--card);color:var(--ink);padding:1px 6px;font-family:var(--mono);font-size:11px}
+
+  /* stage density overrides for the live widgets */
+  .stage .hs-card{max-height:calc(100dvh - 122px);overflow:hidden;padding:12px 16px!important}
+  .stage .hs-chartwrap{max-height:min(33vh,300px)!important}
+  .stage .hs-metrics{gap:8px!important;margin-top:9px!important}
+  .stage .hs-metric{padding:7px 9px!important}
+  .stage .hs-metric .v{font-size:17px!important}
+  .stage .hs-verdict{font-size:13px!important;line-height:1.32!important;margin-top:9px!important;padding:9px 12px!important}
+  .stage .hs-note{font-size:9.5px!important;line-height:1.3!important;margin-top:7px!important}
+  /* densest cards (Apple/Meta) — cap the chart so verdict + note never clip on short viewports */
+  .act[data-company=apple] .stage .hs-chartwrap{max-height:min(24vh,206px)!important}
+  .act[data-company=meta] .stage .hs-chartwrap{max-height:min(23vh,206px)!important}
+  .act[data-company=meta] .stage .hs-verdict{margin-top:8px!important}
+  .act[data-company=meta] .stage .hs-note{margin-top:6px!important}
+
+  /* zero layout-shift: reserve space so a click only changes values INSIDE fixed boxes.
+     the live status label never wraps; racer rows always reserve 2 lines; verdict boxes
+     reserve their tallest state so appearing/longer copy never pushes the card. */
+  .stage .hs-live{display:flex;align-items:center;min-height:16px}
+  .stage .hs-live>span:last-child{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .stage .hs-racer{min-height:32px}
+  .stage .hs-racer .who{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.12;align-self:center}
+  .act[data-company=amazon] .stage .hs-verdict{min-height:100px}
+  .act[data-company=apple] .stage .hs-verdict{min-height:92px}
+  .act[data-company=meta] .stage .hs-verdict{min-height:88px}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s!important;transition-duration:.001s!important;scroll-behavior:auto!important}
+  }
+  /* Below this width the brand tagline would collide with the case rail (the "Amazon" step label);
+     drop the decorative tagline and keep the title. Above it there is a comfortable gap. */
+  @media (max-width:1440px){
+    .brand span{display:none}
+  }
+  @media (max-width:1150px){
+    .act.active{grid-template-columns:minmax(240px,.6fr) minmax(540px,2.1fr);gap:12px 16px}
+    h2{font-size:clamp(32px,4vw,52px)}
+    .lead{font-size:17px}
+  }
+  @media (max-width:900px){
+    html,body{height:auto;min-height:100%;overflow:auto}
+    .shell{height:auto;min-height:100dvh;grid-template-rows:54px minmax(calc(100dvh - 112px),auto) 48px}
+    .bar{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px 10px}
+    .brand{gap:8px}
+    .mark{width:138px;height:40px;padding:4px 8px}
+    .brand b{font-size:15px}
+    .brand span{display:none}
+    .center-rail{display:none}
+    .progress{display:none}
+    .jump{grid-column:2;grid-row:1;gap:4px}
+    .jump button{width:40px;height:36px;border-radius:4px;font-size:13px}
+    main{overflow:auto;padding:10px 12px}
+    .act.active{position:relative;grid-template-columns:1fr;grid-template-rows:auto auto minmax(0,1fr);gap:6px;height:auto;min-height:calc(100dvh - 132px);align-items:start}
+    .eyebrow,h2,.lead,.stage{grid-column:1;grid-row:auto}
+    .eyebrow{font-size:10px;gap:5px}
+    .case-mark{height:26px;padding:0 9px}
+    .case-mark .brand-amazon{height:15px}
+    .case-mark .brand-apple{height:17px}
+    .case-mark .brand-meta{height:14px}
+    h2{font-size:clamp(28px,9.4vw,38px);line-height:.92}
+    .lead{display:block;font-size:13px;line-height:1.24;max-width:none}
+    .lead p{margin:0;max-height:2.6em;overflow:hidden}
+    .lead .framework{display:none}
+    .stage{height:auto;max-height:none;overflow:visible}
+    .stage .hs-card{height:auto;max-height:100%;padding:8px!important}
+    .stage .hs-note{display:none!important}
+    .stage .hs-verdict{max-height:96px;overflow:hidden}
+    .stage .hs-chartwrap{max-height:180px}
+    .stage .hs-racer{grid-template-columns:88px 1fr 64px!important}
+    .stage .hs-strip i{height:6px!important}
+    .hint{display:flex;position:sticky;bottom:0;z-index:20;font-size:9px;gap:8px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <h1 class="sr-only">Demand Decision Lab</h1>
+  <header class="bar" aria-label="Lab controls">
+    <div class="brand">
+      <div><b>Demand Decision Lab</b><span>forecasting only matters when a decision changes</span></div>
+    </div>
+    <div class="center-rail" aria-label="Case scenarios">
+      <div class="progress" id="progress" aria-hidden="true"></div>
+    </div>
+    <nav class="jump" id="jump" aria-label="Jump to act"></nav>
+  </header>
+
+  <main id="lab">
+    <section class="act active" data-mode="light" data-company="amazon" data-result="race" data-short="Amazon">
+      <div class="eyebrow"><div class="case-mark" role="img" aria-label="Amazon"><svg class="brand-svg brand-amazon" viewBox="0 0 132 40" aria-hidden="true"><text x="2.5" y="28" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif" font-size="30" font-weight="800" letter-spacing="-0.6" fill="#0f1111">amazon</text><path d="M11 30 C 44 41.5, 92 41.5, 117 28.5" fill="none" stroke="#FF9900" stroke-width="3.4" stroke-linecap="round"/><path d="M117 28.5 c 2.6 -0.9 4.2 -1 6.4 -0.6 c -1 2 -2.2 3.4 -3.9 4.9 c -0.9 -1.7 -1.7 -2.9 -2.5 -4.3 z" fill="#FF9900"/></svg></div><span class="case-line">Case lens | Last Mile ZIP capacity</span></div>
+      <h2>Set Tomorrow's ZIP Capacity</h2>
+      <div class="lead">
+        <div class="framework" aria-label="Amazon forecasting framework">
+          <div class="fw fw-predict"><b>What we predict</b><span>Tomorrow's package demand for a ZIP cluster &mdash; to size delivery capacity (vans, drivers, shifts).</span></div>
+          <div class="fw fw-manual"><b>Manual today</b><span>A planner types &ldquo;same weekday last week&rdquo; into a spreadsheet.</span></div>
+          <div class="fw fw-ai"><b>AI advantage</b><span>Learns the weekday rhythm <em>and</em> the promo calendar, so it catches the demand spike the sheet misses &mdash; cutting the cost of over- and under-building. The one shock no model can see is flagged to a human.</span></div>
+          <div class="fw fw-obj"><b>Objective</b><span>See, in dollars, where AI beats the manual rule &mdash; and where it correctly hands the call to a person.</span></div>
+        </div>
+      </div>
+      <div class="stage">
+        <hs-race></hs-race>
+      </div>
+    </section>
+
+    <section class="act" data-mode="light" data-company="apple" data-result="buffer" data-short="Apple">
+      <div class="eyebrow"><div class="case-mark" role="img" aria-label="Apple"><svg class="brand-svg brand-apple" viewBox="0 0 24 24" aria-hidden="true"><path fill="#0f1111" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zm3.377-3.065c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z"/></svg></div><span class="case-line">Case lens | SDM to Logistics to Reseller Ops</span></div>
+      <h2>Stop The MacBook Bullwhip</h2>
+      <div class="lead">
+        <div class="framework" aria-label="Apple forecasting framework">
+          <div class="fw fw-predict"><b>What we predict</b><span>Weekly MacBook demand, shared as ONE number down the chain (SDM &rarr; logistics &rarr; store).</span></div>
+          <div class="fw fw-manual"><b>Manual today</b><span>Each tier adds its own safety buffer on top of the padded order beneath it.</span></div>
+          <div class="fw fw-ai"><b>AI advantage</b><span>One shared, calibrated forecast replaces stacked local buffers &mdash; collapsing the bullwhip amplification while holding service and freeing the cash tied in inventory.</span></div>
+          <div class="fw fw-obj"><b>Objective</b><span>See how a single shared signal beats local padding on bullwhip, cost and fill rate.</span></div>
+        </div>
+      </div>
+      <div class="stage"><hs-buffer-run></hs-buffer-run></div>
+    </section>
+
+    <section class="act" data-mode="dark" data-company="meta" data-result="loop" data-short="Meta">
+      <div class="eyebrow"><div class="case-mark" role="img" aria-label="Meta"><svg class="brand-svg brand-meta" viewBox="0 0 300 191" aria-hidden="true"><path fill="#0866ff" d="m31.06,125.96c0,10.98 2.41,19.41 5.56,24.51 4.13,6.68 10.29,9.51 16.57,9.51 8.1,0 15.51-2.01 29.79-21.76 11.44-15.83 24.92-38.05 33.99-51.98l15.36-23.6c10.67-16.39 23.02-34.61 37.18-46.96 11.56-10.08 24.03-15.68 36.58-15.68 21.07,0 41.14,12.21 56.5,35.11 16.81,25.08 24.97,56.67 24.97,89.27 0,19.38-3.82,33.62-10.32,44.87-6.28,10.88-18.52,21.75-39.11,21.75l0-31.02c17.63,0 22.03-16.2 22.03-34.74 0-26.42-6.16-55.74-19.73-76.69-9.63-14.86-22.11-23.94-35.84-23.94-14.85,0-26.8,11.2-40.23,31.17-7.14,10.61-14.47,23.54-22.7,38.13l-9.06,16.05c-18.2,32.27-22.81,39.62-31.91,51.75-15.95,21.24-29.57,29.29-47.5,29.29-21.27,0-34.72-9.21-43.05-23.09-6.8-11.31-10.14-26.15-10.14-43.06z"/><path fill="#0866ff" d="m24.49,37.3c14.24-21.95 34.79-37.3 58.36-37.3 13.65,0 27.22,4.04 41.39,15.61 15.5,12.65 32.02,33.48 52.63,67.81l7.39,12.32c17.84,29.72 27.99,45.01 33.93,52.22 7.64,9.26 12.99,12.02 19.94,12.02 17.63,0 22.03-16.2 22.03-34.74l27.4-.86c0,19.38-3.82,33.62-10.32,44.87-6.28,10.88-18.52,21.75-39.11,21.75-12.8,0-24.14-2.78-36.68-14.61-9.64-9.08-20.91-25.21-29.58-39.71l-25.79-43.08c-12.94-21.62-24.81-37.74-31.68-45.04-7.39-7.85-16.89-17.33-32.05-17.33-12.27,0-22.69,8.61-31.41,21.78z"/><path fill="#0866ff" d="m82.35,31.23c-12.27,0-22.69,8.61-31.41,21.78-12.33,18.61-19.88,46.33-19.88,72.95 0,10.98 2.41,19.41 5.56,24.51l-26.48,17.44c-6.8-11.31-10.14-26.15-10.14-43.06 0-30.75 8.44-62.8 24.49-87.55 14.24-21.95 34.79-37.3 58.36-37.3z"/></svg></div><span class="case-line">Case lens | live demand sensing and capacity release</span></div>
+      <h2>Gate Fast Demand Before It Ships</h2>
+      <div class="lead">
+        <div class="framework" aria-label="Meta forecasting framework">
+          <div class="fw fw-predict"><b>What we predict</b><span>Fast-moving user demand, nowcast live and released behind a trust gate.</span></div>
+          <div class="fw fw-manual"><b>Manual today</b><span>Ship the deploy-day plan and don't look again (no-gate auto-release).</span></div>
+          <div class="fw fw-ai"><b>AI advantage</b><span>A monitored model detects drift, routes the exception to an owner, retrains, and resumes &mdash; avoiding the capacity loss the blind plan bleeds.</span></div>
+          <div class="fw fw-obj"><b>Objective</b><span>See why the value is a governed release LOOP, not a prettier forecast line.</span></div>
+        </div>
+      </div>
+      <div class="stage">
+        <hs-trust-loop></hs-trust-loop>
+      </div>
+    </section>
+  </main>
+
+  <footer class="hint">
+    <button type="button" id="prev-act">Previous</button>
+    <span>Act <b id="act-count">1/3</b></span>
+    <button type="button" id="next-act">Next</button>
+    <span class="disclaimer">Teaching case lenses, not proprietary Amazon, Apple, or Meta systems.</span>
+  </footer>
+</div>
+
+<script>
+  window.FL_PALETTE = {
+    ink:'#080809', sub:'#65686C', faint:'#B0B3B8',
+    grid:'rgba(8,8,9,0.06)', divider:'rgba(8,8,9,0.14)', line:'rgba(8,8,9,0.30)',
+    white:'#FFFFFF', canvas:'#F7F9FC', soft:'#F2F4F7',
+    blue:'#245CFF', blueDk:'#1244D8', blueLt:'rgba(36,92,255,0.12)', blue20:'rgba(36,92,255,0.22)',
+    orange:'#BD3F10', orangeDk:'#9F330C', orangeLt:'rgba(189,63,16,0.16)',
+    red:'#D11F1F', redDk:'#A90F16', redLt:'rgba(209,31,31,0.14)',
+    teal:'#0B8F99', tealLt:'rgba(11,143,153,0.14)'
+  };
+</script>
+<script src="./lib/forecast-lab.js"></script>
+<script src="./lib/hands-on-acts.js"></script>
+<script>
+(function(){
+  var acts = Array.from(document.querySelectorAll(".act"));
+  var idx = 0;
+  var progress = document.getElementById("progress");
+  var jump = document.getElementById("jump");
+  var steps = [], buttons = [];
+  var actCount = document.getElementById("act-count");
+  acts.forEach(function(_, i){
+    var s = document.createElement("div"); s.className = "step"; s.appendChild(document.createElement("span")); s.firstChild.textContent = acts[i].dataset.short || ("Act " + (i + 1)); progress.appendChild(s); steps.push(s);
+    var b = document.createElement("button"); b.type = "button"; b.textContent = String(i + 1); b.setAttribute("aria-label", "Jump to " + (acts[i].dataset.short || ("act " + (i + 1))));
+    b.addEventListener("click", function(){ go(i); });
+    jump.appendChild(b); buttons.push(b);
+  });
+
+  function paint(){
+    acts.forEach(function(act, i){ act.classList.toggle("active", i === idx); });
+    steps.forEach(function(s, i){ s.classList.toggle("done", i < idx); s.classList.toggle("current", i === idx); });
+    buttons.forEach(function(b, i){ b.classList.toggle("current", i === idx); b.setAttribute("aria-current", i === idx ? "step" : "false"); });
+    if(actCount) actCount.textContent = (idx + 1) + "/" + acts.length;
+    document.body.classList.toggle("dark", acts[idx].dataset.mode === "dark");
+    document.body.dataset.company = acts[idx].dataset.company || "";
+    try { window.dispatchEvent(new Event("resize")); document.dispatchEvent(new Event("slidechange")); } catch(e) {}
+    try { document.scrollingElement.scrollTop = 0; } catch(e) {}
+  }
+  function go(next){
+    idx = Math.max(0, Math.min(acts.length - 1, next));
+    paint();
+  }
+  function advance(){
+    if(idx < acts.length - 1) go(idx + 1);
+  }
+  function previous(){
+    if(idx > 0) go(idx - 1);
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target && e.target.closest ? e.target.closest("button") : null;
+    if(b) b.blur();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.target && (/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName) || e.target.isContentEditable)) return;
+    if(e.target && e.target.closest('a[href], button, input, select, textarea, summary, label, video[controls], audio[controls], [role="button"], [onclick], [tabindex]:not([tabindex^="-"]), [contenteditable]:not([contenteditable="false"])')) return;
+    if(e.key === " " || e.key === "Enter" || e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown"){
+      e.preventDefault(); advance(); return;
+    }
+    if(e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp"){
+      e.preventDefault(); previous(); return;
+    }
+    if(e.key >= "1" && Number(e.key) <= acts.length && !e.metaKey && !e.ctrlKey && !e.altKey){
+      e.preventDefault(); go(Number(e.key) - 1);
+    }
+  });
+  var prevBtn = document.getElementById("prev-act");
+  var nextBtn = document.getElementById("next-act");
+  if(prevBtn) prevBtn.addEventListener("click", previous);
+  if(nextBtn) nextBtn.addEventListener("click", advance);
+  paint();
+})();
+</script>
+</body>
+</html>
